@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Tanahemas Map</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <style>
+    #map { height: 100vh; width: 100%; }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<script>
+  // Initialize map
+  var map = L.map('map').setView([3.1, 101.7], 11);
+
+  // Use free OpenStreetMap tiles
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  // --- Load external JSON data ---
+  fetch('locations.json')
+    .then(response => response.json())
+    .then(locations => {
+      locations.forEach(loc => {
+        L.marker(loc.coords)
+          .addTo(map)
+          .bindPopup(`<b>${loc.name}</b><br>${loc.info}`);
+      });
+    })
+    .catch(err => console.error("Error loading locations:", err));
+</script>
+
+</body>
+</html>
