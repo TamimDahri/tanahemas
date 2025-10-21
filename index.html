@@ -1,72 +1,180 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Tanah Emas - Save Lot</title>
-  <meta charset="utf-8" />
-  <link href="te.png" rel="icon">
+  <meta charset="UTF-8" />
+  <title>Tanah Emas - Mencari, Memelihara & Memajukan Tanah Bangsa</title>
+  <link rel="icon" href="te.png" type="image/png" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
   <style>
-    #map { height: 100vh; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f5f5f5;
+    }
+
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
+
+    #header {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      z-index: 1100;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 10px 15px;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    }
+
+    #header img {
+      height: 40px;
+      width: 40px;
+      border-radius: 8px;
+    }
+
+    #header h1 {
+      font-size: 18px;
+      margin: 0;
+      color: #b8860b;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
     #panel {
-      position: absolute; top: 10px; left: 10px; z-index: 1000;
-      background: white; padding: 10px; border-radius: 6px; box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      position: absolute;
+      top: 80px;
+      left: 15px;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.92);
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 250px;
+    }
+
+    #panel input {
+      padding: 8px 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+      outline: none;
+      transition: 0.2s;
+    }
+
+    #panel input:focus {
+      border-color: #b8860b;
+      box-shadow: 0 0 3px rgba(184,134,11,0.4);
+    }
+
+    #panel button {
+      background-color: #b8860b;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 10px;
+      font-size: 15px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+
+    #panel button:hover {
+      background-color: #d4a017;
+    }
+
+    #msg {
+      font-size: 13px;
+      color: #444;
+      margin: 5px 0 0;
+      text-align: center;
+      min-height: 18px;
     }
   </style>
 </head>
+
 <body>
 
-<div id="panel">
-  <input id="name" placeholder="Lot Name">
-  <input id="lat" placeholder="Latitude">
-  <input id="lng" placeholder="Longitude">
-  <button id="save">Save</button>
-  <p id="msg"></p>
-</div>
+  <!-- Header -->
+  <div id="header">
+    <img src="te.png" alt="Tanah Emas Logo">
+    <h1>Tanah Emas</h1>
+  </div>
 
-<div id="map"></div>
+  <!-- Input Panel -->
+  <div id="panel">
+    <input id="name" placeholder="Lot Name">
+    <input id="lat" placeholder="Latitude">
+    <input id="lng" placeholder="Longitude">
+    <button id="save">Save Location</button>
+    <p id="msg"></p>
+  </div>
 
-<script>
-const map = L.map('map').setView([3.1, 101.7], 11);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+  <!-- Map -->
+  <div id="map"></div>
 
-map.on('click', (e) => {
-  document.getElementById('lat').value = e.latlng.lat.toFixed(6);
-  document.getElementById('lng').value = e.latlng.lng.toFixed(6);
-});
+  <script>
+    const map = L.map('map').setView([3.1, 101.7], 11);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
 
-document.getElementById('save').addEventListener('click', async () => {
-  const name = document.getElementById('name').value.trim() || 'Unnamed Lot';
-  const lat = document.getElementById('lat').value;
-  const lng = document.getElementById('lng').value;
-  const msg = document.getElementById('msg');
-
-  if (!lat || !lng) {
-    msg.textContent = '⚠️ Please click on the map first!';
-    return;
-  }
-
-  try {
-    const res = await fetch('https://musidevgames.com/api/save_location.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, lat, lng })
+    // Auto fill lat/lng when clicked
+    map.on('click', (e) => {
+      document.getElementById('lat').value = e.latlng.lat.toFixed(6);
+      document.getElementById('lng').value = e.latlng.lng.toFixed(6);
     });
 
-    const data = await res.json();
-    if (data.success) {
-      msg.textContent = '✅ Saved successfully!';
-      L.marker([lat, lng]).addTo(map).bindPopup(name);
-    } else {
-      msg.textContent = '❌ Failed: ' + data.message;
-    }
-  } catch (err) {
-    msg.textContent = '❌ Error: ' + err.message;
-  }
-});
-</script>
+    // Save button
+    document.getElementById('save').addEventListener('click', async () => {
+      const name = document.getElementById('name').value.trim() || 'Unnamed Lot';
+      const lat = document.getElementById('lat').value;
+      const lng = document.getElementById('lng').value;
+      const msg = document.getElementById('msg');
+
+      if (!lat || !lng) {
+        msg.textContent = '⚠️ Click the map to select coordinates.';
+        msg.style.color = 'red';
+        return;
+      }
+
+      msg.textContent = 'Saving...';
+      msg.style.color = '#444';
+
+      try {
+        const res = await fetch('https://musidevgames.com/api/save_location.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, lat, lng })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          msg.textContent = '✅ Saved successfully!';
+          msg.style.color = 'green';
+          L.marker([lat, lng]).addTo(map).bindPopup(`<b>${name}</b>`);
+        } else {
+          msg.textContent = '❌ Failed: ' + data.message;
+          msg.style.color = 'red';
+        }
+      } catch (err) {
+        msg.textContent = '❌ Error: ' + err.message;
+        msg.style.color = 'red';
+      }
+    });
+  </script>
 
 </body>
 </html>
-
-
