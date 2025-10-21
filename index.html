@@ -46,7 +46,7 @@ document.getElementById('save').addEventListener('click', async () => {
   }
 
   try {
-    const res = await fetch('https://yourdomain.com/api/save_location.php', {
+    const res = await fetch('https://musidevgames.com/api/save_location.php', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, lat, lng })
@@ -67,3 +67,4 @@ document.getElementById('save').addEventListener('click', async () => {
 
 </body>
 </html>
+
