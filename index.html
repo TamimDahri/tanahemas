@@ -7,36 +7,87 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <style>
+    body { margin: 0; font-family: Arial, sans-serif; }
     #map { height: 100vh; width: 100%; }
+    #formBox {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: white;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.2);
+      z-index: 1000;
+    }
+    input, button { margin: 5px 0; width: 100%; }
   </style>
 </head>
 <body>
 
+<div id="formBox">
+  <h3>📍 Add New Location</h3>
+  <label>Name:</label>
+  <input type="text" id="name" placeholder="Lot name">
+  <label>Latitude:</label>
+  <input type="number" id="lat" placeholder="e.g. 3.139" step="any">
+  <label>Longitude:</label>
+  <input type="number" id="lng" placeholder="e.g. 101.6869" step="any">
+  <label>Info:</label>
+  <input type="text" id="info" placeholder="Short description">
+  <button id="addBtn">Add Pin</button>
+</div>
+
 <div id="map"></div>
 
 <script>
-  // Initialize map
-  var map = L.map('map').setView([3.1, 101.7], 11);
+  var map = L.map('map').setView([3.1, 101.7], 10);
 
-  // Use free OpenStreetMap tiles
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '&copy; OpenStreetMap contributors'
   }).addTo(map);
 
-  // --- Load external JSON data ---
+  // Load existing data
   fetch('locations.json')
-    .then(response => response.json())
-    .then(locations => {
-      locations.forEach(loc => {
-        L.marker(loc.coords)
-          .addTo(map)
-          .bindPopup(`<b>${loc.name}</b><br>${loc.info}`);
+    .then(res => res.json())
+    .then(data => {
+      data.forEach(loc => {
+        L.marker(loc.coords).addTo(map).bindPopup(`<b>${loc.name}</b><br>${loc.info}`);
       });
+    });
+
+  // Click map to auto-fill coordinates
+  map.on('click', e => {
+    document.getElementById('lat').value = e.latlng.lat.toFixed(6);
+    document.getElementById('lng').value = e.latlng.lng.toFixed(6);
+  });
+
+  // Add marker + send to PHP
+  document.getElementById('addBtn').addEventListener('click', () => {
+    const name = document.getElementById('name').value.trim();
+    const lat = parseFloat(document.getElementById('lat').value);
+    const lng = parseFloat(document.getElementById('lng').value);
+    const info = document.getElementById('info').value.trim();
+
+    if (!name || isNaN(lat) || isNaN(lng)) {
+      alert("Please enter valid name and coordinates.");
+      return;
+    }
+
+    // Add to map
+    L.marker([lat, lng]).addTo(map).bindPopup(`<b>${name}</b><br>${info}`);
+
+    // Send to server
+    fetch('save_location.php', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, coords: [lat, lng], info })
     })
-    .catch(err => console.error("Error loading locations:", err));
+    .then(res => res.text())
+    .then(msg => alert(msg))
+    .catch(err => alert("Error saving: " + err));
+  });
 </script>
 
 </body>
 </html>
-
