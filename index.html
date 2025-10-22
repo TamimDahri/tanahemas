@@ -1,180 +1,196 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Tanah Emas - Mencari, Memelihara & Memajukan Tanah Bangsa</title>
-  <link rel="icon" href="te.png" type="image/png" />
+  <meta charset="UTF-8">
+  <title>Tanah Emas - Selangor Land Viewer</title>
+  <link rel="icon" href="te.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- Leaflet -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
   <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f5f5f5;
-    }
-
-    #map {
-      height: 100vh;
-      width: 100%;
-    }
-
-    #header {
-      position: absolute;
-      top: 10px;
-      left: 50px;
-      z-index: 1100;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      background: rgba(255, 255, 255, 0.95);
-      padding: 10px 15px;
-      border-radius: 10px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-    }
-
-    #header img {
-      height: 40px;
-      width: 40px;
-      border-radius: 8px;
-    }
-
-    #header h1 {
-      font-size: 18px;
-      margin: 0;
-      color: #b8860b;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-    }
-
+    body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', sans-serif; }
+    #map { height: 100%; width: 100%; }
     #panel {
-      position: absolute;
-      top: 80px;
-      left: 50px;
-      z-index: 1000;
-      background: rgba(255, 255, 255, 0.92);
+      position: absolute; top: 15px; left: 15px; z-index: 1000;
+      background: rgba(255,255,255,0.95);
       padding: 15px;
-      border-radius: 10px;
+      border-radius: 8px;
       box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      width: 250px;
+      width: 280px;
     }
-
-    #panel input {
-      padding: 8px 10px;
+    h2 { margin-top: 0; font-size: 18px; text-align: center; color: #d4a017; }
+    select, button {
+      width: 100%;
+      padding: 6px;
+      margin-top: 6px;
+      border-radius: 6px;
       border: 1px solid #ccc;
-      border-radius: 6px;
       font-size: 14px;
-      outline: none;
-      transition: 0.2s;
     }
+    #msg { margin-top: 10px; font-size: 13px; color: #333; text-align: center; }
 
-    #panel input:focus {
-      border-color: #b8860b;
-      box-shadow: 0 0 3px rgba(184,134,11,0.4);
-    }
-
-    #panel button {
-      background-color: #b8860b;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      padding: 10px;
-      font-size: 15px;
-      cursor: pointer;
+    /* Lot number label styling */
+    .lot-label {
+      background: none;
+      font-size: 11px;
+      color: #000;
+      text-shadow: 0 0 2px #fff;
       font-weight: 600;
-      transition: 0.2s;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s ease-in-out;
     }
-
-    #panel button:hover {
-      background-color: #d4a017;
-    }
-
-    #msg {
-      font-size: 13px;
-      color: #444;
-      margin: 5px 0 0;
-      text-align: center;
-      min-height: 18px;
-    }
+    .lot-label.visible { opacity: 1; }
   </style>
 </head>
-
 <body>
 
-  <!-- Header -->
-  <div id="header">
-    <img src="te.png" alt="Tanah Emas Logo">
-    <h1>Tanah Emas</h1>
-  </div>
+<div id="panel">
+  <h2>🏡 Tanah Emas Viewer</h2>
 
-  <!-- Input Panel -->
-  <div id="panel">
-    <input id="name" placeholder="Lot Name">
-    <input id="lat" placeholder="Latitude">
-    <input id="lng" placeholder="Longitude">
-    <button id="save">Save Location</button>
-    <p id="msg"></p>
-  </div>
+  <label><b>Select Daerah (Selangor)</b></label>
+  <select id="daerah">
+    <option value="">-- Choose Daerah --</option>
+  </select>
 
-  <!-- Map -->
-  <div id="map"></div>
+  <label><b>Select Mukim</b></label>
+  <select id="mukim">
+    <option value="">-- Choose Mukim --</option>
+  </select>
 
-  <script>
-    const map = L.map('map').setView([3.1, 101.7], 11);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
+  <button id="load">Load Lots</button>
+  <p id="msg">Status: waiting...</p>
+</div>
 
-    // Auto fill lat/lng when clicked
-    map.on('click', (e) => {
-      document.getElementById('lat').value = e.latlng.lat.toFixed(6);
-      document.getElementById('lng').value = e.latlng.lng.toFixed(6);
+<div id="map"></div>
+
+<script>
+const map = L.map('map').setView([3.05, 101.6], 10);
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+  attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+const msg = document.getElementById("msg");
+const daerahSelect = document.getElementById("daerah");
+const mukimSelect = document.getElementById("mukim");
+
+let geoLayer = null;
+let labelLayer = L.layerGroup().addTo(map);
+let currentData = null;
+
+// 🗺️ Selangor Daerah & Mukim Reference
+const selangorData = {
+  "01": { name: "Gombak", mukim: { "01": "Setapak", "02": "Ulu Klang", "03": "Rawang" } },
+  "02": { name: "Hulu Langat", mukim: { "01": "Kajang", "02": "Cheras", "03": "Hulu Langat" } },
+  "03": { name: "Hulu Selangor", mukim: { "01": "Ampang Pecah", "02": "Batang Kali", "03": "Ulu Bernam" } },
+  "04": { name: "Klang", mukim: { "01": "Kapar", "02": "Klang" } },
+  "05": { name: "Kuala Langat", mukim: { "01": "Telok Panglima Garang", "02": "Tanjong Dua Belas", "03": "Batu" } },
+  "06": { name: "Kuala Selangor", mukim: { "01": "Ijok", "02": "Jeram", "03": "Tanjong Karang" } },
+  "07": { name: "Petaling", mukim: { "04": "Petaling", "05": "Damansara", "06": "Bukit Raja" } },
+  "08": { name: "Sabak Bernam", mukim: { "01": "Sabak", "02": "Sungai Panjang" } },
+  "09": { name: "Sepang", mukim: { "01": "Dengkil", "02": "Sepang", "03": "Labu" } }
+};
+
+// Populate Daerah dropdown
+for (const [code, d] of Object.entries(selangorData)) {
+  const opt = document.createElement("option");
+  opt.value = code;
+  opt.textContent = `${d.name} (${code})`;
+  daerahSelect.appendChild(opt);
+}
+
+// Update Mukim dropdown dynamically
+daerahSelect.addEventListener("change", () => {
+  const daerahCode = daerahSelect.value;
+  mukimSelect.innerHTML = '<option value="">-- Choose Mukim --</option>';
+  if (!daerahCode) return;
+
+  const mukimList = selangorData[daerahCode].mukim;
+  for (const [code, name] of Object.entries(mukimList)) {
+    const opt = document.createElement("option");
+    opt.value = code;
+    opt.textContent = `${name} (${code})`;
+    mukimSelect.appendChild(opt);
+  }
+});
+
+// Fetch and show data
+document.getElementById("load").addEventListener("click", async () => {
+  const daerah = daerahSelect.value;
+  const mukim = mukimSelect.value;
+  if (!daerah || !mukim) {
+    msg.textContent = "⚠️ Please select both Daerah and Mukim.";
+    return;
+  }
+
+  msg.textContent = `⏳ Loading lots for ${selangorData[daerah].name}, Mukim ${mukim}...`;
+  labelLayer.clearLayers();
+  currentData = null;
+
+  const url = `https://scharms.planmalaysia.gov.my/arcgis/rest/services/iPLAN/LOT_10/MapServer/0/query?where=NEGERI='10'+AND+DAERAH='${daerah}'+AND+MUKIM='${mukim}'&outFields=LOT,UPI,DAERAH,MUKIM,KELUASAN&f=geojson`;
+
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    currentData = data;
+
+    if (geoLayer) map.removeLayer(geoLayer);
+    if (data.features && data.features.length > 0) {
+      geoLayer = L.geoJSON(data, {
+        renderer: L.canvas({ tolerance: 5 }),
+        onEachFeature: (feature, layer) => {
+          const p = feature.properties;
+          layer.bindPopup(`
+            <b>Lot:</b> ${p.LOT}<br>
+            <b>UPI:</b> ${p.UPI}<br>
+            <b>Daerah:</b> ${p.DAERAH}<br>
+            <b>Mukim:</b> ${p.MUKIM}<br>
+            <b>Keluasan:</b> ${p.KELUASAN?.toLocaleString() || '-'} m²
+          `);
+        },
+        style: { color: "#d4a017", weight: 1 }
+      }).addTo(map);
+
+      const bounds = geoLayer.getBounds();
+      if (bounds.isValid()) map.fitBounds(bounds);
+
+      msg.innerHTML = `✅ Loaded ${data.features.length} lots for ${selangorData[daerah].name} (Mukim ${mukim}). Zoom in to see lot numbers.`;
+      updateLabels();
+    } else {
+      msg.textContent = "⚠️ No lots found for this area.";
+    }
+  } catch (err) {
+    msg.textContent = "❌ Error loading data: " + err.message;
+  }
+});
+
+// Show lot numbers when zoomed in
+function updateLabels() {
+  labelLayer.clearLayers();
+  if (!currentData) return;
+
+  const zoom = map.getZoom();
+  if (zoom < 17) return; // only show when zoomed in close
+
+  const features = currentData.features.slice(0, 2000);
+  features.forEach(f => {
+    const p = f.properties;
+    if (!p.LOT) return;
+    const geom = L.geoJSON(f);
+    const center = geom.getBounds().getCenter();
+    const div = L.divIcon({
+      className: "lot-label visible",
+      html: p.LOT,
+      iconSize: null
     });
+    L.marker(center, { icon: div, interactive: false }).addTo(labelLayer);
+  });
+}
 
-    // Save button
-    document.getElementById('save').addEventListener('click', async () => {
-      const name = document.getElementById('name').value.trim() || 'Unnamed Lot';
-      const lat = document.getElementById('lat').value;
-      const lng = document.getElementById('lng').value;
-      const msg = document.getElementById('msg');
-
-      if (!lat || !lng) {
-        msg.textContent = '⚠️ Click the map to select coordinates.';
-        msg.style.color = 'red';
-        return;
-      }
-
-      msg.textContent = 'Saving...';
-      msg.style.color = '#444';
-
-      try {
-        const res = await fetch('https://musidevgames.com/api/save_location.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, lat, lng })
-        });
-
-        const data = await res.json();
-        if (data.success) {
-          msg.textContent = '✅ Saved successfully!';
-          msg.style.color = 'green';
-          L.marker([lat, lng]).addTo(map).bindPopup(`<b>${name}</b>`);
-        } else {
-          msg.textContent = '❌ Failed: ' + data.message;
-          msg.style.color = 'red';
-        }
-      } catch (err) {
-        msg.textContent = '❌ Error: ' + err.message;
-        msg.style.color = 'red';
-      }
-    });
-  </script>
-
+map.on("zoomend", updateLabels);
+</script>
 </body>
 </html>
