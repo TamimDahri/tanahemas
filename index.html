@@ -173,7 +173,7 @@ function updateLabels() {
   if (!currentData) return;
 
   const zoom = map.getZoom();
-  if (zoom < 17) return; // only show when zoomed in close
+  if (zoom < 19) return; // only show when zoomed in close
 
   const features = currentData.features.slice(0, 2000);
   features.forEach(f => {
@@ -194,3 +194,4 @@ map.on("zoomend", updateLabels);
 </script>
 </body>
 </html>
+
