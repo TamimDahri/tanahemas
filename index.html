@@ -1,359 +1,236 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>RIBI Haram Selangor</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <meta charset="utf-8" />
+  <title>Tanahemas – Add Place (with Debug)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Set this if your API is on another origin. Leave empty for same-origin. -->
+  <meta name="api-base" content="">
   <style>
-    body { margin: 0; font-family: "Segoe UI", sans-serif; }
-    #map { height: 100vh; }
-
-    #controls {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: rgba(255, 255, 255, 0.95);
-      padding: 10px;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-      z-index: 1000;
-      width: 260px;
-    }
-
-    select, button, input {
-      width: 100%;
-      margin-top: 6px;
-      padding: 6px;
-      font-size: 14px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      box-sizing: border-box;
-    }
-
-    h3 {
-      margin: 0 0 8px 0;
-      text-align: center;
-      color: #c29b00;
-    }
-
-    .leaflet-div-icon.custom-emoji-icon {
-      background: none;
-      border: none;
-    }
-
-    .emoji-icon-wrapper {
-      display: block;
-      width: 36px;
-      height: 36px;
-      line-height: 36px;
-      text-align: center;
-      background-color: white;
-      border-radius: 50%;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
-      border: 2px solid #333;
-      transform: translate(-50%, -100%);
-      cursor: pointer;
-    }
-
-    .emoji-icon {
-      font-size: 20px;
-      line-height: 32px;
-      text-align: center;
-      transform: translateY(-2px);
-    }
-
-    .legend {
-      position: absolute;
-      bottom: 10px;
-      left: 10px;
-      background: rgba(255,255,255,0.9);
-      border-radius: 8px;
-      padding: 6px 10px;
-      font-size: 14px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    }
-
-    /* --- Modal styling --- */
-    #modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5);
-      justify-content: center;
-      align-items: center;
-      z-index: 2000;
-    }
-
-    .modal-content {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      width: 90%;
-      max-width: 450px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-    }
-
-    .modal-content h2 {
-      text-align: center;
-      color: #c29b00;
-      margin-bottom: 10px;
-    }
-
-    .close-btn {
-      float: right;
-      font-size: 20px;
-      cursor: pointer;
-      color: #666;
-    }
-
-    label { display: block; margin-top: 10px; font-weight: 600; }
-    input, select, textarea { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc; }
-
-    #message { text-align: center; margin-top: 10px; font-weight: bold; }
+    :root { --ok:#16a34a; --warn:#ca8a04; --err:#dc2626; --ink:#e5e7eb; --fg:#111827; --bg:#0b1020; --card:#111827; }
+    html,body{margin:0;padding:0;background:#0b1020;color:#e5e7eb;font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Helvetica Neue",Arial}
+    .wrap{max-width:900px;margin:40px auto;padding:24px}
+    h1{margin:0 0 8px;font-size:22px}
+    .card{background:var(--card);border:1px solid #1f2937;border-radius:14px;padding:18px;box-shadow:0 4px 20px rgba(0,0,0,.25)}
+    label{display:block;margin:.75rem 0 .25rem;font-weight:600}
+    input,select,textarea,button{width:100%;box-sizing:border-box;border-radius:10px;border:1px solid #334155;background:#0b1220;color:#e5e7eb;padding:10px 12px}
+    textarea{min-height:80px;resize:vertical}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .actions{display:flex;gap:10px;align-items:center;margin-top:12px}
+    button{cursor:pointer}
+    button[disabled]{opacity:.6;cursor:not-allowed}
+    .status{margin-top:10px;font-weight:700}
+    .status.ok{color:var(--ok)}
+    .status.warn{color:var(--warn)}
+    .status.err{color:var(--err)}
+    details{margin-top:18px}
+    summary{cursor:pointer;font-weight:700}
+    pre{background:#0b1220;border:1px solid #1f2937;border-radius:10px;padding:12px;overflow:auto;max-height:360px}
+    .muted{opacity:.8;font-size:13px}
+    .inline{display:inline-flex;gap:8px;align-items:center}
+    .pill{border:1px solid #334155;border-radius:999px;padding:2px 8px;font-size:12px}
   </style>
 </head>
 <body>
-  <div id="controls">
-    <h3>🏡 RIBI Haram Selangor</h3>
-    <button id="getLocationBtn">📍 Lokasi Saya</button>
-    <input type="text" id="searchInput" placeholder="🔍 Cari nama, jenis, mukim..." />
-    <select id="daerahSelect">
-      <option value="">-- Pilih Data --</option>
-      <option value="jais">JAIS</option>
-      <option value="klang">Klang</option>
-      <option value="petalingjaya">Petaling Jaya</option>
-    </select>
-    <select id="mukimSelect" style="display:none;">
-      <option value="">-- Semua Mukim --</option>
-    </select>
-    <button id="addBtn">➕ Tambah Lokasi</button>
-  </div>
+  <div class="wrap">
+    <h1>Tambah Tempat</h1>
+    <div class="card">
+      <form id="placeForm" novalidate>
+        <label for="name">Nama Tempat *</label>
+        <input id="name" name="name" placeholder="cth: Surau Al-Hidayah" required />
 
-  <div id="map"></div>
-
-  <div class="legend">
-    <span style="border-radius: 50%; padding: 0 4px 2px; border: 1px solid #333;">🛕</span> Kuil
-    <span style="border-radius: 50%; padding: 0 4px 2px; border: 1px solid #333;">⛪</span> Gereja
-    <span style="border-radius: 50%; padding: 0 4px 2px; border: 1px solid #333;">🏮</span> Tokong
-  </div>
-
-  <!-- Modal Form -->
-  <div id="modal">
-    <div class="modal-content">
-      <span class="close-btn" id="closeModal">&times;</span>
-      <h2>🛕 Tambah Lokasi Baru</h2>
-      <form id="placeForm">
-        <label>Nama Rumah Ibadat</label>
-        <input type="text" id="name" required>
-        <label>Jenis</label>
-        <select id="type" required>
-          <option value="">-- Pilih Jenis --</option>
-          <option value="Kuil">🛕 Kuil</option>
-          <option value="Tokong">🏮 Tokong</option>
-          <option value="Gereja">⛪ Gereja</option>
-          <option value="Gurdwara">🕌 Gurdwara</option>
+        <label for="type">Jenis *</label>
+        <select id="type" name="type" required>
+          <option value="masjid">Masjid</option>
+          <option value="surau">Surau</option>
+          <option value="sekolah">Sekolah</option>
+          <option value="lain">Lain-lain</option>
         </select>
-        <label>Alamat / Lokasi</label>
-        <textarea id="address" rows="3" required></textarea>
-        <label>Latitude</label>
-        <input type="number" step="any" id="lat" required>
-        <label>Longitude</label>
-        <input type="number" step="any" id="lng" required>
-        <button type="submit">💾 Simpan Data</button>
+
+        <label for="address">Alamat (optional)</label>
+        <textarea id="address" name="address" placeholder="Alamat penuh atau keterangan ringkas"></textarea>
+
+        <div class="row">
+          <div>
+            <label for="lat">Latitud *</label>
+            <input id="lat" name="lat" type="number" step="any" placeholder="2.9224" required />
+          </div>
+          <div>
+            <label for="lng">Longitud *</label>
+            <input id="lng" name="lng" type="number" step="any" placeholder="101.6557" required />
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="submitBtn" type="submit">Simpan</button>
+          <button id="testBtn" type="button" title="GET /places untuk uji API">Uji GET /places</button>
+          <span class="muted">* Medan wajib</span>
+        </div>
+
+        <div id="status" class="status">Menunggu input…</div>
+
+        <details open>
+          <summary class="inline">Debug <span id="debugBadge" class="pill">0 log</span></summary>
+          <div class="actions">
+            <button id="clearDbg" type="button">Clear Debug</button>
+            <button id="copyDbg" type="button">Copy Debug</button>
+          </div>
+          <pre id="debug"></pre>
+        </details>
       </form>
-      <div id="message"></div>
     </div>
+    <p class="muted" style="margin-top:10px">
+      Petua: Jika API di domain lain, set <code>&lt;meta name="api-base" content="https://your-app.onrender.com"&gt;</code>.
+      Jika sama origin, biarkan kosong.
+    </p>
   </div>
 
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
-    const map = L.map('map').setView([3.08, 101.62], 11);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
+    // ===== Helpers =====
+    const $ = (id) => document.getElementById(id);
+    const statusEl = $('status');
+    const dbgEl = $('debug');
+    const badgeEl = $('debugBadge');
+    const apiBase = document.querySelector('meta[name="api-base"]')?.content?.trim() || '';
 
-    let markers = [];
-    let currentData = [];
-    const daerahSelect = document.getElementById('daerahSelect');
-    const mukimSelect = document.getElementById('mukimSelect');
-    const searchInput = document.getElementById('searchInput');
-
-    const iconMap = {
-      "Kuil": "🛕", "Gurdwara": "🕌", "Tokong": "⛩️", "Gereja": "⛪", "default": "📍"
-    };
-
-    async function loadData(filename) {
+    let dbgCount = 0;
+    function setStatus(msg, kind='') {
+      statusEl.className = 'status ' + (kind||'');
+      statusEl.textContent = msg;
+      log({ status: msg, level: kind || 'info' });
+    }
+    function log(thing, label) {
+      dbgCount++;
+      badgeEl.textContent = `${dbgCount} log`;
+      const time = new Date().toLocaleTimeString();
+      const head = label ? `# ${time} — ${label}\n` : `# ${time}\n`;
+      let body;
       try {
-        const res = await fetch(filename);
-        if (!res.ok) throw new Error(`Gagal muat ${filename}`);
-        return await res.json();
-      } catch (err) {
-        console.error(err);
-        alert("❌ Gagal memuatkan fail: " + filename);
-        return [];
+        body = typeof thing === 'string' ? thing : JSON.stringify(thing, null, 2);
+      } catch(e) {
+        body = String(thing);
       }
+      dbgEl.textContent += head + body + '\n\n';
+      dbgEl.scrollTop = dbgEl.scrollHeight;
+    }
+    function clearDebug() {
+      dbgEl.textContent = '';
+      dbgCount = 0;
+      badgeEl.textContent = '0 log';
+    }
+    async function copyDebug() {
+      await navigator.clipboard.writeText(dbgEl.textContent || '');
+      setStatus('✅ Debug copied to clipboard.', 'ok');
+    }
+    function requiredStr(v){ return (v ?? '').toString().trim(); }
+    function requiredNum(v){ const n = Number(v); return Number.isFinite(n) ? n : NaN; }
+
+    // Optional: abort slow requests after 15s
+    function withTimeout(ms=15000){
+      const ctrl = new AbortController();
+      const t = setTimeout(()=>ctrl.abort(new Error('Timeout')), ms);
+      return { signal: ctrl.signal, cancel: ()=>clearTimeout(t) };
     }
 
-    function clearMarkers() {
-      markers.forEach(m => map.removeLayer(m));
-      markers = [];
-    }
-
-    function isValidCoordinate(coord) {
-      if (!coord) return false;
-      const parts = coord.split(",");
-      if (parts.length !== 2) return false;
-      const lat = parseFloat(parts[0].trim());
-      const lng = parseFloat(parts[1].trim());
-      return !isNaN(lat) && !isNaN(lng) && lat >= 1 && lat <= 6 && lng >= 99 && lng <= 105;
-    }
-
-    function extractMukim(text) {
-      if (!text) return "Tidak Dinyatakan";
-      const match = text.match(/(Mukim|Bandar)\s*([A-Za-z\s]+)/i);
-      if (match) return `${match[1]} ${match[2].trim()}`;
-      return text.trim();
-    }
-
-    function populateMukimDropdown(data) {
-      mukimSelect.innerHTML = '<option value="">-- Semua Mukim --</option>';
-      const mukims = [...new Set(data.map(d => extractMukim(d.NO?.["LOT & MUKIM (Jika berkenaan)"])))].filter(Boolean).sort();
-      mukims.forEach(m => {
-        const opt = document.createElement('option');
-        opt.value = m;
-        opt.textContent = m;
-        mukimSelect.appendChild(opt);
-      });
-      mukimSelect.style.display = mukims.length ? "block" : "none";
-    }
-
-    function renderMarkers(data, mukimFilter = "", searchQuery = "") {
-      clearMarkers();
-      const bounds = new L.LatLngBounds();
-      const query = searchQuery.toLowerCase();
-
-      data.forEach(item => {
-        const coord = item["Koordinat Longitude dan Latitude"];
-        if (!isValidCoordinate(coord)) return;
-
-        const [lat, lng] = coord.split(",").map(v => parseFloat(v.trim()));
-        const jenis = item["JENIS RUMAH IBADAT\n"] || item["JENIS RUMAH IBADAT"] || "";
-        const mukimText = item.NO?.["LOT & MUKIM (Jika berkenaan)"] || "";
-        const mukim = extractMukim(mukimText);
-
-        if (mukimFilter && mukim !== mukimFilter) return;
-        if (query && !(
-          (item["NAMA RUMAH IBADAT"] || "").toLowerCase().includes(query) ||
-          (jenis || "").toLowerCase().includes(query) ||
-          mukim.toLowerCase().includes(query) ||
-          (item["LOKASI / ALAMAT"] || "").toLowerCase().includes(query)
-        )) return;
-
-        const emoji = iconMap[jenis] || iconMap.default;
-        const divIcon = L.divIcon({
-          html: `<div class="emoji-icon-wrapper"><div class="emoji-icon">${emoji}</div></div>`,
-          iconSize: [36, 36],
-          className: "custom-emoji-icon"
-        });
-
-        const gmapsLink = `https://www.google.com/maps?q=${lat},${lng}`;
-        const popup = `
-          <b>${item["NAMA RUMAH IBADAT"] || "Tidak Dinyatakan"}</b><br>
-          Jenis: ${jenis || "-"}<br>
-          Mukim: ${mukim}<br>
-          Lokasi: ${item["LOKASI / ALAMAT"] || "-"}<br>
-          Status Tanah: ${item["STATUS TANAH\n"] || item["STATUS TANAH"] || "-"}<br>
-          <a href="${gmapsLink}" target="_blank">📍 Buka di Google Maps</a>
-        `;
-
-        const marker = L.marker([lat, lng], { icon: divIcon }).bindPopup(popup);
-        marker.addTo(map);
-        markers.push(marker);
-        bounds.extend([lat, lng]);
-      });
-
-      if (bounds.isValid()) map.fitBounds(bounds, { padding: [20, 20] });
-    }
-
-    daerahSelect.addEventListener("change", async () => {
-      const daerah = daerahSelect.value;
-      if (!daerah) return;
-      const filename = `${daerah}.json`;
-      currentData = await loadData(filename);
-      populateMukimDropdown(currentData);
-      renderMarkers(currentData);
-    });
-
-    mukimSelect.addEventListener("change", () => {
-      renderMarkers(currentData, mukimSelect.value, searchInput.value);
-    });
-
-    searchInput.addEventListener("input", () => {
-      renderMarkers(currentData, mukimSelect.value, searchInput.value);
-    });
-
-    document.getElementById("getLocationBtn").addEventListener("click", () => {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(pos => {
-          const { latitude, longitude } = pos.coords;
-          const userIcon = L.divIcon({
-            html: '<div class="emoji-icon-wrapper" style="background-color:#3f51b5;border:2px solid #fff;"><div class="emoji-icon">👤</div></div>',
-            iconSize: [36, 36],
-            className: "custom-emoji-icon"
-          });
-
-          L.marker([latitude, longitude], { icon: userIcon })
-            .addTo(map)
-            .bindPopup("📍 Lokasi Anda")
-            .openPopup();
-
-          map.setView([latitude, longitude], 14);
-        }, err => alert("Gagal mendapatkan lokasi: " + err.message));
-      } else {
-        alert("Geolocation tidak disokong oleh pelayar ini.");
-      }
-    });
-
-    // --- Modal Logic ---
-    const modal = document.getElementById("modal");
-    const addBtn = document.getElementById("addBtn");
-    const closeModal = document.getElementById("closeModal");
-    const form = document.getElementById("placeForm");
-    const message = document.getElementById("message");
-
-    addBtn.onclick = () => modal.style.display = "flex";
-    closeModal.onclick = () => { modal.style.display = "none"; message.textContent = ""; };
-
-    window.onclick = (e) => { if (e.target === modal) modal.style.display = "none"; };
-
-    form.addEventListener("submit", async (e) => {
+    // ===== Submit handler =====
+    $('placeForm').addEventListener('submit', async (e) => {
       e.preventDefault();
-      message.textContent = "⏳ Menyimpan data...";
+      const btn = $('submitBtn');
+      btn.disabled = true;
 
-      const newPlace = {
-        name: form.name.value.trim(),
-        type: form.type.value,
-        address: form.address.value.trim(),
-        lat: parseFloat(form.lat.value),
-        lng: parseFloat(form.lng.value)
+      // Gather + validate
+      const payload = {
+        name:    requiredStr($('name').value),
+        type:    requiredStr($('type').value || 'lain'),
+        address: requiredStr($('address').value),
+        lat:     requiredNum($('lat').value),
+        lng:     requiredNum($('lng').value),
       };
+      log(payload, 'Payload (about to POST)');
 
+      if (!payload.name) {
+        setStatus('❌ Ralat: "Nama Tempat" wajib.', 'err'); btn.disabled = false; return;
+      }
+      if (!Number.isFinite(payload.lat) || !Number.isFinite(payload.lng)) {
+        setStatus('❌ Ralat: Koordinat tidak sah (lat/lng).', 'err'); btn.disabled = false; return;
+      }
+
+      // Fire request
+      const url = apiBase + '/places';
+      const { signal, cancel } = withTimeout(15000);
+      setStatus('⏳ Menyimpan data…', 'warn');
       try {
-        const res = await fetch("https://tanahemas.onrender.com/places", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(newPlace)
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          signal
         });
+        cancel();
 
-        if (!res.ok) throw new Error("Gagal menyimpan data");
-        await res.json();
-        message.textContent = "✅ Berjaya disimpan!";
-        form.reset();
+        // Read body safely (text first, then try JSON)
+        const raw = await res.text();
+        let json; try { json = JSON.parse(raw); } catch { /* keep raw */ }
+
+        // Debug dump
+        const headersObj = {};
+        res.headers.forEach((v,k)=>headersObj[k]=v);
+        log({ request: { url, method:'POST' },
+              response: { ok: res.ok, status: res.status, statusText: res.statusText, headers: headersObj },
+              body: json ?? raw
+            }, 'Response');
+
+        if (!res.ok) {
+          setStatus(`❌ Gagal (${res.status}): ${json?.error || json?.message || raw || 'Ralat tidak diketahui.'}`, 'err');
+          return;
+        }
+
+        setStatus('✅ Berjaya disimpan!', 'ok');
+        // Optionally reset form after success
+        e.target.reset();
       } catch (err) {
-        message.textContent = "❌ Ralat: " + err.message;
+        log({ error: (err && err.message) || String(err) }, 'Fetch Error');
+        const reason = (err && err.name === 'AbortError') ? 'Timeout' : (err && err.message) || 'Ralat rangkaian';
+        setStatus(`❌ Gagal hantar: ${reason}`, 'err');
+      } finally {
+        btn.disabled = false;
       }
     });
+
+    // ===== Test GET /places =====
+    $('testBtn').addEventListener('click', async () => {
+      const url = apiBase + '/places';
+      const { signal, cancel } = withTimeout(10000);
+      setStatus('🔎 Uji GET /places…', 'warn');
+      try {
+        const res = await fetch(url, { signal });
+        cancel();
+        const raw = await res.text();
+        let json; try { json = JSON.parse(raw); } catch {}
+        const headersObj = {};
+        res.headers.forEach((v,k)=>headersObj[k]=v);
+        log({ request: { url, method:'GET' },
+              response: { ok: res.ok, status: res.status, statusText: res.statusText, headers: headersObj },
+              body: json ?? raw
+            }, 'GET /places');
+        if (!res.ok) {
+          setStatus(`❌ GET gagal (${res.status})`, 'err');
+        } else {
+          setStatus('✅ GET berjaya. Lihat Debug untuk senarai.', 'ok');
+        }
+      } catch (err) {
+        log({ error: (err && err.message) || String(err) }, 'GET Error');
+        setStatus('❌ GET gagal: ' + ((err && err.message) || 'Ralat rangkaian'), 'err');
+      }
+    });
+
+    // ===== Debug buttons =====
+    $('clearDbg').addEventListener('click', clearDebug);
+    $('copyDbg').addEventListener('click', copyDebug);
+
+    // First boot info
+    log({ apiBase: apiBase || '(same-origin)' }, 'Boot');
+    setStatus('✅ Sedia. Masukkan data dan tekan Simpan.', 'ok');
   </script>
 </body>
 </html>
