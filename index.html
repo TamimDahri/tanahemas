@@ -1,197 +1,300 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Tanah Emas - Selangor Land Viewer</title>
-  <link rel="icon" href="te.png">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <meta charset="UTF-8" />
+  <title>RIBI Haram Selangor</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
-    body, html { margin: 0; padding: 0; height: 100%; font-family: 'Segoe UI', sans-serif; }
-    #map { height: 100%; width: 100%; }
-    #panel {
-      position: absolute; top: 15px; left: 15px; z-index: 1000;
-      background: rgba(255,255,255,0.95);
-      padding: 15px;
-      border-radius: 8px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-      width: 280px;
+    body { margin: 0; font-family: "Segoe UI", sans-serif; }
+    #map { height: 100vh; }
+
+    #controls {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      z-index: 1000;
+      width: 260px;
     }
-    h2 { margin-top: 0; font-size: 18px; text-align: center; color: #d4a017; }
+
     select, button {
       width: 100%;
-      padding: 6px;
       margin-top: 6px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
+      padding: 6px;
       font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
     }
-    #msg { margin-top: 10px; font-size: 13px; color: #333; text-align: center; }
 
-    /* Lot number label styling */
-    .lot-label {
-      background: none;
-      font-size: 11px;
-      color: #000;
-      text-shadow: 0 0 2px #fff;
-      font-weight: 600;
-      white-space: nowrap;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.3s ease-in-out;
+    h3 {
+      margin: 0 0 8px 0;
+      text-align: center;
+      color: #c29b00;
     }
-    .lot-label.visible { opacity: 1; }
+
+    /* --- Marker Styling for Highlight/Contrast --- */
+    /* Container for the marker icon */
+    .leaflet-div-icon.custom-emoji-icon {
+        background: none; /* Important: Remove Leaflet's default white background */
+        border: none;
+    }
+
+    /* The inner element that contains the emoji and provides the highlight */
+    .emoji-icon-wrapper {
+        display: block;
+        width: 36px;
+        height: 36px;
+        line-height: 36px;
+        text-align: center;
+        /* Contrast Styling */
+        background-color: white; /* White background for visibility */
+        border-radius: 50%; /* Makes it a circle */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4); /* Subtle shadow for depth */
+        border: 2px solid #333; /* Dark border for sharper definition */
+        transform: translate(-50%, -100%); /* Centers the icon base point on the coordinate */
+        cursor: pointer;
+    }
+    
+    /* The emoji itself */
+    .emoji-icon {
+      font-size: 20px; /* Adjusted size to fit within the 36px circle */
+      line-height: 32px; 
+      text-align: center;
+      transform: translateY(-2px); /* Vertical adjustment */
+    }
+    /* ------------------------------------------- */
+
+
+    .legend {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      background: rgba(255,255,255,0.9);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 14px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
   </style>
 </head>
 <body>
+  <div id="controls">
+    <h3>🏡 RIBI Haram Selangor</h3>
+    <button id="getLocationBtn">📍 Lokasi Saya</button>
+    <select id="daerahSelect">
+      <option value="">-- Pilih Daerah --</option>
+      <option value="klang">Klang</option> 
+      <option value="petalingjaya" selected>Petaling Jaya</option>
+    </select>
+    <select id="mukimSelect">
+      <option value="">-- Pilih Mukim --</option>
+    </select>
+  </div>
 
-<div id="panel">
-  <h2>🏡 Tanah Emas Viewer</h2>
+  <div id="map"></div>
 
-  <label><b>Select Daerah (Selangor)</b></label>
-  <select id="daerah">
-    <option value="">-- Choose Daerah --</option>
-  </select>
+  <div class="legend">
+    <span style="border-radius: 50%; padding: 0 4px 2px; border: 1px solid #333;">🛕</span> Kuil    
+    <span style="border-radius: 50%; padding: 0 4px 2px; border: 1px solid #333;">⛪</span> Gereja    
+    <span style="border-radius: 50%; padding: 0 4px 2px; border: 1px solid #333;">🏮</span> Tokong
+  </div>
 
-  <label><b>Select Mukim</b></label>
-  <select id="mukim">
-    <option value="">-- Choose Mukim --</option>
-  </select>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    // Map centered on Petaling Jaya
+    const map = L.map('map').setView([3.10, 101.62], 12); 
 
-  <button id="load">Load Lots</button>
-  <p id="msg">Status: waiting...</p>
-</div>
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
 
-<div id="map"></div>
+    let markers = [];
+    let currentData = [];
+    const mukimSelect = document.getElementById('mukimSelect');
+    const daerahSelect = document.getElementById('daerahSelect');
 
-<script>
-const map = L.map('map').setView([3.05, 101.6], 10);
+    const iconMap = {
+      "Kuil": "🛕",
+      "Gurdwara": "🛕", 
+      "Tapak Kuil": "🛕", 
+      "Tokong": "⛩️",
+      "Gereja": "⛪",
+      "default": "📍"
+    };
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 19,
-  attribution: '&copy; OpenStreetMap contributors'
-}).addTo(map);
-
-const msg = document.getElementById("msg");
-const daerahSelect = document.getElementById("daerah");
-const mukimSelect = document.getElementById("mukim");
-
-let geoLayer = null;
-let labelLayer = L.layerGroup().addTo(map);
-let currentData = null;
-
-// 🗺️ Selangor Daerah & Mukim Reference
-const selangorData = {
-  "01": { name: "Gombak", mukim: { "01": "Setapak", "02": "Ulu Klang", "03": "Rawang" } },
-  "02": { name: "Hulu Langat", mukim: { "01": "Kajang", "02": "Cheras", "03": "Hulu Langat" } },
-  "03": { name: "Hulu Selangor", mukim: { "01": "Ampang Pecah", "02": "Batang Kali", "03": "Ulu Bernam" } },
-  "04": { name: "Klang", mukim: { "01": "Kapar", "02": "Klang" } },
-  "05": { name: "Kuala Langat", mukim: { "01": "Telok Panglima Garang", "02": "Tanjong Dua Belas", "03": "Batu" } },
-  "06": { name: "Kuala Selangor", mukim: { "01": "Ijok", "02": "Jeram", "03": "Tanjong Karang" } },
-  "07": { name: "Petaling", mukim: { "04": "Petaling", "05": "Damansara", "06": "Bukit Raja" } },
-  "08": { name: "Sabak Bernam", mukim: { "01": "Sabak", "02": "Sungai Panjang" } },
-  "09": { name: "Sepang", mukim: { "01": "Dengkil", "02": "Sepang", "03": "Labu" } }
-};
-
-// Populate Daerah dropdown
-for (const [code, d] of Object.entries(selangorData)) {
-  const opt = document.createElement("option");
-  opt.value = code;
-  opt.textContent = `${d.name} (${code})`;
-  daerahSelect.appendChild(opt);
-}
-
-// Update Mukim dropdown dynamically
-daerahSelect.addEventListener("change", () => {
-  const daerahCode = daerahSelect.value;
-  mukimSelect.innerHTML = '<option value="">-- Choose Mukim --</option>';
-  if (!daerahCode) return;
-
-  const mukimList = selangorData[daerahCode].mukim;
-  for (const [code, name] of Object.entries(mukimList)) {
-    const opt = document.createElement("option");
-    opt.value = code;
-    opt.textContent = `${name} (${code})`;
-    mukimSelect.appendChild(opt);
-  }
-});
-
-// Fetch and show data
-document.getElementById("load").addEventListener("click", async () => {
-  const daerah = daerahSelect.value;
-  const mukim = mukimSelect.value;
-  if (!daerah || !mukim) {
-    msg.textContent = "⚠️ Please select both Daerah and Mukim.";
-    return;
-  }
-
-  msg.textContent = `⏳ Loading lots for ${selangorData[daerah].name}, Mukim ${mukim}...`;
-  labelLayer.clearLayers();
-  currentData = null;
-
-  const url = `https://scharms.planmalaysia.gov.my/arcgis/rest/services/iPLAN/LOT_10/MapServer/0/query?where=NEGERI='10'+AND+DAERAH='${daerah}'+AND+MUKIM='${mukim}'&outFields=LOT,UPI,DAERAH,MUKIM,KELUASAN&f=geojson`;
-
-  try {
-    const res = await fetch(url);
-    const data = await res.json();
-    currentData = data;
-
-    if (geoLayer) map.removeLayer(geoLayer);
-    if (data.features && data.features.length > 0) {
-      geoLayer = L.geoJSON(data, {
-        renderer: L.canvas({ tolerance: 5 }),
-        onEachFeature: (feature, layer) => {
-          const p = feature.properties;
-          layer.bindPopup(`
-            <b>Lot:</b> ${p.LOT}<br>
-            <b>UPI:</b> ${p.UPI}<br>
-            <b>Daerah:</b> ${p.DAERAH}<br>
-            <b>Mukim:</b> ${p.MUKIM}<br>
-            <b>Keluasan:</b> ${p.KELUASAN?.toLocaleString() || '-'} m²
-          `);
-        },
-        style: { color: "#d4a017", weight: 1 }
-      }).addTo(map);
-
-      const bounds = geoLayer.getBounds();
-      if (bounds.isValid()) map.fitBounds(bounds);
-
-      msg.innerHTML = `✅ Loaded ${data.features.length} lots for ${selangorData[daerah].name} (Mukim ${mukim}). Zoom in to see lot numbers.`;
-      updateLabels();
-    } else {
-      msg.textContent = "⚠️ No lots found for this area.";
+    /**
+     * Loads JSON data based on the district filename.
+     */
+    async function loadData(filename) {
+      try {
+        const res = await fetch(filename);
+        if (!res.ok) {
+            console.error(`Failed to load data from ${filename}. Please ensure the file exists.`);
+            return [];
+        }
+        return await res.json();
+      } catch (error) {
+        console.error("Error loading data:", error);
+        return [];
+      }
     }
-  } catch (err) {
-    msg.textContent = "❌ Error loading data: " + err.message;
-  }
-});
 
-// Show lot numbers when zoomed in
-function updateLabels() {
-  labelLayer.clearLayers();
-  if (!currentData) return;
+    function clearMarkers() {
+      markers.forEach(m => map.removeLayer(m));
+      markers = [];
+    }
+    
+    // Function to extract a Mukim name from the lot/mukim string
+    function extractMukimName(text) {
+        if (!text) return 'Tiada Mukim Dinyatakan';
+        return text.trim();
+    }
 
-  const zoom = map.getZoom();
-  if (zoom < 19) return; // only show when zoomed in close
 
-  const features = currentData.features.slice(0, 2000);
-  features.forEach(f => {
-    const p = f.properties;
-    if (!p.LOT) return;
-    const geom = L.geoJSON(f);
-    const center = geom.getBounds().getCenter();
-    const div = L.divIcon({
-      className: "lot-label visible",
-      html: p.LOT,
-      iconSize: null
+    function renderMarkers(data, filterMukim = '') {
+      clearMarkers();
+      let bounds = new L.LatLngBounds();
+
+      const filteredData = data
+        .filter(item => {
+          // Check for valid coordinates
+          const coordField = item["Koordinat Longitude dan Latitude"] || "";
+          const coords = coordField.split(',');
+          if (coords.length !== 2 || isNaN(parseFloat(coords[0].trim())) || isNaN(parseFloat(coords[1].trim()))) {
+            return false;
+          }
+
+          // Filter by Mukim
+          const lotMukimText = item.NO && item.NO["LOT & MUKIM (Jika berkenaan)"] ? item.NO["LOT & MUKIM (Jika berkenaan)"] : "";
+          const extractedMukim = extractMukimName(lotMukimText);
+          
+          return !filterMukim || extractedMukim === filterMukim;
+        });
+
+      filteredData.forEach(item => {
+          const coords = item["Koordinat Longitude dan Latitude"].split(',');
+          const lat = parseFloat(coords[0].trim());
+          const lng = parseFloat(coords[1].trim());
+
+          const jenisIbadat = item["JENIS RUMAH IBADAT"];
+          const emoji = iconMap[jenisIbadat] || iconMap.default;
+          
+          const statusTanah = item["STATUS TANAH"] || "-";
+          const lotMukim = item.NO && item.NO["LOT & MUKIM (Jika berkenaan)"] ? item.NO["LOT & MUKIM (Jika berkenaan)"] : "-";
+          
+          // --- Updated divIcon setup for highlighting ---
+          const divIcon = L.divIcon({
+            // Wrap the emoji in the styled wrapper div
+            html: `<div class="emoji-icon-wrapper"><div class="emoji-icon">${emoji}</div></div>`,
+            iconSize: [36, 36],
+            className: 'custom-emoji-icon' // Class defined in CSS
+          });
+          // ---------------------------------------------
+          
+          // Corrected Google Maps link to search by coordinate
+          // NOTE: Changed to a standard Google Maps URL for reliability.
+          const gmapsLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+          
+          const popup = `
+            <b>${item["NAMA RUMAH IBADAT"]}</b><br>
+            Jenis: ${jenisIbadat}<br>
+            Lokasi: ${item["LOKASI / ALAMAT"]}<br>
+            Status Tanah: ${statusTanah}<br>
+            Lot/Mukim: ${lotMukim}<br>
+            <a href="${gmapsLink}" target="_blank">📍 Buka di Google Maps</a>
+          `;
+
+          const marker = L.marker([lat, lng], { icon: divIcon }).bindPopup(popup);
+          marker.addTo(map);
+          markers.push(marker);
+          bounds.extend([lat, lng]);
+        });
+        
+        // Fit the map view to show all rendered markers
+        if (bounds.isValid()) {
+            map.fitBounds(bounds, { padding: [20, 20] });
+        }
+    }
+    
+    function populateMukimDropdown(data) {
+        mukimSelect.innerHTML = '<option value="">-- Semua Mukim --</option>';
+        
+        let mukimNames = data
+            .map(d => extractMukimName(d.NO && d.NO["LOT & MUKIM (Jika berkenaan)"]))
+            .filter(name => name && name !== 'Tiada Mukim Dinyatakan'); 
+            
+        const uniqueMukimList = [...new Set(mukimNames)].sort();
+
+        uniqueMukimList.forEach(mukim => {
+          const opt = document.createElement('option');
+          opt.value = mukim;
+          opt.textContent = mukim;
+          mukimSelect.appendChild(opt);
+        });
+    }
+
+    daerahSelect.addEventListener('change', async () => {
+      const daerah = daerahSelect.value;
+      if (!daerah) {
+          clearMarkers();
+          mukimSelect.innerHTML = '<option value="">-- Pilih Mukim --</option>';
+          currentData = [];
+          return;
+      }
+
+      const filename = `${daerah}.json`;
+      currentData = await loadData(filename);
+
+      // 1. Populate Mukim dropdown
+      populateMukimDropdown(currentData);
+
+      // 2. Render all markers for the selected district
+      renderMarkers(currentData);
     });
-    L.marker(center, { icon: div, interactive: false }).addTo(labelLayer);
-  });
-}
+    
+    // Event: when Mukim selected
+    mukimSelect.addEventListener('change', () => {
+        renderMarkers(currentData, mukimSelect.value);
+    });
 
-map.on("zoomend", updateLabels);
-</script>
+    // Function to load the default data (Petaling Jaya) on initial page load
+    async function initializeMap() {
+        const defaultDaerah = daerahSelect.value; 
+        if (defaultDaerah) {
+            const filename = `${defaultDaerah}.json`;
+            currentData = await loadData(filename);
+            
+            // Populate and render 
+            populateMukimDropdown(currentData);
+            renderMarkers(currentData);
+        }
+    }
+    
+    // Call the initialization function
+    initializeMap();
+
+
+    // My Location button
+    document.getElementById('getLocationBtn').addEventListener('click', () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(pos => {
+          const { latitude, longitude } = pos.coords;
+          // Use a special icon for user location
+          const userIcon = L.divIcon({ html: '<div class="emoji-icon-wrapper" style="background-color: #3f51b5; border: 2px solid #fff;"><div class="emoji-icon" style="line-height: 32px; font-size: 20px;">👤</div></div>', iconSize: [36, 36], className: 'custom-emoji-icon' });
+          
+          L.marker([latitude, longitude], { icon: userIcon })
+            .addTo(map)
+            .bindPopup("📍 Lokasi Anda")
+            .openPopup();
+          map.setView([latitude, longitude], 14);
+        }, err => alert("Gagal mendapatkan lokasi: " + err.message));
+      } else {
+        alert("Geolocation tidak disokong pada pelayar ini.");
+      }
+    });
+  </script>
 </body>
 </html>
-
