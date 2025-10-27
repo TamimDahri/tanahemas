@@ -1,32 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Tambah Lokasi Baru - Tanah Emas</title>
+  <meta charset="UTF-8" />
+  <title>RIBI Haram Selangor</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
-    body {
-      font-family: "Segoe UI", sans-serif;
-      background: #f7f8fa;
-      margin: 0;
-      padding: 40px;
-    }
+    body { margin: 0; font-family: "Segoe UI", sans-serif; }
+    #map { height: 100vh; }
 
-    .container {
-      max-width: 500px;
-      background: white;
-      padding: 25px;
+    #controls {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 10px;
       border-radius: 10px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-      margin: auto;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      z-index: 1000;
+      width: 260px;
     }
 
-    h2 {
+    select, button {
+      width: 100%;
+      margin-top: 6px;
+      padding: 6px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    h3 {
+      margin: 0 0 8px 0;
       text-align: center;
       color: #c29b00;
-      margin-bottom: 20px;
     }
 
-<<<<<<< Updated upstream
     .leaflet-div-icon.custom-emoji-icon {
         background: none;
         border: none;
@@ -60,45 +68,12 @@
       background: rgba(255,255,255,0.9);
       border-radius: 8px;
       padding: 6px 10px;
-=======
-    label {
-      display: block;
-      margin-top: 12px;
-      font-weight: 600;
-    }
-
-    input, select, textarea, button {
-      width: 100%;
-      padding: 8px;
-      margin-top: 5px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
->>>>>>> Stashed changes
       font-size: 14px;
-      box-sizing: border-box;
-    }
-
-    button {
-      background-color: #c29b00;
-      color: white;
-      font-weight: bold;
-      margin-top: 20px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background-color: #b38e00;
-    }
-
-    .message {
-      text-align: center;
-      margin-top: 20px;
-      font-weight: 600;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
     }
   </style>
 </head>
 <body>
-<<<<<<< Updated upstream
   <div id="controls">
     <h3>🏡 RIBI Haram Selangor</h3>
     <button id="getLocationBtn">📍 Lokasi Saya</button>
@@ -122,64 +97,28 @@
   </div>
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-=======
-  <div class="container">
-    <h2>🛕 Tambah Lokasi Baru</h2>
-
-    <form id="placeForm">
-      <label for="name">Nama Rumah Ibadat</label>
-      <input type="text" id="name" name="name" required>
-
-      <label for="type">Jenis</label>
-      <select id="type" name="type" required>
-        <option value="">-- Pilih Jenis --</option>
-        <option value="Kuil">🛕 Kuil</option>
-        <option value="Tokong">🏮 Tokong</option>
-        <option value="Gereja">⛪ Gereja</option>
-        <option value="Gurdwara">🕌 Gurdwara</option>
-      </select>
-
-      <label for="address">Alamat / Lokasi</label>
-      <textarea id="address" name="address" rows="3" required></textarea>
-
-      <label for="lat">Latitude</label>
-      <input type="number" step="any" id="lat" name="lat" required>
-
-      <label for="lng">Longitude</label>
-      <input type="number" step="any" id="lng" name="lng" required>
-
-      <button type="submit">💾 Simpan Data</button>
-    </form>
-
-    <div id="message" class="message"></div>
-  </div>
-
->>>>>>> Stashed changes
   <script>
-    const form = document.getElementById('placeForm');
-    const message = document.getElementById('message');
+    const map = L.map('map').setView([3.08, 101.62], 11);
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      message.textContent = "⏳ Menyimpan data...";
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
 
-<<<<<<< Updated upstream
     let markers = [];
     let currentData = [];
     const daerahSelect = document.getElementById('daerahSelect');
     const mukimSelect = document.getElementById('mukimSelect');
-=======
-      const newPlace = {
-        name: form.name.value.trim(),
-        type: form.type.value,
-        address: form.address.value.trim(),
-        lat: parseFloat(form.lat.value),
-        lng: parseFloat(form.lng.value)
-      };
->>>>>>> Stashed changes
 
+    const iconMap = {
+      "Kuil": "🛕",
+      "Gurdwara": "🕌",
+      "Tokong": "⛩️",
+      "Gereja": "⛪",
+      "default": "📍"
+    };
+
+    async function loadData(filename) {
       try {
-<<<<<<< Updated upstream
         const res = await fetch(filename);
         if (!res.ok) throw new Error(`Gagal muat ${filename}`);
         return await res.json();
@@ -300,20 +239,6 @@
         }, err => alert("Gagal mendapatkan lokasi: " + err.message));
       } else {
         alert("Geolocation tidak disokong oleh pelayar ini.");
-=======
-        const res = await fetch("https://tanahemas.onrender.com/places", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(newPlace)
-        });
-
-        if (!res.ok) throw new Error("Gagal menyimpan data");
-        const data = await res.json();
-        message.textContent = "✅ Berjaya disimpan!";
-        form.reset();
-      } catch (err) {
-        message.textContent = "❌ Ralat: " + err.message;
->>>>>>> Stashed changes
       }
     });
   </script>
