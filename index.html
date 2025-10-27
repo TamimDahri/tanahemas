@@ -35,7 +35,6 @@
       color: #c29b00;
     }
 
-    /* Marker styling */
     .leaflet-div-icon.custom-emoji-icon {
         background: none;
         border: none;
@@ -54,7 +53,7 @@
         transform: translate(-50%, -100%);
         cursor: pointer;
     }
-    
+
     .emoji-icon {
       font-size: 20px;
       line-height: 32px;
@@ -79,19 +78,21 @@
     <h3>🏡 RIBI Haram Selangor</h3>
     <button id="getLocationBtn">📍 Lokasi Saya</button>
     <select id="daerahSelect">
-      <option value="">-- Pilih Daerah --</option>
-      <option value="petalingjaya" selected>Petaling Jaya</option>
+      <option value="">-- Pilih Data --</option>
+      <option value="jais">JAIS</option>
+      <option value="klang">Klang</option>
+      <option value="petalingjaya">Petaling Jaya</option>
     </select>
-    <select id="mukimSelect">
-      <option value="">-- Pilih Mukim --</option>
+    <select id="mukimSelect" style="display:none;">
+      <option value="">-- Semua Mukim --</option>
     </select>
   </div>
 
   <div id="map"></div>
 
   <div class="legend">
-    <span style="border-radius: 50%; padding: 0 4px 2px; border: 1px solid #333;">🛕</span> Kuil    
-    <span style="border-radius: 50%; padding: 0 4px 2px; border: 1px solid #333;">⛪</span> Gereja    
+    <span style="border-radius: 50%; padding: 0 4px 2px; border: 1px solid #333;">🛕</span> Kuil
+    <span style="border-radius: 50%; padding: 0 4px 2px; border: 1px solid #333;">⛪</span> Gereja
     <span style="border-radius: 50%; padding: 0 4px 2px; border: 1px solid #333;">🏮</span> Tokong
   </div>
 
@@ -104,7 +105,9 @@
     }).addTo(map);
 
     let markers = [];
+    let currentData = [];
     const daerahSelect = document.getElementById('daerahSelect');
+    const mukimSelect = document.getElementById('mukimSelect');
 
     const iconMap = {
       "Kuil": "🛕",
@@ -137,21 +140,47 @@
       if (parts.length !== 2) return false;
       const lat = parseFloat(parts[0].trim());
       const lng = parseFloat(parts[1].trim());
-      return !isNaN(lat) && !isNaN(lng);
+      return !isNaN(lat) && !isNaN(lng) && lat >= 1 && lat <= 6 && lng >= 99 && lng <= 105;
     }
 
-    function renderMarkers(data) {
+    function extractMukim(text) {
+      if (!text) return "Tidak Dinyatakan";
+      const match = text.match(/(Mukim|Bandar)\s*([A-Za-z\s]+)/i);
+      if (match) return `${match[1]} ${match[2].trim()}`;
+      return text.trim();
+    }
+
+    function populateMukimDropdown(data) {
+      mukimSelect.innerHTML = '<option value="">-- Semua Mukim --</option>';
+      const mukims = [...new Set(
+        data.map(d => extractMukim(d.NO && d.NO["LOT & MUKIM (Jika berkenaan)"]))
+      )].filter(Boolean).sort();
+
+      mukims.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m;
+        opt.textContent = m;
+        mukimSelect.appendChild(opt);
+      });
+
+      mukimSelect.style.display = mukims.length ? "block" : "none";
+    }
+
+    function renderMarkers(data, mukimFilter = "") {
       clearMarkers();
       const bounds = new L.LatLngBounds();
 
       data.forEach(item => {
         const coord = item["Koordinat Longitude dan Latitude"];
-        if (!isValidCoordinate(coord)) return; // skip invalid rows
+        if (!isValidCoordinate(coord)) return;
 
         const [lat, lng] = coord.split(",").map(v => parseFloat(v.trim()));
         const jenis = item["JENIS RUMAH IBADAT\n"] || item["JENIS RUMAH IBADAT"] || "";
-        const emoji = iconMap[jenis] || iconMap.default;
+        const mukimText = item.NO?.["LOT & MUKIM (Jika berkenaan)"] || "";
+        const mukim = extractMukim(mukimText);
+        if (mukimFilter && mukim !== mukimFilter) return;
 
+        const emoji = iconMap[jenis] || iconMap.default;
         const divIcon = L.divIcon({
           html: `<div class="emoji-icon-wrapper"><div class="emoji-icon">${emoji}</div></div>`,
           iconSize: [36, 36],
@@ -162,6 +191,7 @@
         const popup = `
           <b>${item["NAMA RUMAH IBADAT"] || "Tidak Dinyatakan"}</b><br>
           Jenis: ${jenis || "-"}<br>
+          Mukim: ${mukim}<br>
           Lokasi: ${item["LOKASI / ALAMAT"] || "-"}<br>
           Status Tanah: ${item["STATUS TANAH\n"] || item["STATUS TANAH"] || "-"}<br>
           <a href="${gmapsLink}" target="_blank">📍 Buka di Google Maps</a>
@@ -181,11 +211,15 @@
       const daerah = daerahSelect.value;
       if (!daerah) return;
       const filename = `${daerah}.json`;
-      const data = await loadData(filename);
-      renderMarkers(data);
+      currentData = await loadData(filename);
+      populateMukimDropdown(currentData);
+      renderMarkers(currentData);
     });
 
-    // Lokasi pengguna
+    mukimSelect.addEventListener("change", () => {
+      renderMarkers(currentData, mukimSelect.value);
+    });
+
     document.getElementById("getLocationBtn").addEventListener("click", () => {
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(pos => {
