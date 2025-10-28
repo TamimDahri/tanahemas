@@ -3,24 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <title>Tanah Emas - Memelihara Tanah Negara</title>
-<meta name="description" content=" Peta interaktif dan carian lokasi.">
+  <meta name="description" content="Peta interaktif dan carian lokasi.">
 
-<!-- Open Graph / Facebook / WhatsApp -->
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://tanahemas.com/">
-<meta property="og:title" content="Tanah Emas">
-<meta property="og:description" content="Peta interaktif dan carian lokasi.">
-<meta property="og:image" content="https://tanahemas.com/te.png"> <!-- Make sure image URL is absolute and public -->
+  <!-- Open Graph / WhatsApp -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://tanahemas.com/">
+  <meta property="og:title" content="Tanah Emas">
+  <meta property="og:description" content="Peta interaktif dan carian lokasi.">
+  <meta property="og:image" content="https://tanahemas.com/te.png">
 
-<!-- Optional: Twitter (also used by some apps) -->
-<meta property="twitter:card" content="summary_large_image">
-<meta property="twitter:url" content="https://tanahemas.com/">
-<meta property="twitter:title" content="Tanah Emas">
-<meta property="twitter:description" content="Peta interaktif dengan data pengguna.">
-<meta property="twitter:image" content="https://tanahemas.com/te.png">
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://tanahemas.com/">
+  <meta property="twitter:title" content="Tanah Emas">
+  <meta property="twitter:description" content="Peta interaktif dengan data pengguna.">
+  <meta property="twitter:image" content="https://tanahemas.com/te.png">
 
-<!-- Favicon -->
-<link rel="icon" type="image/png" href="te.png">
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="te.png">
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
@@ -87,9 +87,9 @@
 
     #controls { position: static; width:100%; }
 
-    /* Legend */
+    /* Legend above footer */
     .legend {
-      position: absolute; bottom: 48px; left: 14px; /* lifted above footer */
+      position: absolute; bottom: 48px; left: 14px;
       background: var(--card-bg); border: 1px solid var(--border);
       border-radius: 10px; padding: 8px 10px; font-size: 14px; box-shadow: var(--card-shadow);
       backdrop-filter: blur(6px);
@@ -145,7 +145,6 @@
         <button id="userRefreshBtn" title="Segarkan dari Sheet">🔄 Refresh</button>
       </div>
       <input id="userSearchInput" placeholder="🔍 Cari (nama/jenis/alamat) " />
-      <!-- <div class="hint" style="font-size:12px; color:#6b7280; margin-top:6px">Carian ini menapis penanda pada peta, tiada senarai.</div> -->
     </div>
   </div>
 
@@ -179,6 +178,11 @@
         <input type="number" step="any" id="lat" required>
         <label>Longitude</label>
         <input type="number" step="any" id="lng" required>
+
+        <!-- NEW: Image upload -->
+        <label>Gambar Bukti(pilihan)</label>
+        <input type="file" id="image" accept="image/*">
+
         <button type="submit">💾 Simpan Data</button>
       </form>
       <div id="message"></div>
@@ -192,6 +196,7 @@
      ***********************/
     const SHEET_API = "https://dry-bread-c188.musabanas99.workers.dev/";
 
+    // GET rows
     async function sheetGetPlaces() {
       const res = await fetch(SHEET_API);
       if (!res.ok) throw new Error("Gagal ambil data dari Sheet");
@@ -199,23 +204,21 @@
       return Array.isArray(data.places) ? data.places : [];
     }
 
-    async function sheetPostPlace(place) {
-      const body = new URLSearchParams({
-        name: place.name || "",
-        type: place.type || "",
-        address: place.address || "",
-        lat: String(place.lat ?? ""),
-        lng: String(place.lng ?? "")
-      });
-      const res = await fetch(SHEET_API, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
-        body
-      });
+    // POST with optional image (multipart/form-data)
+    async function sheetPostPlace(place, file) {
+      const fd = new FormData();
+      fd.append("name", place.name || "");
+      fd.append("type", place.type || "");
+      fd.append("address", place.address || "");
+      fd.append("lat", String(place.lat ?? ""));
+      fd.append("lng", String(place.lng ?? ""));
+      if (file) fd.append("image", file, file.name);
+
+      const res = await fetch(SHEET_API, { method: "POST", body: fd });
       if (!res.ok) throw new Error("Gagal simpan ke Sheet");
       const data = await res.json();
       if (!data.ok) throw new Error(data.error || "Gagal simpan");
-      return data;
+      return data; // {ok:true, imageUrl?}
     }
 
     /***********************
@@ -227,7 +230,7 @@
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    // two separate marker arrays
+    // separate marker arrays
     let staticMarkers = [];
     let sheetMarkers  = [];
     function clearStaticMarkers() { staticMarkers.forEach(m => map.removeLayer(m)); staticMarkers = []; }
@@ -348,13 +351,11 @@
     /*********************** SHEET (user) — map only ***********************/
     let sheetDataRaw = [];
 
-    // Build markers from the current filtered dataset
     function renderSheetFiltered(filter = "") {
       clearSheetMarkers();
       const q = (filter || "").toLowerCase();
       const bounds = new L.LatLngBounds();
 
-      // filter
       const rows = sheetDataRaw.filter(r => {
         const hay = [r.name||"", r.type||"", r.address||""].join(" ").toLowerCase();
         return q ? hay.includes(q) : true;
@@ -371,21 +372,25 @@
           iconSize: [44, 44],
           iconAnchor: [22, 44]
         });
+
         const gmapsLink = `https://www.google.com/maps?q=${lat},${lng}`;
-        const popup = `<b>${r.name || "Tidak Dinyatakan"}</b> <span style="font-size:11px;color:#777")</span><br>
+        const hasImg = r.image && String(r.image).startsWith('http');
+        const imgLine = hasImg ? `<br><a href="${r.image}" target="_blank">🖼️ Lihat imej</a>` : '';
+
+        const popup = `<b>${r.name || "Tidak Dinyatakan"}</b> <span style="font-size:11px;color:#777">(Tambah)</span><br>
           Jenis: ${r.type || "-"}<br>
-          Lokasi: ${r.address || "-"}<br>
+          Lokasi: ${r.address || "-"}${imgLine}<br>
           <a href="${gmapsLink}" target="_blank">📍 Buka di Google Maps</a>`;
 
         const m = L.marker([lat, lng], { icon: divIcon }).bindPopup(popup).addTo(map);
         sheetMarkers.push(m); bounds.extend([lat, lng]);
       });
 
-      // Only fit to bounds if no JSON dataset is active (to avoid fighting)
+      // Only auto-fit when no JSON dataset is active
       if (!daerahSelect.value && bounds.isValid()) map.fitBounds(bounds, { padding: [24, 24] });
     }
 
-    // Debounce helper for smooth searching
+    // Debounce helper
     function debounce(fn, wait = 220){
       let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), wait); };
     }
@@ -404,7 +409,7 @@
     closeModal.onclick = () => { modal.style.display = "none"; message.textContent = ""; };
     window.onclick = (e) => { if (e.target === modal) { modal.style.display = "none"; message.textContent = ""; } };
 
-    // Refresh: fetch all from Sheet and render all markers (map only)
+    // Refresh → fetch from Sheet and render markers only
     userRefreshBtn.onclick = async () => {
       try {
         userRefreshBtn.disabled = true;
@@ -417,12 +422,12 @@
       }
     };
 
-    // Search filters markers on map only (no list)
+    // Search (filters existing sheet markers, no list)
     userSearchInput.addEventListener("input",
       debounce(() => renderSheetFiltered(userSearchInput.value), 220)
     );
 
-    // Submit new place
+    // Submit new place (with optional image)
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       message.textContent = "⏳ Menyimpan data...";
@@ -434,20 +439,23 @@
         lat: parseFloat(document.getElementById("lat").value),
         lng: parseFloat(document.getElementById("lng").value)
       };
+      const fileInput = document.getElementById("image");
+      const file = fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
 
       try {
-        await sheetPostPlace(newPlace);
+        await sheetPostPlace(newPlace, file);
         message.textContent = "✅ Berjaya disimpan!";
         form.reset();
 
-        // Update in-memory rows & re-render filtered markers
+        // Update local cache; user will still need Refresh to reload from Sheet if desired
         sheetDataRaw.push({
           timestamp: new Date().toISOString(),
           name: newPlace.name,
           type: newPlace.type,
           address: newPlace.address,
           lat: newPlace.lat,
-          lng: newPlace.lng
+          lng: newPlace.lng,
+          image: "" // Worker returns imageUrl but we rely on Refresh to sync authoritative data
         });
         renderSheetFiltered(userSearchInput.value);
 
@@ -458,30 +466,26 @@
       }
     });
 
-(async function bootstrapAllData() {
-  try {
-    // DO NOT load Sheet on start
-    // sheetDataRaw stays empty until user clicks Refresh
+    // Bootstrap — DO NOT load Sheet on start (only JSON)
+    (async function bootstrapAllData() {
+      try {
+        if (daerahSelect.value) {
+          staticDataRaw = await loadData(`${daerahSelect.value}.json`);
+        } else {
+          staticDataRaw = [];
+        }
+        populateMukimFromStatic();
+        renderStatic(mukimSelect.value, searchInput.value);
 
-    // If a daerah is preselected, load JSON; else none
-    if (daerahSelect.value) {
-      staticDataRaw = await loadData(`${daerahSelect.value}.json`);
-    } else {
-      staticDataRaw = [];
-    }
-    populateMukimFromStatic();
-    renderStatic(mukimSelect.value, searchInput.value);
-
-    console.log("✅ Ready (no sheet loaded):", { sheet: sheetDataRaw.length, static: staticDataRaw.length });
-  } catch (e) {
-    console.error("❌ Gagal memuat data:", e.message);
-  }
-})();
-
+        console.log("✅ Ready (Sheet not loaded until Refresh)");
+      } catch (e) {
+        console.error("❌ Gagal memuat data:", e.message);
+      }
+    })();
   </script>
 
   <footer id="appFooter">
-    <span><strong>Tanah Emas</strong> v1.0.6</span>
+    <span><strong>Tanah Emas</strong> v1.1.0 — Upload gambar → Google Drive & paparan pautan</span>
   </footer>
 </body>
 </html>
