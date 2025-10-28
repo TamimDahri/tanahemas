@@ -440,27 +440,26 @@
       }
     });
 
-    // Bootstrap
-    (async function bootstrapAllData() {
-      try {
-        // Load sheet data first (so the user panel works immediately)
-        sheetDataRaw = await sheetGetPlaces();
-        renderSheetFiltered("");
+(async function bootstrapAllData() {
+  try {
+    // DO NOT load Sheet on start
+    // sheetDataRaw stays empty until user clicks Refresh
 
-        // If a daerah is preselected, load JSON; else none
-        if (daerahSelect.value) {
-          staticDataRaw = await loadData(`${daerahSelect.value}.json`);
-        } else {
-          staticDataRaw = [];
-        }
-        populateMukimFromStatic();
-        renderStatic(mukimSelect.value, searchInput.value);
+    // If a daerah is preselected, load JSON; else none
+    if (daerahSelect.value) {
+      staticDataRaw = await loadData(`${daerahSelect.value}.json`);
+    } else {
+      staticDataRaw = [];
+    }
+    populateMukimFromStatic();
+    renderStatic(mukimSelect.value, searchInput.value);
 
-        console.log("✅ Ready:", { sheet: sheetDataRaw.length, static: staticDataRaw.length });
-      } catch (e) {
-        console.error("❌ Gagal memuat data:", e.message);
-      }
-    })();
+    console.log("✅ Ready (no sheet loaded):", { sheet: sheetDataRaw.length, static: staticDataRaw.length });
+  } catch (e) {
+    console.error("❌ Gagal memuat data:", e.message);
+  }
+})();
+
   </script>
 
   <footer id="appFooter">
