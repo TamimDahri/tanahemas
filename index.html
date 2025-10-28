@@ -15,126 +15,85 @@
       --muted: #6b7280;
       --border: #e5e7eb;
     }
-/* Make ALL Leaflet div markers have no default bg/border */
-.leaflet-div-icon { background: transparent; border: none; }
 
-/* Our custom emoji badge */
-.emoji-icon-wrapper{
-  width: 44px;             /* bigger circle */
-  height: 44px;
-  border-radius: 50%;
-  background: #ffffff;     /* white background (the badge) */
-  border: 2px solid #333;  /* visible ring */
-  box-shadow: 0 4px 10px rgba(0,0,0,0.35);
-  display: flex;           /* perfectly center the emoji */
-  align-items: center;
-  justify-content: center;
-}
+    /* Footer */
+    #appFooter {
+      position: fixed; bottom: 0; left: 0; width: 100%;
+      background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(6px);
+      color: #f3f4f6; text-align: center; padding: 8px 12px; font-size: 13px; font-weight: 500;
+      display: flex; justify-content: center; gap: 10px; align-items: center; z-index: 2000;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    #appFooter strong { color: #ffd700; }
 
-/* Bigger emoji */
-.emoji-icon{
-  font-size: 26px;         /* was 20px */
-  line-height: 1;
-  transform: translateY(0); /* keep centered */
-}
+    /* Leaflet marker emoji badge */
+    .leaflet-div-icon { background: transparent; border: none; }
+    .emoji-icon-wrapper{
+      width: 44px; height: 44px; border-radius: 50%;
+      background: #ffffff; border: 2px solid #333; box-shadow: 0 4px 10px rgba(0,0,0,0.35);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .emoji-icon{ font-size: 26px; line-height: 1; transform: translateY(0); }
 
     * { box-sizing: border-box; }
     body { margin: 0; font-family: ui-sans-serif, system-ui, "Segoe UI", Roboto, Arial, sans-serif; color: var(--text); }
     #map { height: 100vh; }
 
-    /* Stack of panels (moved a bit from edges) */
+    /* Panels stack */
     #uiStack{
       position:absolute; top:14px; left:14px; width:300px;
       display:flex; flex-direction:column; gap:12px; z-index:1000;
-      pointer-events: auto;
     }
     .panel{
-      background: var(--card-bg);
-      backdrop-filter: blur(6px);
-      padding:12px 12px 14px;
-      border-radius: var(--radius);
-      box-shadow: var(--card-shadow);
-      border: 1px solid var(--border);
+      background: var(--card-bg); backdrop-filter: blur(6px);
+      padding:12px 12px 14px; border-radius: var(--radius);
+      box-shadow: var(--card-shadow); border: 1px solid var(--border);
     }
     .panel h3, .panel h4{
-      margin: 0 0 10px 0;
-      display:flex; align-items:center; gap:8px;
-      font-weight: 700;
+      margin: 0 0 10px 0; display:flex; align-items:center; gap:8px; font-weight: 700;
     }
     .panel h3{ color: var(--brand); }
     .panel h4{ color:#333; }
 
     /* Inputs */
     select, button, input, textarea {
-      width: 100%;
-      margin-top: 8px;
-      padding: 9px 10px;
-      font-size: 14px;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      background: #fff;
-      outline: none;
+      width: 100%; margin-top: 8px; padding: 9px 10px; font-size: 14px;
+      border: 1px solid var(--border); border-radius: 10px; background: #fff; outline: none;
     }
     input::placeholder{ color:#9aa3ad; }
     button{
-      background:#f8fafc;
-      cursor:pointer;
-      transition: transform .06s ease, box-shadow .06s ease;
+      background:#f8fafc; cursor:pointer; transition: transform .06s ease, box-shadow .06s ease;
     }
     button:hover{ transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,0.07); }
     button:active{ transform: translateY(0); box-shadow: none; }
 
-    /* JSON panel spacing */
     #controls { position: static; width:100%; }
-
-    /* User list box */
-    #userList{
-      margin-top: 8px;
-      max-height: 260px; overflow:auto;
-      border:1px solid var(--border);
-      border-radius: 10px; background:#fff;
-    }
-    .user-row{
-      padding:10px; border-bottom:1px solid #f2f4f7; cursor:pointer;
-      display:flex; flex-direction:column; gap:2px;
-    }
-    .user-row:hover{ background:#f9fafb; }
-    .user-name{ font-weight:600; }
-    .user-meta{ font-size:12px; color:#667085; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
     /* Legend */
     .legend {
-      position: absolute; bottom: 12px; left: 14px;
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 8px 10px;
-      font-size: 14px;
-      box-shadow: var(--card-shadow);
+      position: absolute; bottom: 48px; left: 14px; /* lifted above footer */
+      background: var(--card-bg); border: 1px solid var(--border);
+      border-radius: 10px; padding: 8px 10px; font-size: 14px; box-shadow: var(--card-shadow);
       backdrop-filter: blur(6px);
     }
 
     /* Modal */
     #modal {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.45);
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45);
       justify-content: center; align-items: center; z-index: 2000;
     }
     .modal-content {
       background: #fff; padding: 20px; border-radius: 14px; width: 92%; max-width: 480px;
-      box-shadow: 0 24px 56px rgba(0,0,0,0.25);
-      border: 1px solid var(--border);
+      box-shadow: 0 24px 56px rgba(0,0,0,0.25); border: 1px solid var(--border);
     }
     .modal-content h2 { text-align: center; color: var(--brand); margin-bottom: 12px; }
     .close-btn { float: right; font-size: 20px; cursor: pointer; color: #667085; }
     label { display: block; margin-top: 10px; font-weight: 600; }
     #message { text-align: center; margin-top: 10px; font-weight: bold; color:#0b6a0b; }
-    .hint { font-size: 12px; color: var(--muted); margin-top: 6px; text-align: center; }
 
-    /* Move Leaflet zoom to top-right so it doesn't clash with the panels */
-    .leaflet-top.leaflet-left { display:none; } /* hide default position completely */
+    /* Move Leaflet zoom to top-right */
+    .leaflet-top.leaflet-left { display:none; }
 
-    /* Responsive: center panels on small screens */
     @media (max-width: 640px){
       #uiStack{ left:50%; transform: translateX(-50%); width: min(92vw, 360px); }
       .legend{ left:50%; transform: translateX(-50%); }
@@ -143,9 +102,9 @@
 </head>
 <body>
 
-  <!-- Panels -->
+  <!-- PANELS -->
   <div id="uiStack">
-    <!-- Panel 1: JSON-only -->
+    <!-- TOP: JSON-only -->
     <div id="controls" class="panel">
       <h3>🏡 RIBI Haram Selangor</h3>
       <select id="daerahSelect" aria-label="Pilih data daerah">
@@ -157,18 +116,18 @@
       <select id="mukimSelect" style="display:none;">
         <option value="">-- Semua Mukim --</option>
       </select>
-      <input type="text" id="searchInput" placeholder="🔍 Cari (nama/jenis/mukim)" />
+      <input type="text" id="searchInput" placeholder="🔍 Cari (nama/jenis/mukim) " />
     </div>
 
-    <!-- Panel 2: Sheet-only -->
+    <!-- BOTTOM: Sheet-only controls (no list) -->
     <div id="userPanel" class="panel">
       <h4>🧑‍🤝‍🧑 Lokasi dari Pengguna</h4>
       <div style="display:flex; gap:8px; margin-bottom:6px">
         <button id="userAddBtn" title="Tambah lokasi baharu">➕ Tambah</button>
         <button id="userRefreshBtn" title="Segarkan dari Sheet">🔄 Refresh</button>
       </div>
-      <input id="userSearchInput" placeholder="Cari dalam data pengguna (nama/jenis/alamat)..." />
-      <div id="userList"></div>
+      <input id="userSearchInput" placeholder="🔍 Cari (nama/jenis/alamat) " />
+      <!-- <div class="hint" style="font-size:12px; color:#6b7280; margin-top:6px">Carian ini menapis penanda pada peta, tiada senarai.</div> -->
     </div>
   </div>
 
@@ -242,15 +201,15 @@
     }
 
     /***********************
-     * Map setup (zoom moved to top-right)
+     * Map setup
      ***********************/
     const map = L.map('map', { zoomControl: false }).setView([3.08, 101.62], 11);
-    L.control.zoom({ position: 'topright' }).addTo(map);   // put +/− at top-right
+    L.control.zoom({ position: 'topright' }).addTo(map);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    // two separate marker groups
+    // two separate marker arrays
     let staticMarkers = [];
     let sheetMarkers  = [];
     function clearStaticMarkers() { staticMarkers.forEach(m => map.removeLayer(m)); staticMarkers = []; }
@@ -331,7 +290,9 @@
         const emoji = iconMap[item.type] || iconMap.default;
         const divIcon = L.divIcon({
           html: `<div class="emoji-icon-wrapper"><div class="emoji-icon">${emoji}</div></div>`,
-          iconSize: [36, 36], className: "custom-emoji-icon"
+          className: "custom-emoji-icon",
+          iconSize: [44, 44],
+          iconAnchor: [22, 44]
         });
         const gmapsLink = `https://www.google.com/maps?q=${item.lat},${item.lng}`;
         const popup = `
@@ -366,110 +327,84 @@
     mukimSelect.addEventListener("change", () => renderStatic(mukimSelect.value, searchInput.value));
     searchInput.addEventListener("input", () => renderStatic(mukimSelect.value, searchInput.value));
 
-    /*********************** SHEET (user) ***********************/
+    /*********************** SHEET (user) — map only ***********************/
     let sheetDataRaw = [];
 
-    function renderSheetAll() {
+    // Build markers from the current filtered dataset
+    function renderSheetFiltered(filter = "") {
       clearSheetMarkers();
+      const q = (filter || "").toLowerCase();
       const bounds = new L.LatLngBounds();
 
-      sheetDataRaw.forEach(r => {
+      // filter
+      const rows = sheetDataRaw.filter(r => {
+        const hay = [r.name||"", r.type||"", r.address||""].join(" ").toLowerCase();
+        return q ? hay.includes(q) : true;
+      });
+
+      rows.forEach(r => {
         const lat = parseFloat(r.lat), lng = parseFloat(r.lng);
         if (isNaN(lat) || isNaN(lng)) return;
 
         const emoji = iconMap[r.type] || iconMap.default;
         const divIcon = L.divIcon({
           html: `<div class="emoji-icon-wrapper"><div class="emoji-icon">${emoji}</div></div>`,
-          iconSize: [36, 36], className: "custom-emoji-icon"
+          className: "custom-emoji-icon",
+          iconSize: [44, 44],
+          iconAnchor: [22, 44]
         });
-       const gmapsLink = `https://www.google.com/maps?q=${lat},${lng}`;
-const popup = `<b>${r.name || "Tidak Dinyatakan"}</b> <span style="font-size:11px;color:#777">(Tambah)</span><br>
-  Jenis: ${r.type || "-"}<br>
-  Lokasi: ${r.address || "-"}<br>
-  <a href="${gmapsLink}" target="_blank">📍 Buka di Google Maps</a>`;
+        const gmapsLink = `https://www.google.com/maps?q=${lat},${lng}`;
+        const popup = `<b>${r.name || "Tidak Dinyatakan"}</b> <span style="font-size:11px;color:#777">(Tambah)</span><br>
+          Jenis: ${r.type || "-"}<br>
+          Lokasi: ${r.address || "-"}<br>
+          <a href="${gmapsLink}" target="_blank">📍 Buka di Google Maps</a>`;
 
+        const m = L.marker([lat, lng], { icon: divIcon }).bindPopup(popup).addTo(map);
+        sheetMarkers.push(m); bounds.extend([lat, lng]);
       });
 
+      // Only fit to bounds if no JSON dataset is active (to avoid fighting)
       if (!daerahSelect.value && bounds.isValid()) map.fitBounds(bounds, { padding: [24, 24] });
     }
 
+    // Debounce helper for smooth searching
+    function debounce(fn, wait = 220){
+      let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), wait); };
+    }
+
+    // Controls
     const modal = document.getElementById("modal");
     const message = document.getElementById("message");
     const userAddBtn = document.getElementById("userAddBtn");
     const userRefreshBtn = document.getElementById("userRefreshBtn");
     const userSearchInput = document.getElementById("userSearchInput");
-    const userListEl = document.getElementById("userList");
 
-    function renderUserList(filter = "") {
-      const q = (filter || "").toLowerCase();
-      const rows = sheetDataRaw
-        .slice()
-        .sort((a,b) => (a.name||"").localeCompare(b.name||"", "ms"))
-        .filter(r => {
-          const hay = [r.name||"", r.type||"", r.address||""].join(" ").toLowerCase();
-          return q ? hay.includes(q) : true;
-        });
-
-      if (!rows.length) {
-        userListEl.innerHTML = `<div style="color:#777;font-size:13px;padding:10px">Tiada data pengguna.</div>`;
-        return;
-      }
-
-      userListEl.innerHTML = rows.map((r, idx) => `
-        <div class="user-row" data-idx="${idx}">
-          <div class="user-name">${r.name || "(Tanpa Nama)"} <span style="font-size:11px;color:#777">${r.type || ""}</span></div>
-          <div class="user-meta">${r.address || "-"}</div>
-        </div>
-      `).join("");
-
-      userListEl.querySelectorAll(".user-row").forEach(el => {
-        el.addEventListener("click", () => {
-          const idx = parseInt(el.getAttribute("data-idx"), 10);
-          const r = rows[idx];
-          const lat = parseFloat(r.lat), lng = parseFloat(r.lng);
-          if (isNaN(lat) || isNaN(lng)) return;
-
-          const emoji = iconMap[r.type] || iconMap.default;
-          const divIcon = L.divIcon({
-            html: `<div class="emoji-icon-wrapper"><div class="emoji-icon">${emoji}</div></div>`,
-            iconSize: [36, 36], className: "custom-emoji-icon"
-          });
-const gmapsLink = `https://www.google.com/maps?q=${lat},${lng}`;
-const m = L.marker([lat, lng], { icon: divIcon })
-  .addTo(map)
-  .bindPopup(`<b>${r.name || "Tidak Dinyatakan"}</b><br>
-    Jenis: ${r.type || "-"}<br>
-    Lokasi: ${r.address || "-"}<br>
-    <a href="${gmapsLink}" target="_blank">📍 Buka di Google Maps</a>`)
-  .openPopup();
-
-          map.setView([lat, lng], 16);
-          setTimeout(() => map.removeLayer(m), 8000);
-        });
-      });
-    }
-
-    // Open/close modal, save, refresh
+    // Open/close modal
     const closeModal = document.getElementById("closeModal");
     const form = document.getElementById("placeForm");
     userAddBtn.onclick = () => { modal.style.display = "flex"; message.textContent = ""; };
     closeModal.onclick = () => { modal.style.display = "none"; message.textContent = ""; };
     window.onclick = (e) => { if (e.target === modal) { modal.style.display = "none"; message.textContent = ""; } };
 
+    // Refresh: fetch all from Sheet and render all markers (map only)
     userRefreshBtn.onclick = async () => {
       try {
         userRefreshBtn.disabled = true;
         sheetDataRaw = await sheetGetPlaces();
-        renderSheetAll();
-        renderUserList(userSearchInput.value);
+        renderSheetFiltered(userSearchInput.value);
       } catch(e) {
         alert("Gagal refresh: " + e.message);
       } finally {
         userRefreshBtn.disabled = false;
       }
     };
-    userSearchInput.addEventListener("input", () => renderUserList(userSearchInput.value));
 
+    // Search filters markers on map only (no list)
+    userSearchInput.addEventListener("input",
+      debounce(() => renderSheetFiltered(userSearchInput.value), 220)
+    );
+
+    // Submit new place
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       message.textContent = "⏳ Menyimpan data...";
@@ -487,6 +422,7 @@ const m = L.marker([lat, lng], { icon: divIcon })
         message.textContent = "✅ Berjaya disimpan!";
         form.reset();
 
+        // Update in-memory rows & re-render filtered markers
         sheetDataRaw.push({
           timestamp: new Date().toISOString(),
           name: newPlace.name,
@@ -495,8 +431,7 @@ const m = L.marker([lat, lng], { icon: divIcon })
           lat: newPlace.lat,
           lng: newPlace.lng
         });
-        renderSheetAll();
-        renderUserList(userSearchInput.value);
+        renderSheetFiltered(userSearchInput.value);
 
         setTimeout(() => { modal.style.display = "none"; message.textContent = ""; }, 700);
       } catch (err) {
@@ -508,10 +443,11 @@ const m = L.marker([lat, lng], { icon: divIcon })
     // Bootstrap
     (async function bootstrapAllData() {
       try {
+        // Load sheet data first (so the user panel works immediately)
         sheetDataRaw = await sheetGetPlaces();
-        renderSheetAll();
-        renderUserList("");
+        renderSheetFiltered("");
 
+        // If a daerah is preselected, load JSON; else none
         if (daerahSelect.value) {
           staticDataRaw = await loadData(`${daerahSelect.value}.json`);
         } else {
@@ -526,5 +462,9 @@ const m = L.marker([lat, lng], { icon: divIcon })
       }
     })();
   </script>
+
+  <footer id="appFooter">
+    <span><strong>Tanah Emas</strong> v1.0.6</span>
+  </footer>
 </body>
 </html>
