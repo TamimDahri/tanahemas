@@ -168,7 +168,7 @@
         <select id="type" required>
           <option value="">-- Pilih Jenis --</option>
           <option value="Kuil">🛕 Kuil</option>
-          <option value="Tokong">🏮 Tokong</option>
+          <option value="Tokong">⛩️ Tokong</option>
           <option value="Gereja">⛪ Gereja</option>
           <option value="Gurdwara">🕌 Gurdwara</option>
         </select>
@@ -204,22 +204,41 @@
       return Array.isArray(data.places) ? data.places : [];
     }
 
-    // POST with optional image (multipart/form-data)
-    async function sheetPostPlace(place, file) {
-      const fd = new FormData();
-      fd.append("name", place.name || "");
-      fd.append("type", place.type || "");
-      fd.append("address", place.address || "");
-      fd.append("lat", String(place.lat ?? ""));
-      fd.append("lng", String(place.lng ?? ""));
-      if (file) fd.append("image", file, file.name);
+// POST with optional image (multipart/form-data)
+async function sheetPostPlace(place, file) {
+    const fd = new FormData();
+    fd.append("name", place.name || "");
+    fd.append("type", place.type || "");
+    fd.append("address", place.address || "");
+    fd.append("lat", String(place.lat ?? ""));
+    fd.append("lng", String(place.lng ?? ""));
+    if (file) fd.append("image", file, file.name);
 
-      const res = await fetch(SHEET_API, { method: "POST", body: fd });
-      if (!res.ok) throw new Error("Gagal simpan ke Sheet");
-      const data = await res.json();
-      if (!data.ok) throw new Error(data.error || "Gagal simpan");
-      return data; // {ok:true, imageUrl?}
+    // --- START DEBUG BLOCK ---
+    console.log("--- DEBUG: FormData Contents ---");
+    let hasImage = false;
+    for (const [key, value] of fd.entries()) {
+        if (key === 'image') {
+            hasImage = true;
+            console.log(`Key: ${key}, Value Type: ${value instanceof File ? 'File' : typeof value}, File Name: ${value.name || 'N/A'}`);
+        } else {
+            console.log(`Key: ${key}, Value: ${value}`);
+        }
     }
+    if (hasImage) {
+        console.log("✅ Image file is included in FormData.");
+    } else {
+        console.warn("❌ WARNING: The 'image' file key is MISSING from FormData.");
+    }
+    console.log("-------------------------------");
+    // --- END DEBUG BLOCK ---
+
+    const res = await fetch(SHEET_API, { method: "POST", body: fd });
+    if (!res.ok) throw new Error("Gagal simpan ke Sheet");
+    const data = await res.json();
+    if (!data.ok) throw new Error(data.error || "Gagal simpan");
+    return data; // {ok:true, imageUrl?}
+}
 
     /***********************
      * Map setup
@@ -485,7 +504,7 @@
   </script>
 
   <footer id="appFooter">
-    <span><strong>Tanah Emas</strong> v1.1.0 — Upload gambar → Google Drive & paparan pautan</span>
+    <span><strong>Tanah Emas</strong> v1.0.7</span>
   </footer>
 </body>
 </html>
