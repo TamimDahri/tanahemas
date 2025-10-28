@@ -382,12 +382,12 @@
           html: `<div class="emoji-icon-wrapper"><div class="emoji-icon">${emoji}</div></div>`,
           iconSize: [36, 36], className: "custom-emoji-icon"
         });
-        const popup = `<b>${r.name || "Tidak Dinyatakan"}</b> <span style="font-size:11px;color:#777">(Tambah)</span><br>
-          Jenis: ${r.type || "-"}<br>
-          Lokasi: ${r.address || "-"}`;
+       const gmapsLink = `https://www.google.com/maps?q=${lat},${lng}`;
+const popup = `<b>${r.name || "Tidak Dinyatakan"}</b> <span style="font-size:11px;color:#777">(Tambah)</span><br>
+  Jenis: ${r.type || "-"}<br>
+  Lokasi: ${r.address || "-"}<br>
+  <a href="${gmapsLink}" target="_blank">📍 Buka di Google Maps</a>`;
 
-        const m = L.marker([lat, lng], { icon: divIcon }).bindPopup(popup).addTo(map);
-        sheetMarkers.push(m); bounds.extend([lat, lng]);
       });
 
       if (!daerahSelect.value && bounds.isValid()) map.fitBounds(bounds, { padding: [24, 24] });
@@ -434,10 +434,15 @@
             html: `<div class="emoji-icon-wrapper"><div class="emoji-icon">${emoji}</div></div>`,
             iconSize: [36, 36], className: "custom-emoji-icon"
           });
-          const m = L.marker([lat, lng], { icon: divIcon })
-            .addTo(map)
-            .bindPopup(`<b>${r.name || "Tidak Dinyatakan"}</b><br>Jenis: ${r.type || "-"}<br>Lokasi: ${r.address || "-"}`)
-            .openPopup();
+const gmapsLink = `https://www.google.com/maps?q=${lat},${lng}`;
+const m = L.marker([lat, lng], { icon: divIcon })
+  .addTo(map)
+  .bindPopup(`<b>${r.name || "Tidak Dinyatakan"}</b><br>
+    Jenis: ${r.type || "-"}<br>
+    Lokasi: ${r.address || "-"}<br>
+    <a href="${gmapsLink}" target="_blank">📍 Buka di Google Maps</a>`)
+  .openPopup();
+
           map.setView([lat, lng], 16);
           setTimeout(() => map.removeLayer(m), 8000);
         });
