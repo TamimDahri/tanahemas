@@ -21,7 +21,7 @@
       width: 260px;
     }
 
-    select, button, input {
+    select, button, input, textarea {
       width: 100%;
       margin-top: 6px;
       padding: 6px;
@@ -109,9 +109,8 @@
     }
 
     label { display: block; margin-top: 10px; font-weight: 600; }
-    input, select, textarea { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc; }
-
     #message { text-align: center; margin-top: 10px; font-weight: bold; }
+    .hint { font-size: 12px; color: #666; margin-top: 6px; text-align: center; }
   </style>
 </head>
 <body>
@@ -129,6 +128,7 @@
       <option value="">-- Semua Mukim --</option>
     </select>
     <button id="addBtn">➕ Tambah Lokasi</button>
+    <div class="hint">Data pengguna disimpan di Google Sheet (Web App)</div>
   </div>
 
   <div id="map"></div>
@@ -161,7 +161,7 @@
         <input type="number" step="any" id="lat" required>
         <label>Longitude</label>
         <input type="number" step="any" id="lng" required>
-        <!-- <button type="submit">💾 Simpan Data</button> -->
+        <button type="submit">💾 Simpan Data</button>
       </form>
       <div id="message"></div>
     </div>
@@ -169,13 +169,50 @@
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script>
+    /***********************
+     * Google Sheets Web App
+     * (Deploy as Web App → Who has access: Anyone)
+     ***********************/
+    // 👉 Replace with your Web App URL (https://script.google.com/macros/s/XXXXX/exec)
+    const SHEET_API = "https://dry-bread-c188.musabanas99.workers.dev/";
+
+    // GET all saved places from the sheet
+    async function sheetGetPlaces() {
+      const res = await fetch(SHEET_API); // returns { places: [...] }
+      if (!res.ok) throw new Error("Gagal ambil data dari Sheet");
+      const data = await res.json();
+      return Array.isArray(data.places) ? data.places : [];
+    }
+
+    // POST new place (x-www-form-urlencoded to avoid preflight/CORS issues)
+    async function sheetPostPlace(place) {
+      const body = new URLSearchParams({
+        name: place.name || "",
+        type: place.type || "",
+        address: place.address || "",
+        lat: String(place.lat ?? ""),
+        lng: String(place.lng ?? "")
+      });
+      const res = await fetch(SHEET_API, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+        body
+      });
+      if (!res.ok) throw new Error("Gagal simpan ke Sheet");
+      const data = await res.json();
+      if (!data.ok) throw new Error(data.error || "Gagal simpan");
+      return data;
+    }
+
+    /***********************
+     * Map & UI Behaviour  *
+     ***********************/
     const map = L.map('map').setView([3.08, 101.62], 11);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
     let markers = [];
-    let currentData = [];
     const daerahSelect = document.getElementById('daerahSelect');
     const mukimSelect = document.getElementById('mukimSelect');
     const searchInput = document.getElementById('searchInput');
@@ -201,15 +238,6 @@
       markers = [];
     }
 
-    function isValidCoordinate(coord) {
-      if (!coord) return false;
-      const parts = coord.split(",");
-      if (parts.length !== 2) return false;
-      const lat = parseFloat(parts[0].trim());
-      const lng = parseFloat(parts[1].trim());
-      return !isNaN(lat) && !isNaN(lng) && lat >= 1 && lat <= 6 && lng >= 99 && lng <= 105;
-    }
-
     function extractMukim(text) {
       if (!text) return "Tidak Dinyatakan";
       const match = text.match(/(Mukim|Bandar)\s*([A-Za-z\s]+)/i);
@@ -217,9 +245,63 @@
       return text.trim();
     }
 
-    function populateMukimDropdown(data) {
+    /***********************
+     * MERGED SEARCH STATE *
+     ***********************/
+    let staticDataRaw = [];   // from jais.json / klang.json / petalingjaya.json
+    let sheetDataRaw = [];    // from Google Sheets
+    let combinedData = [];    // normalized union
+
+    function normalizeStatic(item) {
+      // coords
+      const coord = item["Koordinat Longitude dan Latitude"];
+      let lat = null, lng = null;
+      if (coord && coord.includes(",")) {
+        const [a, b] = coord.split(",").map(v => parseFloat(v.trim()));
+        if (!isNaN(a) && !isNaN(b)) { lat = a; lng = b; }
+      }
+
+      const jenis = item["JENIS RUMAH IBADAT\n"] || item["JENIS RUMAH IBADAT"] || "";
+      const mukimText = item.NO?.["LOT & MUKIM (Jika berkenaan)"] || "";
+      const mukim = extractMukim(mukimText);
+
+      return {
+        source: "static",
+        name: item["NAMA RUMAH IBADAT"] || "Tidak Dinyatakan",
+        type: jenis || "",
+        address: item["LOKASI / ALAMAT"] || "",
+        mukim,
+        statusTanah: item["STATUS TANAH\n"] || item["STATUS TANAH"] || "-",
+        lat, lng
+      };
+    }
+
+    function normalizeSheet(row) {
+      const lat = parseFloat(row.lat);
+      const lng = parseFloat(row.lng);
+      return {
+        source: "sheet",
+        name: row.name || "Tidak Dinyatakan",
+        type: row.type || "",
+        address: row.address || "",
+        mukim: extractMukim(row.address || "") || "Tidak Dinyatakan",
+        statusTanah: "-", // not tracked in sheet
+        lat: isNaN(lat) ? null : lat,
+        lng: isNaN(lng) ? null : lng
+      };
+    }
+
+    function rebuildCombined() {
+      const a = staticDataRaw.map(normalizeStatic);
+      const b = sheetDataRaw.map(normalizeSheet);
+      combinedData = [...a, ...b];
+    }
+
+    function populateMukimDropdownFromCombined() {
       mukimSelect.innerHTML = '<option value="">-- Semua Mukim --</option>';
-      const mukims = [...new Set(data.map(d => extractMukim(d.NO?.["LOT & MUKIM (Jika berkenaan)"])))].filter(Boolean).sort();
+      const mukims = [...new Set(
+        combinedData.map(d => d.mukim).filter(Boolean)
+      )].sort((x,y) => x.localeCompare(y, "ms"));
       mukims.forEach(m => {
         const opt = document.createElement('option');
         opt.value = m;
@@ -229,69 +311,70 @@
       mukimSelect.style.display = mukims.length ? "block" : "none";
     }
 
-    function renderMarkers(data, mukimFilter = "", searchQuery = "") {
+    function renderCombined(mukimFilter = "", searchQuery = "") {
       clearMarkers();
       const bounds = new L.LatLngBounds();
-      const query = searchQuery.toLowerCase();
+      const q = (searchQuery || "").toLowerCase();
 
-      data.forEach(item => {
-        const coord = item["Koordinat Longitude dan Latitude"];
-        if (!isValidCoordinate(coord)) return;
+      combinedData.forEach(item => {
+        if (typeof item.lat !== "number" || typeof item.lng !== "number") return;
+        if (mukimFilter && item.mukim !== mukimFilter) return;
 
-        const [lat, lng] = coord.split(",").map(v => parseFloat(v.trim()));
-        const jenis = item["JENIS RUMAH IBADAT\n"] || item["JENIS RUMAH IBADAT"] || "";
-        const mukimText = item.NO?.["LOT & MUKIM (Jika berkenaan)"] || "";
-        const mukim = extractMukim(mukimText);
+        const hay = [item.name || "", item.type || "", item.address || "", item.mukim || ""]
+          .join(" ").toLowerCase();
+        if (q && !hay.includes(q)) return;
 
-        if (mukimFilter && mukim !== mukimFilter) return;
-        if (query && !(
-          (item["NAMA RUMAH IBADAT"] || "").toLowerCase().includes(query) ||
-          (jenis || "").toLowerCase().includes(query) ||
-          mukim.toLowerCase().includes(query) ||
-          (item["LOKASI / ALAMAT"] || "").toLowerCase().includes(query)
-        )) return;
-
-        const emoji = iconMap[jenis] || iconMap.default;
+        const emoji = iconMap[item.type] || iconMap.default;
         const divIcon = L.divIcon({
           html: `<div class="emoji-icon-wrapper"><div class="emoji-icon">${emoji}</div></div>`,
           iconSize: [36, 36],
           className: "custom-emoji-icon"
         });
 
-        const gmapsLink = `https://www.google.com/maps?q=${lat},${lng}`;
+        const gmapsLink = `https://www.google.com/maps?q=${item.lat},${item.lng}`;
         const popup = `
-          <b>${item["NAMA RUMAH IBADAT"] || "Tidak Dinyatakan"}</b><br>
-          Jenis: ${jenis || "-"}<br>
-          Mukim: ${mukim}<br>
-          Lokasi: ${item["LOKASI / ALAMAT"] || "-"}<br>
-          Status Tanah: ${item["STATUS TANAH\n"] || item["STATUS TANAH"] || "-"}<br>
+          <b>${item.name}</b> ${item.source === "sheet" ? '<span style="font-size:11px;color:#777">(Tambah)</span>' : ""}<br>
+          Jenis: ${item.type || "-"}<br>
+          Mukim: ${item.mukim || "-"}<br>
+          Lokasi: ${item.address || "-"}<br>
+          ${item.source === "static" ? `Status Tanah: ${item.statusTanah || "-" }<br>` : ""}
           <a href="${gmapsLink}" target="_blank">📍 Buka di Google Maps</a>
         `;
 
-        const marker = L.marker([lat, lng], { icon: divIcon }).bindPopup(popup);
+        const marker = L.marker([item.lat, item.lng], { icon: divIcon }).bindPopup(popup);
         marker.addTo(map);
         markers.push(marker);
-        bounds.extend([lat, lng]);
+        bounds.extend([item.lat, item.lng]);
       });
 
       if (bounds.isValid()) map.fitBounds(bounds, { padding: [20, 20] });
     }
 
+    /***********************
+     * UI Events (merged)  *
+     ***********************/
     daerahSelect.addEventListener("change", async () => {
       const daerah = daerahSelect.value;
-      if (!daerah) return;
+      if (!daerah) {
+        staticDataRaw = [];
+        rebuildCombined();
+        populateMukimDropdownFromCombined();
+        renderCombined("", searchInput.value);
+        return;
+      }
       const filename = `${daerah}.json`;
-      currentData = await loadData(filename);
-      populateMukimDropdown(currentData);
-      renderMarkers(currentData);
+      staticDataRaw = await loadData(filename);
+      rebuildCombined();
+      populateMukimDropdownFromCombined();
+      renderCombined(mukimSelect.value, searchInput.value);
     });
 
     mukimSelect.addEventListener("change", () => {
-      renderMarkers(currentData, mukimSelect.value, searchInput.value);
+      renderCombined(mukimSelect.value, searchInput.value);
     });
 
     searchInput.addEventListener("input", () => {
-      renderMarkers(currentData, mukimSelect.value, searchInput.value);
+      renderCombined(mukimSelect.value, searchInput.value);
     });
 
     document.getElementById("getLocationBtn").addEventListener("click", () => {
@@ -303,12 +386,10 @@
             iconSize: [36, 36],
             className: "custom-emoji-icon"
           });
-
           L.marker([latitude, longitude], { icon: userIcon })
             .addTo(map)
             .bindPopup("📍 Lokasi Anda")
             .openPopup();
-
           map.setView([latitude, longitude], 14);
         }, err => alert("Gagal mendapatkan lokasi: " + err.message));
       } else {
@@ -323,39 +404,72 @@
     const form = document.getElementById("placeForm");
     const message = document.getElementById("message");
 
-    addBtn.onclick = () => modal.style.display = "flex";
+    addBtn.onclick = () => { modal.style.display = "flex"; message.textContent = ""; };
     closeModal.onclick = () => { modal.style.display = "none"; message.textContent = ""; };
+    window.onclick = (e) => { if (e.target === modal) { modal.style.display = "none"; message.textContent = ""; } };
 
-    window.onclick = (e) => { if (e.target === modal) modal.style.display = "none"; };
-
+    // === Save to Google Sheet (POST) and update merged view ===
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
       message.textContent = "⏳ Menyimpan data...";
 
       const newPlace = {
-        name: form.name.value.trim(),
-        type: form.type.value,
-        address: form.address.value.trim(),
-        lat: parseFloat(form.lat.value),
-        lng: parseFloat(form.lng.value)
+        name: document.getElementById("name").value.trim(),
+        type: document.getElementById("type").value,
+        address: document.getElementById("address").value.trim(),
+        lat: parseFloat(document.getElementById("lat").value),
+        lng: parseFloat(document.getElementById("lng").value)
       };
 
       try {
-        const res = await fetch("https://tanahemas.onrender.com/places", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(newPlace)
-        });
-
-        if (!res.ok) throw new Error("Gagal menyimpan data");
-        await res.json();
+        await sheetPostPlace(newPlace);
         message.textContent = "✅ Berjaya disimpan!";
         form.reset();
+
+        // Push into in-memory sheet list and re-render merged immediately
+        sheetDataRaw.push({
+          timestamp: new Date().toISOString(),
+          name: newPlace.name,
+          type: newPlace.type,
+          address: newPlace.address,
+          lat: newPlace.lat,
+          lng: newPlace.lng
+        });
+        rebuildCombined();
+        populateMukimDropdownFromCombined();
+        renderCombined(mukimSelect.value, searchInput.value);
+
+        setTimeout(() => { modal.style.display = "none"; message.textContent = ""; }, 700);
       } catch (err) {
+        console.error(err);
         message.textContent = "❌ Ralat: " + err.message;
       }
     });
+
+    // === Bootstrap: load both sources and render merged ===
+    (async function bootstrapAllData() {
+      try {
+        // a) preload sheet rows
+        sheetDataRaw = await sheetGetPlaces();
+
+        // b) if a daerah is already chosen, load it; else leave static empty
+        if (daerahSelect.value) {
+          const filename = `${daerahSelect.value}.json`;
+          staticDataRaw = await loadData(filename);
+        } else {
+          staticDataRaw = [];
+        }
+
+        // c) merge + populate UI + render
+        rebuildCombined();
+        populateMukimDropdownFromCombined();
+        renderCombined(mukimSelect.value, searchInput.value);
+
+        console.log("✅ Merged data ready:", { sheet: sheetDataRaw.length, static: staticDataRaw.length });
+      } catch (e) {
+        console.error("❌ Gagal memuat data:", e.message);
+      }
+    })();
   </script>
 </body>
 </html>
-
