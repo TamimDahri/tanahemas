@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>News & Updates | Tanahemas Group</title>
+
+  <!-- Tailwind CSS (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#182B49',
+            secondary: '#D4A762',
+            accent: '#F7F7F7',
+            'dark-bg': '#0D1A2E',
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          boxShadow: {
+            '3xl': '0 35px 60px -15px rgba(0,0,0,0.3)',
+            'gold-sm': '0 4px 6px -1px rgba(212, 167, 98, 0.5), 0 2px 4px -2px rgba(212, 167, 98, 0.2)',
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    .news-card {
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+      transition: all 0.3s ease-in-out;
+      border-radius: 1rem;
+    }
+    .news-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.2), 0 0 10px rgba(212,167,98,0.5);
+    }
+    .pagination a { transition: background-color 0.2s, color 0.2s; }
+    .pagination a:hover:not(.active) { background-color: #eee; }
+    .featured-content {
+      background-color: #0D1A2E;
+      background-image: linear-gradient(180deg, rgba(13,26,46,0.95) 0%, rgba(24,43,73,0.9) 100%);
+    }
+  </style>
+</head>
+<body class="bg-accent font-sans">
+
+  <!-- Header -->
+  <header class="bg-primary shadow-xl sticky top-0 z-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20">
+        <div class="flex items-center">
+          <a href="#" class="text-3xl font-extrabold text-white tracking-widest hover:text-secondary transition">
+            TANAHEMAS
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <!-- Hero Title -->
+      <section class="mb-16 text-center">
+        <h1 class="text-6xl font-extrabold text-primary mb-4 tracking-tight">
+          <span class="text-secondary">Tanahemas</span> Updates
+        </h1>
+        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+          Exploring our latest corporate announcements, industry insights, and commitment to sustainable growth across Southeast Asia.
+        </p>
+      </section>
+
+      <!-- Featured Article -->
+      <section id="featured-article" class="rounded-3xl shadow-3xl overflow-hidden mb-20 news-card">
+        <div class="p-16 text-center text-primary animate-pulse">
+          <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-primary inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Memuatkan Berita Utama...
+        </div>
+      </section>
+
+      <!-- Grid -->
+      <section>
+        <h2 class="text-4xl font-bold text-primary mb-10 border-b border-gray-300 pb-3">Latest Stories</h2>
+        <div id="news-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+          <!-- Cards injected here -->
+        </div>
+      </section>
+
+      <!-- Pagination (static demo) -->
+      <div class="flex justify-center mt-16">
+        <div class="pagination flex items-center space-x-2 rounded-full bg-white p-2 shadow-xl border border-gray-200">
+          <a href="#" class="px-5 py-2 text-sm text-gray-500 hover:text-primary rounded-full hover:bg-gray-50">
+            <svg class="w-4 h-4 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            Previous
+          </a>
+          <a href="#" class="px-4 py-2 text-sm bg-secondary text-primary font-bold rounded-full shadow-gold-sm">1</a>
+          <a href="#" class="px-4 py-2 text-sm text-gray-700 hover:text-primary rounded-full hover:bg-gray-100 transition">2</a>
+          <a href="#" class="px-4 py-2 text-sm text-gray-700 hover:text-primary rounded-full hover:bg-gray-100 transition">3</a>
+          <a href="#" class="px-5 py-2 text-sm text-gray-500 hover:text-primary rounded-full hover:bg-gray-50">
+            Next
+            <svg class="w-4 h-4 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-dark-bg text-white mt-20 border-t-4 border-secondary">
+    <div class="max-w-7xl mx-auto py-12 px-4 overflow-hidden sm:px-6 lg:px-8">
+      <nav class="-mx-5 -my-2 flex flex-wrap justify-center space-x-8" aria-label="Footer">
+        <a href="#" class="px-3 py-2 text-base text-gray-400 hover:text-secondary transition">Privacy Policy</a>
+        <a href="#" class="px-3 py-2 text-base text-gray-400 hover:text-secondary transition">Terms of Use</a>
+        <a href="#" class="px-3 py-2 text-base text-gray-400 hover:text-secondary transition">Contact Media</a>
+      </nav>
+      <p class="mt-10 text-center text-base text-gray-500">
+        &copy; <span id="current-year">2025</span> Tanahemas Group. All rights reserved. Built with pride.
+      </p>
+    </div>
+  </footer>
+
+  <script>
+    // Build link into the dynamic article template
+    function buildArticleLink(contentSource) {
+      return `LamanBerita/article_template.html?source=${contentSource}`;
+    }
+
+    // Featured banner renderer (uses real image if provided; otherwise placeholder)
+    function renderFeaturedArticle(article) {
+      const container = document.getElementById('featured-article');
+      if (!container || !article) return;
+
+      const linkPath = buildArticleLink(article.contentSource);
+      const imageUrl = article.image
+        ? article.image
+        : `https://placehold.co/1200x600/${article.imageColor}?text=${(article.imagePlaceholder||'NEWS').replace(/\+/g,' ')}`;
+
+      container.innerHTML = `
+        <div class="relative">
+          <!-- Background Image -->
+          <div class="absolute inset-0">
+            <img src="${imageUrl}"
+                 alt="Featured image for ${article.title}"
+                 class="w-full h-full object-cover opacity-70"
+                 onerror="this.onerror=null;this.src='https://placehold.co/1200x600/182B49/D4A762?text=FEATURED';">
+          </div>
+          <!-- Overlay Content -->
+          <div class="relative p-8 md:p-16 lg:p-20 featured-content text-white">
+            <div class="max-w-4xl">
+              <span class="text-base font-semibold text-secondary uppercase tracking-widest block mb-3">
+                Featured Report | ${article.date}
+              </span>
+              <h2 class="mt-2 mb-6 text-5xl font-bold leading-snug">${article.title}</h2>
+              <p class="text-gray-300 mb-8 text-lg leading-relaxed max-w-3xl">${article.description}</p>
+              <a href="${linkPath}" class="inline-flex items-center bg-secondary text-dark-bg font-bold px-6 py-3 rounded-full text-base shadow-lg hover:bg-opacity-90 transition">
+                Discover the Full Story
+                <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Grid renderer (uses real image if provided; otherwise placeholder)
+    function renderNewsGrid(data) {
+      const gridContainer = document.getElementById('news-grid');
+      if (!gridContainer) return;
+
+      const regularArticles = data.filter(item => !item.isFeatured);
+      let html = '';
+
+      if (regularArticles.length === 0) {
+        html = '<p class="text-center text-gray-500 col-span-full py-10">Tiada berita terkini lain untuk dipaparkan.</p>';
+      } else {
+        regularArticles.forEach(article => {
+          const linkPath = buildArticleLink(article.contentSource);
+          const imageUrl = article.image
+            ? article.image
+            : `https://placehold.co/600x350/${article.imageColor}?text=${(article.imagePlaceholder||'NEWS').replace(/\+/g,' ')}`;
+
+          html += `
+            <article class="bg-white news-card flex flex-col">
+              <img src="${imageUrl}"
+                   alt="Image for ${article.category}"
+                   class="w-full h-48 object-cover rounded-t-2xl"
+                   onerror="this.onerror=null;this.src='https://placehold.co/600x350/182B49/D4A762?text=NEWS';">
+              <div class="p-6 flex flex-col flex-grow">
+                <span class="text-xs font-medium text-secondary uppercase tracking-wider">${article.category}</span>
+                <h3 class="mt-2 text-xl font-bold text-primary hover:text-secondary transition flex-grow">
+                  <a href="${linkPath}">${article.title}</a>
+                </h3>
+                <p class="mt-3 text-gray-600 text-sm">${(article.description||'').substring(0, 100)}...</p>
+                <div class="mt-4 text-xs text-gray-400">${article.date}</div>
+              </div>
+            </article>
+          `;
+        });
+      }
+
+      gridContainer.innerHTML = html;
+    }
+
+    // Data fetch + init
+    function loadNews() {
+      document.getElementById('news-grid').innerHTML =
+        '<div class="col-span-full py-10 text-center text-primary animate-pulse">Memuatkan cerita-cerita terkini...</div>';
+
+      fetch('news_data.json')
+        .then(res => {
+          if (!res.ok) throw new Error('Gagal memuatkan data berita (Ralat rangkaian/fail tidak ditemui).');
+          return res.json();
+        })
+        .then(newsData => {
+          const featuredArticle = newsData.find(i => i.isFeatured) || newsData[0];
+          renderFeaturedArticle(featuredArticle);
+          renderNewsGrid(newsData);
+        })
+        .catch(err => {
+          console.error(err);
+          document.getElementById('featured-article').innerHTML =
+            '<p class="p-16 text-center text-red-500">Ralat: Gagal memuatkan data berita. Sila pastikan fail <strong>news_data.json</strong> wujud.</p>';
+          document.getElementById('news-grid').innerHTML =
+            '<p class="text-center text-red-500 col-span-full py-10">Ralat: Gagal memuatkan cerita-cerita terkini.</p>';
+        });
+    }
+
+    window.onload = function () {
+      document.getElementById('current-year').textContent = new Date().getFullYear();
+      loadNews();
+    };
+  </script>
+</body>
+</html>
