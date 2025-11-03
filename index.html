@@ -1,10 +1,6 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ms">
 <head>
-  <meta charset="UTF-8" />
-  <title>Tanah Emas - Memelihara Tanah Negara</title>
-  <meta name="description" content="Peta interaktif dan carian lokasi.">
-
   <!-- Open Graph / WhatsApp -->
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://tanahemas.com/">
@@ -19,492 +15,339 @@
   <meta property="twitter:description" content="Peta interaktif dengan data pengguna.">
   <meta property="twitter:image" content="https://tanahemas.com/te.png">
 
-  <!-- Favicon -->
+  <!-- Favicon: Selesai, menggunakan te.png -->
   <link rel="icon" type="image/png" href="te.png">
 
-  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <style>
-    :root{
-      --card-bg: rgba(255,255,255,0.96);
-      --card-shadow: 0 8px 24px rgba(0,0,0,0.15);
-      --radius: 14px;
-      --brand: #c29b00;
-      --text: #2b2b2b;
-      --muted: #6b7280;
-      --border: #e5e7eb;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tanah Emas - Peta RIBI Haram</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Load Lucide Icons (FIXED: Menggunakan versi UMD global untuk kestabilan) -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 
-    /* Footer */
-    #appFooter {
-      position: fixed; bottom: 0; left: 0; width: 100%;
-      background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(6px);
-      color: #f3f4f6; text-align: center; padding: 8px 12px; font-size: 13px; font-weight: 500;
-      display: flex; justify-content: center; gap: 10px; align-items: center; z-index: 2000;
-      border-top: 1px solid rgba(255,255,255,0.1);
-    }
-    #appFooter strong { color: #ffd700; }
+    <style>
+        /* Custom Font Import (Inter is default, but a fallback is good) */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-color);
+        }
 
-    /* Leaflet marker emoji badge */
-    .leaflet-div-icon { background: transparent; border: none; }
-    .emoji-icon-wrapper{
-      width: 44px; height: 44px; border-radius: 50%;
-      background: #ffffff; border: 2px solid #333; box-shadow: 0 4px 10px rgba(0,0,0,0.35);
-      display: flex; align-items: center; justify-content: center;
-    }
-    .emoji-icon{ font-size: 26px; line-height: 1; transform: translateY(0); }
+        /* Define custom CSS variables for easy theme changes (Emas & Tanah) */
+        :root {
+            --primary-color: #4A4339; /* Deep Earth Brown/Mocha */
+            --accent-color: #D4AF37; /* Rich Gold/Emas */
+            --text-color: #2D3748; 
+            --light-bg: #FDF9F5; /* Creamy off-white */
+        }
+        
+        /* Smooth scrolling for anchor links */
+        html {
+            scroll-behavior: smooth;
+        }
 
-    * { box-sizing: border-box; }
-    body { margin: 0; font-family: ui-sans-serif, system-ui, "Segoe UI", Roboto, Arial, sans-serif; color: var(--text); }
-    #map { height: 100vh; }
+        /* Styling for the custom modal dialog */
+        dialog {
+            border: none;
+            padding: 0;
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+            max-width: 90%;
+            width: 400px;
+        }
 
-    /* Panels stack */
-    #uiStack{
-      position:absolute; top:14px; left:14px; width:300px;
-      display:flex; flex-direction:column; gap:12px; z-index:1000;
-    }
-    .panel{
-      background: var(--card-bg); backdrop-filter: blur(6px);
-      padding:12px 12px 14px; border-radius: var(--radius);
-      box-shadow: var(--card-shadow); border: 1px solid var(--border);
-    }
-    .panel h3, .panel h4{
-      margin: 0 0 10px 0; display:flex; align-items:center; gap:8px; font-weight: 700;
-    }
-    .panel h3{ color: var(--brand); }
-    .panel h4{ color:#333; }
+        dialog::backdrop {
+            background-color: rgba(0, 0, 0, 0.6);
+        }
+        
+        /* --- CUSTOM ANIMATIONS --- */
+        
+        /* Keyframes for the Subtle Gold Pulse on the main button */
+        @keyframes gold-pulse {
+            0% { box-shadow: 0 0 0 0px var(--accent-color); }
+            70% { box-shadow: 0 0 0 10px rgba(212, 175, 55, 0); }
+            100% { box-shadow: 0 0 0 0px rgba(212, 175, 55, 0); }
+        }
+        
+        .btn-gold-pulse {
+            animation: gold-pulse 2.5s infinite;
+        }
 
-    /* Inputs */
-    select, button, input, textarea {
-      width: 100%; margin-top: 8px; padding: 9px 10px; font-size: 14px;
-      border: 1px solid var(--border); border-radius: 10px; background: #fff; outline: none;
-    }
-    input::placeholder{ color:#9aa3ad; }
-    button{
-      background:#f8fafc; cursor:pointer; transition: transform .06s ease, box-shadow .06s ease;
-    }
-    button:hover{ transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,0.07); }
-    button:active{ transform: translateY(0); box-shadow: none; }
+        /* Initial state for scroll-triggered elements (Hidden, slightly moved down) */
+        .scroll-fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
 
-    #controls { position: static; width:100%; }
-
-    /* Legend above footer */
-    .legend {
-      position: absolute; bottom: 48px; left: 14px;
-      background: var(--card-bg); border: 1px solid var(--border);
-      border-radius: 10px; padding: 8px 10px; font-size: 14px; box-shadow: var(--card-shadow);
-      backdrop-filter: blur(6px);
-    }
-
-    /* Modal */
-    #modal {
-      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45);
-      justify-content: center; align-items: center; z-index: 2000;
-    }
-    .modal-content {
-      background: #fff; padding: 20px; border-radius: 14px; width: 92%; max-width: 480px;
-      box-shadow: 0 24px 56px rgba(0,0,0,0.25); border: 1px solid var(--border);
-    }
-    .modal-content h2 { text-align: center; color: var(--brand); margin-bottom: 12px; }
-    .close-btn { float: right; font-size: 20px; cursor: pointer; color: #667085; }
-    label { display: block; margin-top: 10px; font-weight: 600; }
-    #message { text-align: center; margin-top: 10px; font-weight: bold; color:#0b6a0b; }
-
-    /* Move Leaflet zoom to top-right */
-    .leaflet-top.leaflet-left { display:none; }
-
-    @media (max-width: 640px){
-      #uiStack{ left:50%; transform: translateX(-50%); width: min(92vw, 360px); }
-      .legend{ left:50%; transform: translateX(-50%); }
-    }
-  </style>
+        /* Final state when element is visible */
+        .scroll-fade-in.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
 </head>
-<body>
+<body class="antialiased" style="color: var(--text-color);">
+    
+    <!-- Custom Modal Dialog (Hidden by default) -->
+    <dialog id="action-modal">
+        <div class="p-6 text-center bg-white rounded-xl">
+            <div class="flex justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle-2" style="color: var(--accent-color);">
+                    <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z"></path><path d="m9 12 2 2 4-4"></path>
+                </svg>
+            </div>
+            <h3 class="text-xl font-bold mb-3" style="color: var(--primary-color);">Tindakan Berjaya!</h3>
+            <p class="text-gray-600 mb-6" id="modal-message">Anda telah berjaya memulakan penerokaan.</p>
+            <button onclick="document.getElementById('action-modal').close()" class="w-full px-4 py-2 text-white font-semibold rounded-lg transition duration-200 hover:opacity-90" style="background-color: var(--primary-color);">Tutup</button>
+        </div>
+    </dialog>
 
-  <!-- PANELS -->
-  <div id="uiStack">
-    <!-- TOP: JSON-only -->
-    <div id="controls" class="panel">
-      <h3>🏡 RIBI Haram Selangor</h3>
-      <select id="daerahSelect" aria-label="Pilih data daerah">
-        <option value="">-- Pilih Data --</option>
-        <option value="jais">JAIS</option>
-        <option value="klang">Klang</option>
-        <option value="petalingjaya">Petaling Jaya</option>
-      </select>
-      <select id="mukimSelect" style="display:none;">
-        <option value="">-- Semua Mukim --</option>
-      </select>
-      <input type="text" id="searchInput" placeholder="🔍 Cari (nama/jenis/mukim) " />
+    <!-- Header & Navigation -->
+    <header class="fixed top-0 left-0 w-full bg-white shadow-lg z-20">
+        <!-- Added a fade-in animation to the header for a smooth load effect -->
+        <div class="container mx-auto px-4 lg:px-8 py-3 flex justify-between items-center animate-[fade-in_0.5s_ease-out_forwards]">
+            <!-- Logo & Name (Ikon digantikan dengan te.png) -->
+            <div class="flex items-center space-x-2">
+                <!-- Icon now uses te.png for consistency with favicon -->
+                <img src="te.png" alt="Tanah Emas Logo" class="h-6 w-6" />
+                <h1 class="text-xl font-extrabold tracking-tight" style="color: var(--primary-color);">Tanah Emas</h1>
+            </div>
+
+            <!-- Main Navigation Links (Desktop) -->
+            <nav class="hidden md:flex space-x-4 md:space-x-8 text-gray-700 font-medium text-sm md:text-base">
+                <a href="#home" class="hover:text-gray-900 transition duration-150 p-2 rounded-lg hover:bg-gray-50">Utama</a>
+                <a href="#mengenai" class="hover:text-gray-900 transition duration-150 p-2 rounded-lg hover:bg-gray-50">Mengenai</a>
+                <a href="#ciri" class="hover:text-gray-900 transition duration-150 p-2 rounded-lg hover:bg-gray-50">Ciri-Ciri</a>
+                <a href="#hubungi" class="hover:text-gray-900 transition duration-150 p-2 rounded-lg hover:bg-gray-50">Sokongan</a>
+            </nav>
+
+            <!-- Mobile Menu Button -->
+            <button id="menu-toggle" class="md:hidden p-2 rounded-lg hover:bg-gray-100 transition" aria-label="Toggle Navigation">
+                <!-- Hamburger Icon -->
+                <svg id="menu-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                <!-- Close Icon (Hidden by default) -->
+                <svg id="close-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+
+        <!-- Mobile Menu Overlay (Hidden by default) -->
+        <div id="mobile-menu" class="hidden md:hidden absolute top-full left-0 w-full bg-white shadow-xl border-t border-gray-200 py-4 z-10">
+            <nav class="flex flex-col items-start px-4 space-y-2 text-gray-700 font-medium">
+                <!-- Added onclick to close the menu when a link is clicked -->
+                <a href="#home" onclick="closeMobileMenu()" class="w-full hover:bg-gray-100 p-2 rounded-lg transition duration-150">Utama</a>
+                <a href="#mengenai" onclick="closeMobileMenu()" class="w-full hover:bg-gray-100 p-2 rounded-lg transition duration-150">Mengenai</a>
+                <a href="#ciri" onclick="closeMobileMenu()" class="w-full hover:bg-gray-100 p-2 rounded-lg transition duration-150">Ciri-Ciri</a>
+                <a href="#hubungi" onclick="closeMobileMenu()" class="w-full hover:bg-gray-100 p-2 rounded-lg transition duration-150">Sokongan</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section id="home" class="pt-32 pb-20 md:pt-40 md:pb-28" style="background-color: var(--light-bg);">
+            <div class="container mx-auto px-4 lg:px-8 text-center max-w-5xl">
+                <!-- Apply simple fade-in to text elements -->
+                <h2 class="text-5xl md:text-7xl font-extrabold leading-tight tracking-tighter mb-4 animate-in fade-in slide-in-from-top-4 duration-700" style="color: var(--primary-color);">
+                    Pangkalan Data Tanah & Rizab
+                </h2>
+                <p class="text-xl md:text-2xl text-gray-600 mb-10 animate-in fade-in slide-in-from-top-4 duration-700 delay-200" style="animation-fill-mode: both;">
+                   Menghimpunkan maklumat sahih tentang rizab, sempadan, dan status tanah di seluruh negara,bagi mempertahan, memulih, dan memartabatkan warisan tanah bangsa.
+                </p>
+                <!-- Added btn-gold-pulse class for the subtle animation -->
+                <div class="flex justify-center animate-in fade-in duration-700 delay-500" style="animation-fill-mode: both;">
+                    <a href="/PetaRIBIHaram" target="_blank" rel="noopener noreferrer" class="px-8 py-3 text-lg font-bold text-gray-900 rounded-full transform transition duration-300 hover:scale-[1.05] active:scale-[0.98] focus:outline-none focus:ring-4 focus:ring-offset-2 btn-gold-pulse" 
+                            style="background-color: var(--accent-color); box-shadow: 0 0 0 0px #D4AF37cc;">
+                        Terokai Sekarang
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <!-- Added scroll-fade-in class to section content -->
+        <section id="mengenai" class="py-20 bg-white">
+            <div class="container mx-auto px-4 lg:px-8 max-w-6xl">
+                <h3 class="text-4xl font-extrabold mb-12 text-center scroll-fade-in" style="color: var(--primary-color);">
+                    Mengenai Tanah Emas
+                </h3>
+                <div class="flex flex-col-reverse md:flex-row items-center md:space-x-16 scroll-fade-in">
+                    <div class="md:w-1/2">
+                        <!-- Image for visual asset: te.Png with fallback -->
+                        <img src="map.jpg" alt="Peta tanah interaktif Tanah Emas" 
+                             class="w-full h-full object-cover rounded-xl shadow-lg border-4 mt-8 md:mt-0" 
+                             style="border-color: var(--accent-color);"
+                             onerror="this.onerror=null; this.src='https://placehold.co/640x640/4A4339/D4AF37?text=Gambar+te.Png+Tidak+Dijumpai';"
+                        >
+                    </div>
+                    <div class="md:w-1/2">
+                        <p class="text-lg leading-relaxed mb-4">
+                            Tanahemas.com ialah platform digital yang menggabungkan data tanah, peta interaktif, dan analisis spatial untuk memudahkan masyarakat menilai status serta potensi sesuatu kawasan. Melalui integrasi maklumat rasmi daripada pelbagai agensi, Tanahemas menyokong usaha meningkatkan ketelusan, kesedaran, dan tindakan berasaskan fakta dalam pengurusan serta penguatkuasaan tanah di Malaysia.
+                        </p>
+                        <p class="text-lg leading-relaxed font-semibold" style="color: var(--primary-color);">
+                            Misi kami ialah mengembalikan nilai dan maruah tanah bangsa, dengan menjadikan ilmu tanah, zonifikasi, dan perancangan pembangunan lebih telus, mudah difahami, dan boleh diakses oleh semua.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+<!-- Features Grid Section -->
+<section id="ciri" class="py-20" style="background-color: var(--light-bg);">
+    <div class="container mx-auto px-4 lg:px-8">
+        <h3 class="text-4xl font-extrabold mb-12 text-center scroll-fade-in" style="color: var(--primary-color);">
+            Ciri-Ciri Utama
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto">
+            
+            <!-- Feature 1 - Added scroll-fade-in and refined hover effect -->
+            <div class="bg-white p-8 rounded-2xl shadow-xl border-t-8 transition duration-500 hover:shadow-2xl hover:scale-[1.03] scroll-fade-in" style="border-top-color: var(--accent-color);">
+                <i data-lucide="search" size="40" class="mb-5" style="color: var(--accent-color);"></i>
+                <h4 class="text-2xl font-extrabold mb-3" style="color: var(--primary-color);">Carian Pantas & Tepat</h4>
+                <p class="leading-relaxed text-base">
+                    Cari lokasi rumah ibadat yang dibina atas tanah tidak sah atau bukan hak milik yang sah. 
+                    Gunakan peta interaktif kami untuk mengenal pasti kawasan terlibat dan memahami konteks sebenar status tanah di sesuatu lokasi.
+                </p>
+            </div>
+
+            <!-- Feature 2 - Added scroll-fade-in and refined hover effect with delay -->
+            <div class="bg-white p-8 rounded-2xl shadow-xl border-t-8 transition duration-500 hover:shadow-2xl hover:scale-[1.03] scroll-fade-in" style="border-top-color: var(--accent-color); transition-delay: 0.1s;">
+                <i data-lucide="map" size="40" class="mb-5" style="color: var(--accent-color);"></i>
+                <h4 class="text-2xl font-extrabold mb-3" style="color: var(--primary-color);">Peta Interaktif Nasional</h4>
+                <p class="leading-relaxed text-base">
+                    Teroka peta interaktif yang memaparkan maklumat rumah ibadat, sempadan lot, rizab, dan pelan guna tanah di seluruh negara. 
+                    Setiap titik dan poligon membantu pengguna menilai kesahihan serta sejarah pemilikan sesuatu kawasan.
+                </p>
+            </div>
+
+            <!-- Feature 3 - Added scroll-fade-in and refined hover effect with delay -->
+            <div class="bg-white p-8 rounded-2xl shadow-xl border-t-8 transition duration-500 hover:shadow-2xl hover:scale-[1.03] scroll-fade-in" style="border-top-color: var(--accent-color); transition-delay: 0.2s;">
+                <i data-lucide="check-circle" size="40" class="mb-5" style="color: var(--accent-color);"></i>
+                <h4 class="text-2xl font-extrabold mb-3" style="color: var(--primary-color);">Data Sahih & Terkini</h4>
+                <p class="leading-relaxed text-base">
+                    Data Tanahemas disahkan melalui rujukan silang dengan sumber rasmi seperti JUPEM, i-Plan, KPKT dan JAIS. 
+                    Kami memastikan setiap maklumat berasaskan bukti sebenar bagi menyokong ketelusan dan tindakan penguatkuasaan.
+                </p>
+            </div>
+
+        </div>
     </div>
+</section>
 
-    <!-- BOTTOM: Sheet-only controls (no list) -->
-    <div id="userPanel" class="panel">
-      <h4>🧑‍🤝‍🧑 Lokasi dari Pengguna</h4>
-      <div style="display:flex; gap:8px; margin-bottom:6px">
-        <button id="userAddBtn" title="Tambah lokasi baharu">➕ Tambah</button>
-        <button id="userRefreshBtn" title="Segarkan dari Sheet">🔄 Refresh</button>
-      </div>
-      <input id="userSearchInput" placeholder="🔍 Cari (nama/jenis/alamat) " />
-    </div>
-  </div>
 
-  <div id="map"></div>
+        <!-- Final Call to Action (Donation Focus) -->
+        <!-- Added scroll-fade-in class to section content -->
+        <section id="hubungi" class="py-20" style="background-color: var(--light-bg);">
+            <div class="container mx-auto px-4 lg:px-8 text-center max-w-5xl scroll-fade-in">
+                <h3 class="text-3xl md:text-5xl font-extrabold mb-4" style="color: var(--primary-color);">
+                    Sokong Misi Data Tanah Kami.
+                </h3>
+                <p class="text-lg text-gray-600 mb-10">
+                    Tanah Emas dibina oleh komuniti untuk komuniti. Sumbangan anda membantu mengekalkan ketepatan data, membayar kos hosting, dan menjamin akses percuma untuk semua.
+                </p>
+                <!-- Donation Link -->
+                <a href="https://www.buymeacoffee.com/tanahemas" target="_blank" rel="noopener noreferrer" class="flex items-center space-x-3 mx-auto max-w-xs justify-center px-12 py-4 text-xl font-bold text-gray-900 rounded-full shadow-xl transform transition duration-300 hover:scale-[1.05] active:scale-[0.98] focus:outline-none focus:ring-4 focus:ring-offset-2" 
+                        style="background-color: var(--accent-color); box-shadow: 0 8px 25px -8px #D4AF37cc;">
+                    <i data-lucide="coffee" size="24" class="text-gray-900"></i>
+                    <span>Sumbang Sekarang</span>
+                </a>
+            </div>
+        </section>
+    </main>
 
-  <div class="legend">
-    <span style="border-radius: 50%; padding: 0 4px 2px; border: 1px solid #333;">🛕</span> Kuil
-    <span style="border-radius: 50%; padding: 0 4px 2px; border: 1px solid #333;">⛪</span> Gereja
-    <span style="border-radius: 50%; padding: 0 4px 2px; border: 1px solid #333;">🏮</span> Tokong
-  </div>
+    <!-- Footer (Updated to remove email and add coffee icon) -->
+    <footer class="text-white py-8" style="background-color: var(--primary-color);">
+        <div class="container mx-auto px-4 lg:px-8 text-center flex flex-col items-center space-y-4">
+        
 
-  <!-- Modal Form -->
-  <div id="modal">
-    <div class="modal-content">
-      <span class="close-btn" id="closeModal">&times;</span>
-      <h2>🛕 Tambah Lokasi Baru</h2>
-      <form id="placeForm">
-        <label>Nama Rumah Ibadat</label>
-        <input type="text" id="name" required>
-        <label>Jenis</label>
-        <select id="type" required>
-          <option value="">-- Pilih Jenis --</option>
-          <option value="Kuil">🛕 Kuil</option>
-          <option value="Tokong">⛩️ Tokong</option>
-          <option value="Gereja">⛪ Gereja</option>
-          <option value="Gurdwara">🕌 Gurdwara</option>
-        </select>
-        <label>Alamat / Lokasi</label>
-        <textarea id="address" rows="3" required></textarea>
-        <label>Latitude</label>
-        <input type="number" step="any" id="lat" required>
-        <label>Longitude</label>
-        <input type="number" step="any" id="lng" required>
+            <p class="text-sm text-gray-400 pt-2 border-t border-gray-700 w-full">&copy; <span id="current-year"></span> Tanah Emas. Dibangunkan secara sukarela dan disokong oleh komuniti.</p>
+        </div>
+    </footer>
 
-        <!-- NEW: Image upload -->
-        <label>Gambar Bukti(pilihan)</label>
-        <input type="file" id="image" accept="image/*">
+    <script>
+        // Set the current year in the footer dynamically
+        document.getElementById('current-year').textContent = new Date().getFullYear();
 
-        <button type="submit">💾 Simpan Data</button>
-      </form>
-      <div id="message"></div>
-    </div>
-  </div>
-
-  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <script>
-    /***********************
-     * Google Sheets via Cloudflare Worker
-     ***********************/
-    const SHEET_API = "https://dry-bread-c188.musabanas99.workers.dev/";
-
-    // GET rows
-    async function sheetGetPlaces() {
-      const res = await fetch(SHEET_API);
-      if (!res.ok) throw new Error("Gagal ambil data dari Sheet");
-      const data = await res.json();
-      return Array.isArray(data.places) ? data.places : [];
-    }
-
-// POST with optional image (multipart/form-data)
-async function sheetPostPlace(place, file) {
-    const fd = new FormData();
-    fd.append("name", place.name || "");
-    fd.append("type", place.type || "");
-    fd.append("address", place.address || "");
-    fd.append("lat", String(place.lat ?? ""));
-    fd.append("lng", String(place.lng ?? ""));
-    if (file) fd.append("image", file, file.name);
-
-    // --- START DEBUG BLOCK ---
-    console.log("--- DEBUG: FormData Contents ---");
-    let hasImage = false;
-    for (const [key, value] of fd.entries()) {
-        if (key === 'image') {
-            hasImage = true;
-            console.log(`Key: ${key}, Value Type: ${value instanceof File ? 'File' : typeof value}, File Name: ${value.name || 'N/A'}`);
-        } else {
-            console.log(`Key: ${key}, Value: ${value}`);
+        /**
+         * Simulates a successful action using the custom modal dialog.
+         * @param {string} action - The action that was performed.
+         */
+        function simulateAction(action) {
+            const modal = document.getElementById('action-modal');
+            const messageElement = document.getElementById('modal-message');
+            
+            let message = '';
+            if (action === 'Sokongan') {
+                message = 'Terima kasih atas sokongan anda! Anda akan dibawa ke halaman sumbangan Buy Me a Coffee.';
+            } else {
+                message = 'Tindakan berjaya dilaksanakan.';
+            }
+            
+            messageElement.textContent = message;
+            
+            // Show the modal
+            if (modal.showModal) {
+                modal.showModal();
+            } else {
+                console.log("Action Simulated:", action);
+            }
         }
-    }
-    if (hasImage) {
-        console.log("✅ Image file is included in FormData.");
-    } else {
-        console.warn("❌ WARNING: The 'image' file key is MISSING from FormData.");
-    }
-    console.log("-------------------------------");
-    // --- END DEBUG BLOCK ---
 
-    const res = await fetch(SHEET_API, { method: "POST", body: fd });
-    if (!res.ok) throw new Error("Gagal simpan ke Sheet");
-    const data = await res.json();
-    if (!data.ok) throw new Error(data.error || "Gagal simpan");
-    return data; // {ok:true, imageUrl?}
-}
+        // --- Intersection Observer for Scroll Animations ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const scrollElements = document.querySelectorAll(".scroll-fade-in");
 
-    /***********************
-     * Map setup
-     ***********************/
-    const map = L.map('map', { zoomControl: false }).setView([3.08, 101.62], 11);
-    L.control.zoom({ position: 'topright' }).addTo(map);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors'
-    }).addTo(map);
+            // Define the options for the observer
+            const observerOptions = {
+                root: null, // relative to the viewport
+                rootMargin: '0px',
+                threshold: 0.2 // trigger when 20% of the item is visible
+            };
 
-    // separate marker arrays
-    let staticMarkers = [];
-    let sheetMarkers  = [];
-    function clearStaticMarkers() { staticMarkers.forEach(m => map.removeLayer(m)); staticMarkers = []; }
-    function clearSheetMarkers()  { sheetMarkers.forEach(m => map.removeLayer(m)); sheetMarkers  = []; }
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        // Add the visible class when it comes into view
+                        entry.target.classList.add("is-visible");
+                        // Stop observing after it has animated once
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
 
-    const daerahSelect = document.getElementById('daerahSelect');
-    const mukimSelect  = document.getElementById('mukimSelect');
-    const searchInput  = document.getElementById('searchInput');
+            // Observe each element
+            scrollElements.forEach(el => observer.observe(el));
 
-    const iconMap = {
-      "Kuil": "🛕", "Gurdwara": "🕌", "Tokong": "⛩️", "Gereja": "⛪", "default": "📍"
-    };
 
-    async function loadData(filename) {
-      try {
-        const res = await fetch(filename);
-        if (!res.ok) throw new Error(`Gagal muat ${filename}`);
-        return await res.json();
-      } catch (err) {
-        console.error(err);
-        alert("❌ Gagal memuatkan fail: " + filename);
-        return [];
-      }
-    }
+            // --- Mobile Menu Toggle Logic ---
+            const menuToggle = document.getElementById('menu-toggle');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const menuIcon = document.getElementById('menu-icon');
+            const closeIcon = document.getElementById('close-icon');
 
-    function extractMukim(text) {
-      if (!text) return "Tidak Dinyatakan";
-      const match = text.match(/(Mukim|Bandar)\s*([A-Za-z\s]+)/i);
-      if (match) return `${match[1]} ${match[2].trim()}`;
-      return text.trim();
-    }
+            menuToggle.addEventListener('click', () => {
+                const isHidden = mobileMenu.classList.toggle('hidden');
+                // Toggle between showing the hamburger or the close icon
+                menuIcon.classList.toggle('hidden', !isHidden);
+                closeIcon.classList.toggle('hidden', isHidden);
+            });
 
-    /*********************** JSON (static) ***********************/
-    let staticDataRaw = [];
-    function normalizeStatic(item) {
-      const coord = item["Koordinat Longitude dan Latitude"];
-      let lat = null, lng = null;
-      if (coord && coord.includes(",")) {
-        const [a, b] = coord.split(",").map(v => parseFloat(v.trim()));
-        if (!isNaN(a) && !isNaN(b)) { lat = a; lng = b; }
-      }
-      const jenis = item["JENIS RUMAH IBADAT\n"] || item["JENIS RUMAH IBADAT"] || "";
-      const mukimText = item.NO?.["LOT & MUKIM (Jika berkenaan)"] || "";
-      const mukim = extractMukim(mukimText);
-      return {
-        name: item["NAMA RUMAH IBADAT"] || "Tidak Dinyatakan",
-        type: jenis || "",
-        address: item["LOKASI / ALAMAT"] || "",
-        mukim,
-        statusTanah: item["STATUS TANAH\n"] || item["STATUS TANAH"] || "-",
-        lat, lng
-      };
-    }
+            // Function to close the menu, useful after clicking a link
+            window.closeMobileMenu = () => {
+                mobileMenu.classList.add('hidden');
+                menuIcon.classList.remove('hidden');
+                closeIcon.classList.add('hidden');
+            };
 
-    function populateMukimFromStatic() {
-      mukimSelect.innerHTML = '<option value="">-- Semua Mukim --</option>';
-      const mukims = [...new Set(
-        staticDataRaw.map(normalizeStatic).map(d => d.mukim).filter(Boolean)
-      )].sort((x,y) => x.localeCompare(y, "ms"));
-      mukims.forEach(m => {
-        const opt = document.createElement('option');
-        opt.value = m; opt.textContent = m; mukimSelect.appendChild(opt);
-      });
-      mukimSelect.style.display = mukims.length ? "block" : "none";
-    }
-
-    function renderStatic(mukimFilter = "", searchQuery = "") {
-      clearStaticMarkers();
-      const bounds = new L.LatLngBounds();
-      const q = (searchQuery || "").toLowerCase();
-
-      staticDataRaw.map(normalizeStatic).forEach(item => {
-        if (typeof item.lat !== "number" || typeof item.lng !== "number") return;
-        if (mukimFilter && item.mukim !== mukimFilter) return;
-        const hay = [item.name, item.type, item.address, item.mukim].join(" ").toLowerCase();
-        if (q && !hay.includes(q)) return;
-
-        const emoji = iconMap[item.type] || iconMap.default;
-        const divIcon = L.divIcon({
-          html: `<div class="emoji-icon-wrapper"><div class="emoji-icon">${emoji}</div></div>`,
-          className: "custom-emoji-icon",
-          iconSize: [44, 44],
-          iconAnchor: [22, 44]
+            // Activate Lucide Icons after DOM is ready
+            if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                 lucide.createIcons();
+            }
         });
-        const gmapsLink = `https://www.google.com/maps?q=${item.lat},${item.lng}`;
-        const popup = `
-          <b>${item.name}</b><br>
-          Jenis: ${item.type || "-"}<br>
-          Mukim: ${item.mukim || "-"}<br>
-          Lokasi: ${item.address || "-"}<br>
-          Status Tanah: ${item.statusTanah || "-"}<br>
-          <a href="${gmapsLink}" target="_blank">📍 Buka di Google Maps</a>
-        `;
-
-        const marker = L.marker([item.lat, item.lng], { icon: divIcon }).bindPopup(popup);
-        marker.addTo(map); staticMarkers.push(marker);
-        bounds.extend([item.lat, item.lng]);
-      });
-
-      if (bounds.isValid()) map.fitBounds(bounds, { padding: [24, 24] });
-    }
-
-    daerahSelect.addEventListener("change", async () => {
-      const daerah = daerahSelect.value;
-      if (!daerah) {
-        staticDataRaw = [];
-        populateMukimFromStatic();
-        renderStatic("", searchInput.value);
-        return;
-      }
-      staticDataRaw = await loadData(`${daerah}.json`);
-      populateMukimFromStatic();
-      renderStatic(mukimSelect.value, searchInput.value);
-    });
-    mukimSelect.addEventListener("change", () => renderStatic(mukimSelect.value, searchInput.value));
-    searchInput.addEventListener("input", () => renderStatic(mukimSelect.value, searchInput.value));
-
-    /*********************** SHEET (user) — map only ***********************/
-    let sheetDataRaw = [];
-
-    function renderSheetFiltered(filter = "") {
-      clearSheetMarkers();
-      const q = (filter || "").toLowerCase();
-      const bounds = new L.LatLngBounds();
-
-      const rows = sheetDataRaw.filter(r => {
-        const hay = [r.name||"", r.type||"", r.address||""].join(" ").toLowerCase();
-        return q ? hay.includes(q) : true;
-      });
-
-      rows.forEach(r => {
-        const lat = parseFloat(r.lat), lng = parseFloat(r.lng);
-        if (isNaN(lat) || isNaN(lng)) return;
-
-        const emoji = iconMap[r.type] || iconMap.default;
-        const divIcon = L.divIcon({
-          html: `<div class="emoji-icon-wrapper"><div class="emoji-icon">${emoji}</div></div>`,
-          className: "custom-emoji-icon",
-          iconSize: [44, 44],
-          iconAnchor: [22, 44]
-        });
-
-        const gmapsLink = `https://www.google.com/maps?q=${lat},${lng}`;
-        const hasImg = r.image && String(r.image).startsWith('http');
-        const imgLine = hasImg ? `<br><a href="${r.image}" target="_blank">🖼️ Lihat imej</a>` : '';
-
-        const popup = `<b>${r.name || "Tidak Dinyatakan"}</b> <span style="font-size:11px;color:#777">(Tambah)</span><br>
-          Jenis: ${r.type || "-"}<br>
-          Lokasi: ${r.address || "-"}${imgLine}<br>
-          <a href="${gmapsLink}" target="_blank">📍 Buka di Google Maps</a>`;
-
-        const m = L.marker([lat, lng], { icon: divIcon }).bindPopup(popup).addTo(map);
-        sheetMarkers.push(m); bounds.extend([lat, lng]);
-      });
-
-      // Only auto-fit when no JSON dataset is active
-      if (!daerahSelect.value && bounds.isValid()) map.fitBounds(bounds, { padding: [24, 24] });
-    }
-
-    // Debounce helper
-    function debounce(fn, wait = 220){
-      let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), wait); };
-    }
-
-    // Controls
-    const modal = document.getElementById("modal");
-    const message = document.getElementById("message");
-    const userAddBtn = document.getElementById("userAddBtn");
-    const userRefreshBtn = document.getElementById("userRefreshBtn");
-    const userSearchInput = document.getElementById("userSearchInput");
-
-    // Open/close modal
-    const closeModal = document.getElementById("closeModal");
-    const form = document.getElementById("placeForm");
-    userAddBtn.onclick = () => { modal.style.display = "flex"; message.textContent = ""; };
-    closeModal.onclick = () => { modal.style.display = "none"; message.textContent = ""; };
-    window.onclick = (e) => { if (e.target === modal) { modal.style.display = "none"; message.textContent = ""; } };
-
-    // Refresh → fetch from Sheet and render markers only
-    userRefreshBtn.onclick = async () => {
-      try {
-        userRefreshBtn.disabled = true;
-        sheetDataRaw = await sheetGetPlaces();
-        renderSheetFiltered(userSearchInput.value);
-      } catch(e) {
-        alert("Gagal refresh: " + e.message);
-      } finally {
-        userRefreshBtn.disabled = false;
-      }
-    };
-
-    // Search (filters existing sheet markers, no list)
-    userSearchInput.addEventListener("input",
-      debounce(() => renderSheetFiltered(userSearchInput.value), 220)
-    );
-
-    // Submit new place (with optional image)
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      message.textContent = "⏳ Menyimpan data...";
-
-      const newPlace = {
-        name: document.getElementById("name").value.trim(),
-        type: document.getElementById("type").value,
-        address: document.getElementById("address").value.trim(),
-        lat: parseFloat(document.getElementById("lat").value),
-        lng: parseFloat(document.getElementById("lng").value)
-      };
-      const fileInput = document.getElementById("image");
-      const file = fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
-
-      try {
-        await sheetPostPlace(newPlace, file);
-        message.textContent = "✅ Berjaya disimpan!";
-        form.reset();
-
-        // Update local cache; user will still need Refresh to reload from Sheet if desired
-        sheetDataRaw.push({
-          timestamp: new Date().toISOString(),
-          name: newPlace.name,
-          type: newPlace.type,
-          address: newPlace.address,
-          lat: newPlace.lat,
-          lng: newPlace.lng,
-          image: "" // Worker returns imageUrl but we rely on Refresh to sync authoritative data
-        });
-        renderSheetFiltered(userSearchInput.value);
-
-        setTimeout(() => { modal.style.display = "none"; message.textContent = ""; }, 700);
-      } catch (err) {
-        console.error(err);
-        message.textContent = "❌ Ralat: " + err.message;
-      }
-    });
-
-    // Bootstrap — DO NOT load Sheet on start (only JSON)
-    (async function bootstrapAllData() {
-      try {
-        if (daerahSelect.value) {
-          staticDataRaw = await loadData(`${daerahSelect.value}.json`);
-        } else {
-          staticDataRaw = [];
-        }
-        populateMukimFromStatic();
-        renderStatic(mukimSelect.value, searchInput.value);
-
-        console.log("✅ Ready (Sheet not loaded until Refresh)");
-      } catch (e) {
-        console.error("❌ Gagal memuat data:", e.message);
-      }
-    })();
-  </script>
-
-  <footer id="appFooter">
-    <span><strong>Tanah Emas</strong> v1.0.7</span>
-  </footer>
+        // --- End Mobile Menu Toggle Logic ---
+    </script>
 </body>
 </html>
