@@ -1,5 +1,5 @@
 
-![Alt text for the image](/Berita/lamanberita/images/article1.png)
+![Alt text for the image](/Berita/LamanBerita/images/article1.png)
 
 ---
 
@@ -51,4 +51,4 @@ Anda benar apabila menyatakan bahawa wujudnya kekosongan data negara dalam konte
 * **Perancangan pembangunan dan pemuliharaan**: TRM sebagai satu aset masyarakat Melayu perlu diurus secara strategik supaya tidak hanya “terus ada” tetapi juga memberi nilai ekonomi dan sosial yang optimum. Kertas kerja menyebut bahawa “tanah yang dimajukan … menjadi petunjuk untuk memajukan tanah yang mundur.” ([news.uthm.edu.my][8])
 * **Audit dan pembaikan sistem**: Jika platform menyediakan data masa-nyata atau hampir, ia boleh membantu dalam mengenal pasti isu seperti tumpang-tindih hak, penjualan yang mungkin melanggar syarat Enakmen, atau kawasan yang statusnya berubah tanpa makluman umum.
 * **Penglibatan komuniti dan inovasi digital**: Sebagai pemain yang membina ekosistem peta/analitik untuk platform anda (tanahmalaya.com), anda boleh menjadikan TRM sebagai modul peta interaktif — membantu pengguna memahami hak milik, zon rizab, potensi, sejarah dan isu. Ini juga boleh menyumbang kepada penglibatan awam yang lebih besar.
-![Alt text for the image](/Berita/lamanberita/images/article1.1.png)
+![Alt text for the image](/Berita/LamanBerita/images/article1.1.png)

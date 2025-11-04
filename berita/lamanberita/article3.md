@@ -1,4 +1,4 @@
-![Alt text for the image](/Berita/lamanberita/images/article3.png)
+![Alt text for the image](/Berita/LamanBerita/images/article3.png)
 
 ---
 

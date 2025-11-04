@@ -6,7 +6,7 @@
     "description": "tanah-tanah kepunyaan Melayu akan berkekalan dikuasai oleh orang Melayu sepanjang zaman",
     "date": "November 4, 2025", 
     "isFeatured": true,
-    "image": "lamanberita/images/article1.png",
+    "image": "LamanBerita/images/article1.png",
     "imagePlaceholder": "image.png", 
     "imageColor": "182B49/D4A762",
     "contentSource": "article1.md"
@@ -17,7 +17,7 @@
     "category": "Ilmu Tanah", 
     "description": "",
     "date": "November 4, 2025", 
-    "image": "lamanberita/images/article2.png",
+    "image": "LamanBerita/images/article2.png",
     "imagePlaceholder": "image.png", 
     "imageColor": "182B49/D4A762",
     "contentSource": "article2.md"
@@ -28,7 +28,7 @@
     "category": "Ilmu Tanah", 
     "description": "",
     "date": "November 4, 2025", 
-    "image": "lamanberita/images/article3.png",
+    "image": "LamanBerita/images/article3.png",
     "imagePlaceholder": "image.png", 
     "imageColor": "182B49/D4A762",
     "contentSource": "article3.md"
@@ -39,7 +39,7 @@
     "category": "Ilmu Tanah", 
     "description": "",
     "date": "November 4, 2025", 
-    "image": "lamanberita/images/article4.png",
+    "image": "LamanBerita/images/article4.png",
     "imagePlaceholder": "image.png", 
     "imageColor": "182B49/D4A762",
     "contentSource": "article4.md"
