@@ -771,8 +771,10 @@ async function sheetPostPlace(place, file) {
     /*********************** SHEET (user) — map only ***********************/
     let sheetDataRaw = [];
 
-    function renderSheetFiltered(filter = "") {
-      clearSheetMarkers();
+    // MODIFIED: This function now takes a `renderMarkers` boolean to control whether markers are added to the map.
+    function renderSheetFiltered(filter = "", renderMarkers = true) {
+      clearSheetMarkers(); // Always clear existing sheet markers first
+
       const q = (filter || "").toLowerCase();
       const bounds = new L.LatLngBounds();
 
@@ -784,33 +786,41 @@ async function sheetPostPlace(place, file) {
         return q ? hay.includes(q) : true;
       });
 
-      rows.forEach(r => {
-        const lat = parseFloat(r.lat), lng = parseFloat(r.lng);
-        if (isNaN(lat) || isNaN(lng)) return;
+      if (renderMarkers) { // Only add markers if renderMarkers is true
+        rows.forEach(r => {
+          const lat = parseFloat(r.lat), lng = parseFloat(r.lng);
+          if (isNaN(lat) || isNaN(lng)) return;
 
-        const emoji = iconMap[r.type] || iconMap.default;
-        const divIcon = L.divIcon({
-          html: `<div class="emoji-icon-wrapper"><div class="emoji-icon">${emoji}</div></div>`,
-          className: "custom-emoji-icon",
-          iconSize: [44, 44],
-          iconAnchor: [22, 44]
+          const emoji = iconMap[r.type] || iconMap.default;
+          const divIcon = L.divIcon({
+            html: `<div class="emoji-icon-wrapper"><div class="emoji-icon">${emoji}</div></div>`,
+            className: "custom-emoji-icon",
+            iconSize: [44, 44],
+            iconAnchor: [22, 44]
+          });
+
+          const gmapsLink = `https://www.google.com/maps?q=${lat},${lng}`;
+          const hasImg = r.image && String(r.image).startsWith('http');
+          const imgLine = hasImg ? `<br><a href="${r.image}" target="_blank">🖼️ Lihat imej</a>` : '';
+
+          const popup = `<b>${r.name || "Tidak Dinyatakan"}</b> <span style="font-size:11px;color:#777"></span><br>
+            Jenis: ${r.type || "-"}<br>
+            Lokasi: ${r.address || "-"}${imgLine}<br>
+            <a href="${gmapsLink}" target="_blank">📍 Buka di Google Maps</a>`;
+
+          const m = L.marker([lat, lng], { icon: divIcon }).bindPopup(popup).addTo(map);
+          sheetMarkers.push(m); bounds.extend([lat, lng]);
         });
+      }
 
-        const gmapsLink = `https://www.google.com/maps?q=${lat},${lng}`;
-        const hasImg = r.image && String(r.image).startsWith('http');
-        const imgLine = hasImg ? `<br><a href="${r.image}" target="_blank">🖼️ Lihat imej</a>` : '';
-
-        const popup = `<b>${r.name || "Tidak Dinyatakan"}</b> <span style="font-size:11px;color:#777"></span><br>
-          Jenis: ${r.type || "-"}<br>
-          Lokasi: ${r.address || "-"}${imgLine}<br>
-          <a href="${gmapsLink}" target="_blank">📍 Buka di Google Maps</a>`;
-
-        const m = L.marker([lat, lng], { icon: divIcon }).bindPopup(popup).addTo(map);
-        sheetMarkers.push(m); bounds.extend([lat, lng]);
-      });
-
-      // Only auto-fit when no JSON dataset is active
-      if (!negeriSelect.value && sheetMarkers.length > 0 && bounds.isValid()) map.fitBounds(bounds, { padding: [24, 24] });
+      // Only auto-fit when no JSON dataset is active AND if markers were rendered
+      if (!negeriSelect.value && renderMarkers && sheetMarkers.length > 0 && bounds.isValid()) {
+          map.fitBounds(bounds, { padding: [24, 24] });
+      }
+      // If no static data is loaded AND no sheet markers are present, reset view
+      else if (!staticMarkers.length && !sheetMarkers.length && !bounds.isValid()) {
+          map.setView([3.08, 101.62], 11);
+      }
     }
 
     // Debounce helper
@@ -859,7 +869,8 @@ async function sheetPostPlace(place, file) {
       try {
         userRefreshBtn.disabled = true;
         sheetDataRaw = await sheetGetPlaces();
-        renderSheetFiltered(userSearchInput.value);
+        // MODIFIED: Call with renderMarkers = true to show markers on refresh
+        renderSheetFiltered(userSearchInput.value, true); 
         // NEW: Update stat count
         document.getElementById('stat-approved').textContent = sheetDataRaw.length;
       } catch(e) {
@@ -872,7 +883,9 @@ async function sheetPostPlace(place, file) {
 
     // Search (filters existing sheet markers, no list)
     userSearchInput.addEventListener("input",
-      debounce(() => renderSheetFiltered(userSearchInput.value), 220)
+      // MODIFIED: This will filter the already loaded sheetDataRaw, and will also render the markers
+      // if the refresh button was clicked previously. If not, it won't render any new markers.
+      debounce(() => renderSheetFiltered(userSearchInput.value, true), 220) 
     );
 
     // Submit new place (with optional image)
@@ -905,7 +918,9 @@ async function sheetPostPlace(place, file) {
           lng: newPlace.lng,
           image: "" // Worker returns imageUrl but we rely on Refresh to sync authoritative data
         });
-        renderSheetFiltered(userSearchInput.value);
+        // MODIFIED: After adding a new place, we still want to render the current filter, 
+        // including this new local data.
+        renderSheetFiltered(userSearchInput.value, true); 
         
         // NEW: Update stat count
         document.getElementById('stat-approved').textContent = sheetDataRaw.length;
@@ -966,13 +981,14 @@ async function sheetPostPlace(place, file) {
         }
     }
 
-    // NEW: Function to load sheet data on initial load
+    // MODIFIED: Function to load sheet data on initial load and update stats, but NOT render markers.
     async function loadInitialSheetData() {
         const statEl = document.getElementById('stat-approved');
         try {
             statEl.textContent = 'Memuat...'; // Loading...
             sheetDataRaw = await sheetGetPlaces();
-            renderSheetFiltered(userSearchInput.value);
+            // MODIFIED: Call with renderMarkers = false to only load data, not display on map
+            renderSheetFiltered(userSearchInput.value, false); 
             statEl.textContent = sheetDataRaw.length;
         } catch(e) {
             console.error("Gagal memuat data sheet permulaan:", e);
@@ -986,7 +1002,8 @@ async function sheetPostPlace(place, file) {
     (async function bootstrapAllData() {
       try {
         updateTotalPlacemarks(); // NEW: Start calculating total from JSONs
-        loadInitialSheetData(); // NEW: Start loading sheet data
+        loadInitialSheetData(); // NEW: Start loading sheet data and updating its count
+
         populateNegeri(); // Initialize Negeri dropdown
 
         // Initial load check (should be empty until Negeri/Daerah is selected)
@@ -1010,4 +1027,3 @@ async function sheetPostPlace(place, file) {
   </footer>
 </body>
 </html>
-
