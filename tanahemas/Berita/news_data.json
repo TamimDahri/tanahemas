@@ -1,0 +1,47 @@
+[
+  { 
+    "id": 1, 
+    "title": "Apa itu Tanah Rizab Melayu (TRM)", 
+    "category": "Ilmu Tanah", 
+    "description": "tanah-tanah kepunyaan Melayu akan berkekalan dikuasai oleh orang Melayu sepanjang zaman",
+    "date": "November 4, 2025", 
+    "isFeatured": true,
+    "image": "LamanBerita/images/article1.png",
+    "imagePlaceholder": "image.png", 
+    "imageColor": "182B49/D4A762",
+    "contentSource": "article1.md"
+  },
+  { 
+    "id": 2,
+    "title": "Apa Itu Tanah Kerajaan Negeri (Stateland)", 
+    "category": "Ilmu Tanah", 
+    "description": "",
+    "date": "November 4, 2025", 
+    "image": "LamanBerita/images/article2.png",
+    "imagePlaceholder": "image.png", 
+    "imageColor": "182B49/D4A762",
+    "contentSource": "article2.md"
+  },
+  { 
+    "id": 3,
+    "title": "Dari Stateland ke Tanah Warta: Prosedur dan Asal Usul Perubahan Status Tanah", 
+    "category": "Ilmu Tanah", 
+    "description": "",
+    "date": "November 4, 2025", 
+    "image": "LamanBerita/images/article3.png",
+    "imagePlaceholder": "image.png", 
+    "imageColor": "182B49/D4A762",
+    "contentSource": "article3.md"
+  },
+  { 
+    "id": 4,
+    "title": "Apa itu lot lidi", 
+    "category": "Ilmu Tanah", 
+    "description": "",
+    "date": "November 4, 2025", 
+    "image": "LamanBerita/images/article4.png",
+    "imagePlaceholder": "image.png", 
+    "imageColor": "182B49/D4A762",
+    "contentSource": "article4.md"
+  }
+]
