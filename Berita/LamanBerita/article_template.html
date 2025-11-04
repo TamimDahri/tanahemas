@@ -1,9 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ms">
 <head>
+    <!-- Open Graph / WhatsApp -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://tanahmalaya.com/">
+  <meta property="og:title" content="Tanah Malaya">
+  <meta property="og:description" content="Memelihara Tanah Negara">
+  <meta property="og:image" content="https://tanahmalaya.com/te.png">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://tanahmalaya.com/">
+  <meta property="twitter:title" content="Tanah Malaya">
+  <meta property="twitter:description" content="Memelihara Tanah Negara">
+  <meta property="twitter:image" content="https://tanahmalaya.com/te.png">
+
+  <!-- Favicon: Selesai, menggunakan te.png -->
+  <link rel="icon" type="image/png" href="te.png">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title id="page-title">Loading Article...</title>
+  <title id="page-title">Memuatkan Artikel...</title>
+
+  <!-- Google AdSense Script (!!! IMPORTANT: REPLACE 'ca-pub-...' with your actual Publisher ID !!!) -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1234567890123456"
+     crossorigin="anonymous"></script>
+  <!-- End Google AdSense Script -->
 
   <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -15,10 +36,10 @@
       theme: {
         extend: {
           colors: {
-            primary: '#182B49',
-            secondary: '#D4A762',
-            accent: '#F7F7F7',
-            'dark-bg': '#0D1A2E',
+            primary: '#4A4339', // Deep Earth Brown/Mocha (Tanah) - CHANGED
+            secondary: '#D4AF37', // Rich Gold/Emas (Emas Accent) - CHANGED
+            accent: '#FDF9F5', // Creamy off-white (Light Background) - CHANGED
+            'dark-bg': '#4A4339', // Same as Primary - CHANGED
           },
           fontFamily: {
             sans: ['Inter', 'sans-serif'],
@@ -35,191 +56,216 @@
     .markdown-content h1{
       font-size: 2.25rem; /* text-4xl */
       font-weight: 800;
-      color: #182B49;
-      margin-bottom: 1.5rem;
-      padding-top: 1rem;
-      border-bottom: 1px solid rgba(212,167,98,0.5);
+      color: #4A4339; /* primary */ /* CHANGED */
+      margin-bottom: 1.5rem; /* mb-6 */
+      padding-top: 1rem; /* pt-4 */
+      border-bottom: 1px solid rgba(212, 175, 55, 0.5); /* secondary/50 */ /* CHANGED */
     }
+
     .markdown-content h2{
       font-size: 1.875rem; /* text-3xl */
       font-weight: 700;
-      color: #182B49;
-      margin-top: 2rem;
-      margin-bottom: 1rem;
-      border-left: 4px solid #D4A762;
-      padding-left: 0.75rem;
-    }
-    .markdown-content p{
-      font-size: 1.125rem; /* text-lg */
-      color: #374151;      /* gray-700 */
-      line-height: 1.9;    /* loose */
-      margin: 1.75rem 0;   /* vertical spacing between paragraphs */
-    }
-    .markdown-content strong{
-      color: #182B49;
-      font-weight: 600;
-    }
-    .markdown-content ul{
-      list-style: disc;
-      padding-left: 1.5rem; /* similar to ml-6 */
-      margin-bottom: 2rem;
-    }
-    .markdown-content li{
-      margin-bottom: 0.5rem;
-      color: #4B5563; /* gray-600 */
-    }
-    .markdown-content blockquote{
-      border-left: 4px solid #D4A762;
-      background: #F9FAFB;  /* gray-50 */
-      padding: 1rem;
-      font-style: italic;
-      color: #1F2937;       /* gray-800 */
-      border-radius: 0.5rem;
-      margin: 2.5rem 0;
-    }
-    /* Optional: make <br> create visible extra space */
-    .markdown-content br{
-      display: block;
-      content: "";
-      margin-bottom: 1rem;
+      color: #4A4339; /* primary */ /* CHANGED */
+      margin-top: 2rem; /* mt-8 */
+      margin-bottom: 1rem; /* mb-4 */
+      border-left: 4px solid #D4AF37; /* secondary */ /* CHANGED */
+      padding-left: 0.75rem; /* pl-3 */
     }
 
-    /* Article hero image polish */
-    #article-image-container img{
-      border-radius: 1rem;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    /* Pelarasan di sini: Menggunakan 'my-8' untuk margin atas dan bawah 
+       untuk jarak yang lebih konsisten dan jelas antara perenggan. */
+    .markdown-content p{
+      font-size: 1.125rem; /* text-lg */
+      color: #4A4339; /* text-gray-700 in new scheme is closer to primary or text-neutral-700, using primary for distinction */
+      margin-top: 2rem;
+      margin-bottom: 2rem;
+      line-height: 1.8; /* leading-loose */
+    }
+
+    .markdown-content strong{
+      color: #4A4339; /* primary */ /* CHANGED */
+      font-weight: 600;
+    }
+
+    /* Margin bawah senarai ditingkatkan kepada mb-8 */
+    .markdown-content ul{
+      list-style-type: disc;
+      list-style-position: inside;
+      margin-left: 1.5rem; /* ml-6 */
+      margin-bottom: 2rem; /* mb-8 */
+    }
+
+    .markdown-content li{
+      margin-bottom: 0.5rem; /* mb-2 */
+      color: #4A4339; /* text-gray-600 in new scheme */
+    }
+
+    /* Pelarasan di sini: Meningkatkan margin-y untuk Blockquote kepada my-10 */
+    .markdown-content blockquote{
+      border-left: 4px solid #D4AF37; /* secondary */ /* CHANGED */
+      background-color: #F8F8F8; /* A light background that complements accent (#FDF9F5) */
+      padding: 1rem; /* p-4 */
+      font-style: italic;
+      color: #4A4339; /* text-gray-800 in new scheme is closer to primary */
+      border-radius: 0.5rem; /* rounded-lg */
+      margin-top: 2.5rem; /* my-10 */
+      margin-bottom: 2.5rem; /* my-10 */
     }
   </style>
 </head>
-
 <body class="bg-accent font-sans min-h-screen">
-  <!-- Header -->
-  <header class="bg-primary shadow-lg">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <a href="../index.html" class="text-xl font-extrabold text-white tracking-widest hover:text-secondary transition">
-        &larr; BACK TO NEWS
-      </a>
-      <span class="text-secondary font-bold text-xl">TANAHEMAS</span>
+
+    <!-- Header (Simple - Hanya logo di kiri) -->
+    <header class="bg-primary shadow-lg">
+        <!-- Changed max-w-4xl to max-w-7xl for full bleed, and justify-center to justify-start -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-start">
+            <a href="../index.html" class="text-3xl font-extrabold text-white tracking-wider">Tanah<span class="text-secondary">Malaya</span></a>
+        </div>
+    </header>
+
+    <!-- ===== AD RAIL CONTAINERS (160x600 Skyscraper) START ===== -->
+
+    <!-- Left Ad Rail: Fixed position, only visible on XL screens and up (1280px+) -->
+    <!-- top-20 positions it 5rem (80px) from the top, just below the header -->
+    <div id="ad-left-rail" class="hidden xl:block fixed top-20 left-8 w-40 h-[600px] z-10">
+        <!-- 
+            !!! IMPORTANT: PASTE YOUR ACTUAL 160x600 AD CODE HERE !!! 
+            We are using a placeholder ad code below for structure.
+        -->
+        <ins class="adsbygoogle"
+            style="display:inline-block;width:160px;height:600px;background-color:#EFEFEF;border:1px dashed #D4AF37;border-radius:8px;text-align:center;padding-top:200px;color:#4A4339;"
+            data-ad-client="ca-pub-1234567890123456"
+            data-ad-slot="1111111111">Left Skyscraper Ad</ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script> 
     </div>
-  </header>
 
-  <main class="py-12">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 bg-white p-6 md:p-10 rounded-2xl shadow-xl">
-      <!-- Article Header -->
-      <div id="article-header" class="mb-8">
-        <p id="article-category" class="text-sm font-semibold text-secondary uppercase tracking-wider mb-2">Category</p>
-        <h1 id="article-title" class="text-5xl font-extrabold text-primary mb-4">Title Loading...</h1>
-        <p id="article-description" class="text-xl text-gray-600 mb-6 font-light">Short description loading...</p>
-        <div id="article-meta" class="text-gray-500 text-sm flex items-center gap-4 border-t pt-4">
-          <span>Oleh: <strong class="text-primary">Media Tanahemas</strong></span>
-          <span id="article-date">Loading...</span>
-        </div>
-      </div>
-
-      <!-- Hero Image -->
-      <div id="article-image-container" class="mb-10">
-        <img src="image.png" alt="Article main image" class="w-full h-auto object-cover transition-all duration-500">
-      </div>
-
-      <!-- Markdown Content -->
-      <div class="pt-4">
-        <div id="article-content" class="markdown-content">
-          <p class="text-center text-gray-500 py-10">
-            <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-primary inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Memuatkan kandungan artikel...
-          </p>
-        </div>
-      </div>
-
-      <!-- Share -->
-      <div class="mt-10 pt-6 border-t border-gray-200 flex justify-between items-center">
-        <p class="text-sm text-gray-600 font-medium">Share This Article:</p>
-        <div class="flex space-x-3">
-          <button class="text-gray-400 hover:text-primary transition" aria-label="Share to Twitter">
-            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M22.05 4.607c-.77.34-1.594.57-2.457.674.887-.53 1.57-1.376 1.89-2.383-.827.49-1.748.84-2.73.992-.78-1.04-1.88-1.69-3.11-1.69-2.35 0-4.26 1.91-4.26 4.26 0 .335.037.66.11.97-3.54-.18-6.68-1.87-8.78-4.43-.365.63-.574 1.37-.574 2.16 0 1.47.747 2.77 1.88 3.53-.69-.022-1.34-.21-1.9-.53v.05c0 2.06 1.47 3.78 3.42 4.18-.35.1-.72.15-1.1.15-.27 0-.53-.026-.79-.08.54 1.7 2.11 2.94 3.97 2.98C6.9 17.18 5.23 18 3.48 18c-.34 0-.68-.02-1.01-.06 1.89 1.2 4.14 1.9 6.57 1.9 7.88 0 12.18-6.52 12.18-12.18 0-.18 0-.36-.01-.54.83-.6 1.55-1.34 2.12-2.19z"/></svg>
-          </button>
-          <button class="text-gray-400 hover:text-primary transition" aria-label="Share to LinkedIn">
-            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zM8.6 15.6H6.1v-8h2.5v8zM7.35 6.91a1.27 1.27 0 01-1.28-1.28c0-.71.57-1.28 1.28-1.28s1.28.57 1.28 1.28c0 .71-.57 1.28-1.28 1.28zM18 15.6h-2.34v-2.35c0-.57-.01-1.3-.79-1.3s-1.02.6-1.02 1.28v2.37H12.5v-8h2.34v1.02h.03c.33-.63 1.15-1.28 2.21-1.28 2.37 0 2.81 1.56 2.81 3.58v4.68z"/></svg>
-          </button>
-        </div>
-      </div>
-
-      <!-- Back -->
-      <div class="mt-12 text-center">
-        <a href="../index.html" class="inline-flex items-center bg-primary text-white font-bold px-8 py-3 rounded-full text-base shadow-lg hover:bg-dark-bg transition">
-          &larr; Return to News Listings
-        </a>
-      </div>
+    <!-- Right Ad Rail: Fixed position, only visible on XL screens and up (1280px+) -->
+    <div id="ad-right-rail" class="hidden xl:block fixed top-20 right-8 w-40 h-[600px] z-10">
+        <!-- 
+            !!! IMPORTANT: PASTE YOUR ACTUAL 160x600 AD CODE HERE !!! 
+            We are using a placeholder ad code below for structure.
+        -->
+        <ins class="adsbygoogle"
+            style="display:inline-block;width:160px;height:600px;background-color:#EFEFEF;border:1px dashed #D4AF37;border-radius:8px;text-align:center;padding-top:200px;color:#4A4339;"
+            data-ad-client="ca-pub-1234567890123456"
+            data-ad-slot="2222222222">Right Skyscraper Ad</ins>
+        <script>
+            (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
     </div>
-  </main>
+    <!-- ===== AD RAIL CONTAINERS END ===== -->
 
-  <footer class="bg-dark-bg h-16 w-full mt-10"></footer>
+    <main class="py-12">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 bg-white p-6 md:p-10 rounded-2xl shadow-xl">
+            <!-- Article Header (Dynamically updated) -->
+            <div id="article-header" class="mb-8">
+                <p id="article-category" class="text-sm font-semibold text-secondary uppercase tracking-wider mb-2">KATEGORI</p>
+                <h1 id="article-title" class="text-5xl font-extrabold text-primary mb-4">Tajuk Dimuatkan...</h1>
+                <p id="article-description" class="text-xl text-gray-600 mb-6 font-light">Keterangan ringkas dimuatkan...</p>
+                <div id="article-meta" class="text-gray-500 text-sm flex items-center space-x-4 border-t pt-4">
+                    <span>Oleh: <strong class="text-primary">Media TanahMalaya</strong></span>
+                    <span id="article-date">Memuatkan...</span>
+                </div>
+            </div>
+            
+            <!-- Main Content Area -->
+            <div class="pt-4">
+                <!-- Content from Markdown file will be injected here -->
+                <div id="article-content" class="markdown-content">
+                    <p class="text-center text-gray-500 py-10">
+                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-primary inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Memuatkan kandungan artikel...
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Share Section removed for brevity, was commented out -->
 
-  <script>
-    function getUrlParameter(name){
-      name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-      var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-      var results = regex.exec(location.search);
-      return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
-    }
+            <!-- Back button -->
+            <div class="mt-12 text-center">
+                <a href="../index.html" class="inline-flex items-center bg-primary text-white font-bold px-8 py-3 rounded-full text-base shadow-lg hover:bg-dark-bg transition duration-300">
+                    &larr; Kembali ke Senarai Berita
+                </a>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer placeholder - for visual completeness -->
+    <footer class="bg-dark-bg h-16 w-full mt-10"></footer>
 
-    async function loadAndRenderArticle(){
-      const contentFileName = getUrlParameter('source');
-      const articleContentDiv = document.getElementById('article-content');
-      const articleImage = document.querySelector('#article-image-container img');
+    <script>
+        // Function to extract URL parameter
+        function getUrlParameter(name) {
+            name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+            var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+            var results = regex.exec(location.search);
+            return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        };
 
-      if (!contentFileName){
-        articleContentDiv.innerHTML = '<p class="text-red-500 text-xl text-center">Error: No content source specified in URL.</p>';
-        document.getElementById('article-title').textContent = 'Error';
-        document.getElementById('page-title').textContent = 'Error | Tanahemas';
-        return;
-      }
+        // Asynchronously loads article content and metadata
+        async function loadAndRenderArticle() {
+          const contentFileName = getUrlParameter('source');
+          const articleContentDiv = document.getElementById('article-content');
+          
+          if (!contentFileName) {
+            articleContentDiv.innerHTML = '<p class="text-red-500 text-xl text-center">Ralat: Tiada sumber kandungan ditetapkan dalam URL.</p>';
+            document.getElementById('article-title').textContent = 'Ralat';
+            document.getElementById('page-title').textContent = 'Ralat | TanahMalaya';
+            return;
+          }
 
-      try{
-        // 1) Load Markdown
-        const response = await fetch(contentFileName);
-        if (!response.ok) throw new Error('Failed to load Markdown file: ' + contentFileName);
-        const markdownText = await response.text();
+          try{
+            // 1) Fetch content
+            const markdownFilePath = contentFileName;
+            const response = await fetch(markdownFilePath);
+            if (!response.ok) throw new Error(`Gagal memuatkan fail Markdown: ${markdownFilePath}`);
+            const markdownText = await response.text();
 
-        // 2) Load metadata (optional; keep if you use news_data.json)
-        const metadataResponse = await fetch('../news_data.json').catch(()=>null);
-        if (metadataResponse && metadataResponse.ok){
-          const newsData = await metadataResponse.json();
-          const metadata = newsData.find(i => i.contentSource === contentFileName);
-          if (metadata){
-            document.getElementById('article-category').textContent = metadata.category || 'News';
-            document.getElementById('article-title').textContent = metadata.title || 'Untitled';
-            document.getElementById('article-description').textContent = metadata.description || '';
-            document.getElementById('article-date').textContent = metadata.date || '';
-            document.getElementById('page-title').textContent = (metadata.title || 'Article') + ' | Tanahemas';
+            // 2) Fetch metadata
+            const metadataResponse = await fetch('../news_data.json');
+            const newsData = await metadataResponse.json();
+            const metadata = newsData.find(item => item.contentSource === contentFileName);
+
+            // Update Header
+            if(metadata){
+              document.getElementById('article-category').textContent = metadata.category || 'Berita';
+              document.getElementById('article-title').textContent = metadata.title || 'Tanpa Tajuk';
+              document.getElementById('article-description').textContent = metadata.description || '';
+              document.getElementById('article-date').textContent = metadata.date || '';
+              document.getElementById('page-title').textContent = (metadata.title || 'Artikel') + ' | TanahMalaya';
+              
+              // Image update section removed
+            } else {
+              document.getElementById('article-description').textContent = 'Metadata tidak ditemui untuk artikel ini.';
+            }
+
+            // 3) Convert Markdown -> HTML
+            const converter = new showdown.Converter({
+              // keep default paragraph behavior (blank line => <p>)
+              simpleLineBreaks: false,
+              tables: true,
+              tasklists: true,
+              smartIndentationFix: true,
+              literalMidWordUnderscores: true
+            });
+
+            const htmlContent = converter.makeHtml(markdownText);
+            articleContentDiv.innerHTML = htmlContent;
+
+          }catch(err){
+            console.error(err);
+            articleContentDiv.innerHTML = `<p class="text-red-500 text-xl text-center">Ralat: Gagal memuatkan artikel penuh. Sila pastikan fail Markdown (${contentFileName}) wujud.</p>`;
+            document.getElementById('article-title').textContent = 'Kandungan Tidak Ditemui';
+            document.getElementById('page-title').textContent = 'Kandungan Tidak Ditemui | TanahMalaya';
           }
         }
 
-        // 3) Convert Markdown -> HTML
-        const converter = new showdown.Converter({
-          // keep default paragraph behavior (blank line => <p>)
-          simpleLineBreaks: false,
-          tables: true,
-          tasklists: true,
-          smartIndentationFix: true,
-          literalMidWordUnderscores: true
-        });
-
-        const htmlContent = converter.makeHtml(markdownText);
-        articleContentDiv.innerHTML = htmlContent;
-
-      }catch(err){
-        console.error(err);
-        articleContentDiv.innerHTML = `<p class="text-red-500 text-xl text-center">Ralat: Gagal memuatkan artikel penuh. Sila pastikan fail Markdown (${contentFileName}) wujud.</p>`;
-        document.getElementById('article-title').textContent = 'Content Not Found';
-        document.getElementById('page-title').textContent = 'Content Not Found | Tanahemas';
-      }
-    }
-
-    window.onload = loadAndRenderArticle;
+        window.onload = loadAndRenderArticle;
   </script>
 </body>
 </html>

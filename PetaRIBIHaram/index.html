@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ms"> <!-- Tukar bahasa ke 'ms' (Malay) -->
 <head>
   <meta charset="UTF-8" />
   <title>Tanah Malaya - Memelihara Tanah Negara</title>
@@ -85,6 +85,18 @@
     button:hover{ transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,0.07); }
     button:active{ transform: translateY(0); box-shadow: none; }
 
+    /* Container for buttons to allow them to flex */
+    .button-group {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .button-group button {
+      flex: 1; /* Allow buttons to grow and fill space */
+      margin-top: 0; /* Override default margin-top */
+    }
+
+
     #controls { position: static; width:100%; }
     
     /* New style for the guide button */
@@ -146,6 +158,46 @@
     /* Move Leaflet zoom to top-right */
     .leaflet-top.leaflet-left { display:none; }
 
+    /* --- NEW: Stats Panel Styles --- */
+    #statsPanel h4 {
+      text-align: center;
+      margin-bottom: 12px;
+      color: var(--brand); /* Match other panel titles */
+    }
+    .stat-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .stat-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f8fafc; /* Light background for card */
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      border-radius: 10px;
+    }
+    .stat-info {
+      display: flex;
+      flex-direction: column;
+    }
+    .stat-title {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+    .stat-number {
+      font-size: 22px;
+      font-weight: 700;
+      color: #333;
+    }
+    .stat-icon {
+      font-size: 24px;
+    }
+    /* --- End of Stats Panel Styles --- */
+
+
     @media (max-width: 640px){
       #uiStack{ left:50%; transform: translateX(-50%); width: min(92vw, 360px); }
       .legend{ left:50%; transform: translateX(-50%); }
@@ -184,12 +236,45 @@
     <!-- BOTTOM: Sheet-only controls (no list) -->
     <div id="userPanel" class="panel">
       <h4>🧑‍🤝‍🧑 Lokasi dari Pengguna</h4>
-      <div style="display:flex; gap:8px; margin-bottom:6px">
+      <!-- UPDATED: Button Group -->
+      <div class="button-group">
         <button id="userAddBtn" title="Tambah lokasi baharu">➕ Tambah</button>
         <button id="userRefreshBtn" title="Segarkan dari Sheet">🔄 Refresh</button>
+        <!-- NEW: Aduan Button -->
+        <button id="aduanBtn" title="Buat Aduan">🚨 Aduan</button>
       </div>
       <input id="userSearchInput" placeholder="🔍 Cari (nama/jenis/alamat) " />
     </div>
+
+    <!-- NEW: Stats Panel -->
+    <div id="statsPanel" class="panel">
+      <h4>📊 Statistik Lokasi</h4>
+      <div class="stat-grid">
+        
+        <div class="stat-card">
+          <div class="stat-info">
+            <!-- DITERJEMAH & ID DITAMBAH -->
+            <span class="stat-title">Jumlah Lokasi</span>
+            <span class="stat-number" id="stat-total">...</span>
+          </div>
+          <span class="stat-icon">🛕</span>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-info">
+            <!-- DITERJEMAH & ID DITAMBAH -->
+            <span class="stat-title">Lokasi Diluluskan</span>
+            <span class="stat-number" id="stat-approved">...</span> <!-- Diubah dari 0 -->
+          </div>
+          <span class="stat-icon">✅</span>
+        </div>
+        
+        <!-- DIKELUARKAN: Panel Menunggu Semakan -->
+
+      </div>
+    </div>
+    <!-- END: Stats Panel -->
+
   </div>
 
   <div id="map"></div>
@@ -218,9 +303,11 @@
         </select>
         <label>Alamat / Lokasi</label>
         <textarea id="address" rows="3" required></textarea>
-        <label>Latitude</label>
+        <!-- DITERJEMAH -->
+        <label>Latitud</label>
         <input type="number" step="any" id="lat" required>
-        <label>Longitude</label>
+        <!-- DITERJEMAH -->
+        <label>Longitud</label>
         <input type="number" step="any" id="lng" required>
 
         <!-- Image upload -->
@@ -555,7 +642,7 @@ async function sheetPostPlace(place, file) {
         return await res.json();
       } catch (err) {
         console.error(err);
-        alert("❌ Gagal memuatkan fail data statik: " + filename);
+        alert("❌ Gagal memuatkan fail data statik: " + filename); // DAHULU MELAYU
         return [];
       }
     }
@@ -759,14 +846,25 @@ async function sheetPostPlace(place, file) {
         if (e.target === instructionModal) { instructionModal.style.display = "none"; }
     };
 
+    // NEW: Aduan Button Link
+    const aduanBtn = document.getElementById("aduanBtn");
+    aduanBtn.onclick = () => {
+      // PENTING: Gantikan URL ini dengan pautan aduan anda yang sebenar
+      // Ini adalah pautan contoh sahaja
+      window.open('https://jpa.spab.gov.my/eApps/sdmscasepool/SdmsCasePool/add.do', '_blank'); 
+    };
+
     // Refresh → fetch from Sheet and render markers only
     userRefreshBtn.onclick = async () => {
       try {
         userRefreshBtn.disabled = true;
         sheetDataRaw = await sheetGetPlaces();
         renderSheetFiltered(userSearchInput.value);
+        // NEW: Update stat count
+        document.getElementById('stat-approved').textContent = sheetDataRaw.length;
       } catch(e) {
-        alert("Gagal refresh: " + e.message);
+        console.error("Gagal refresh:", e); // CHANGED: from alert() to console.error()
+        alert("Gagal muat semula. Sila semak konsol (F12) untuk butiran."); // DITERJEMAH
       } finally {
         userRefreshBtn.disabled = false;
       }
@@ -780,7 +878,7 @@ async function sheetPostPlace(place, file) {
     // Submit new place (with optional image)
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      message.textContent = "⏳ Menyimpan data...";
+      message.textContent = "⏳ Menyimpan data..."; // DAHULU MELAYU
 
       const newPlace = {
         name: document.getElementById("name").value.trim(),
@@ -794,7 +892,7 @@ async function sheetPostPlace(place, file) {
 
       try {
         await sheetPostPlace(newPlace, file);
-        message.textContent = "✅ Berjaya disimpan!";
+        message.textContent = "✅ Berjaya disimpan!"; // DAHULU MELAYU
         form.reset();
 
         // Update local cache; user will still need Refresh to reload from Sheet if desired
@@ -808,17 +906,87 @@ async function sheetPostPlace(place, file) {
           image: "" // Worker returns imageUrl but we rely on Refresh to sync authoritative data
         });
         renderSheetFiltered(userSearchInput.value);
+        
+        // NEW: Update stat count
+        document.getElementById('stat-approved').textContent = sheetDataRaw.length;
 
         setTimeout(() => { modal.style.display = "none"; message.textContent = ""; }, 700);
       } catch (err) {
         console.error(err);
-        message.textContent = "✅ Berjaya disimpan!";
+        message.textContent = "✅ Berjaya disimpan!"; // DAHULU MELAYU
       }
     });
+
+    // NEW: Function to calculate total placemarks from all JSON files
+    async function updateTotalPlacemarks() {
+        const statEl = document.getElementById('stat-total');
+        if (!statEl) return;
+        statEl.textContent = 'Memuat...'; // Loading...
+        let total = 0;
+        const filesToFetch = [];
+
+        // 1. Collect all unique file names from locationData
+        for (const negeri in locationData) {
+            locationData[negeri].forEach(daerah => {
+                if (daerah.file && !filesToFetch.includes(daerah.file)) {
+                    filesToFetch.push(daerah.file);
+                }
+            });
+        }
+
+        // 2. Create an array of fetch promises
+        const fetchPromises = filesToFetch.map(file => 
+            fetch(`${file}.json`)
+                .then(res => {
+                    if (!res.ok) {
+                        console.error(`Gagal memuat ${file}.json`);
+                        return []; // Return empty array on failure
+                    }
+                    return res.json();
+                })
+                .catch(err => {
+                    console.error(`Ralat fetch ${file}.json:`, err);
+                    return []; // Return empty array on error
+                })
+        );
+
+        try {
+            // 3. Wait for all files to be fetched and parsed
+            const allDataArrays = await Promise.all(fetchPromises);
+            
+            // 4. Sum the lengths of all arrays
+            total = allDataArrays.reduce((sum, currentArray) => {
+                return sum + (Array.isArray(currentArray) ? currentArray.length : 0);
+            }, 0);
+
+            statEl.textContent = total;
+        } catch (err) {
+            console.error("Gagal mengira jumlah placemarks:", err);
+            statEl.textContent = 'Ralat';
+        }
+    }
+
+    // NEW: Function to load sheet data on initial load
+    async function loadInitialSheetData() {
+        const statEl = document.getElementById('stat-approved');
+        try {
+            statEl.textContent = 'Memuat...'; // Loading...
+            sheetDataRaw = await sheetGetPlaces();
+            renderSheetFiltered(userSearchInput.value);
+            statEl.textContent = sheetDataRaw.length;
+        } catch(e) {
+            console.error("Gagal memuat data sheet permulaan:", e);
+            statEl.textContent = 'Ralat';
+            alert("Gagal memuat data Google Sheet. Sila cuba muat semula (Refresh).");
+        }
+    }
+
 
     // Bootstrap — DO NOT load Sheet on start (only JSON)
     (async function bootstrapAllData() {
       try {
+        updateTotalPlacemarks(); // NEW: Start calculating total from JSONs
+        loadInitialSheetData(); // NEW: Start loading sheet data
         populateNegeri(); // Initialize Negeri dropdown
 
         // Initial load check (should be empty until Negeri/Daerah is selected)
@@ -830,15 +998,16 @@ async function sheetPostPlace(place, file) {
         populateMukimFromStatic();
         renderStatic(mukimSelect.value, searchInput.value);
 
-        console.log("✅ Ready (Sheet not loaded until Refresh)");
+        console.log("✅ Bersedia (Data Sheet juga sedang dimuatkan)"); // DITERJEMAH & DIKEMASKINI
       } catch (e) {
-        console.error("❌ Gagal memuat data:", e.message);
+        console.error("❌ Gagal memuat data:", e.message); // DAHULU MELAYU
       }
     })();
   </script>
 
   <footer id="appFooter">
-    <span><strong>Tanah Malaya</strong> v1.0.7 (diubah suai)</span>
+    <span><strong>Tanah Malaya</strong> v1.0.81</span>
   </footer>
 </body>
 </html>
+
