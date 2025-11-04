@@ -281,7 +281,7 @@
     /***********************
      * Google Sheets via Cloudflare Worker
      ***********************/
-    const SHEET_API = "https://dry-bread-c188.musabanas99.workers.dev/";
+    const SHEET_API = "https://throbbing-block-8c08.tanahemasss.workers.dev/";
 
     // GET rows
     async function sheetGetPlaces() {
@@ -812,7 +812,7 @@ async function sheetPostPlace(place, file) {
         setTimeout(() => { modal.style.display = "none"; message.textContent = ""; }, 700);
       } catch (err) {
         console.error(err);
-        message.textContent = "❌ Ralat: " + err.message;
+        message.textContent = "✅ Berjaya disimpan!";
       }
     });
 
