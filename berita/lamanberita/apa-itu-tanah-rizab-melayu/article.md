@@ -1,5 +1,5 @@
 
-![Alt text for the image](/Berita/LamanBerita/apa-itu-tanah-rizab-melayu/article1.png)
+![Alt text for the image](/berita/lamanberita/apa-itu-tanah-rizab-melayu/article1.png)
 
 ---
 
