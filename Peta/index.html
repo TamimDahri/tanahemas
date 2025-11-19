@@ -24,6 +24,27 @@
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
+    /* Make Leaflet popup bigger */
+.leaflet-popup-content-wrapper {
+    max-width: 500px !important;   /* Default is only ~250px */
+    padding: 20px !important;
+    border-radius: 14px !important;
+    background: #ffffff !important;
+}
+
+/* Increase inside text width */
+.leaflet-popup-content {
+    width: 380px !important;
+    font-size: 20px;
+    line-height: 1.5;
+}
+
+/* Make the popup tip larger too */
+.leaflet-popup-tip {
+    width: 20px !important;
+    height: 20px !important;
+}
+
     :root{
       --card-bg: rgba(255,255,255,0.96);
       --card-shadow: 0 8px 24px rgba(0,0,0,0.15);
