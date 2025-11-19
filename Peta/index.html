@@ -1043,57 +1043,52 @@ negeriSelect.addEventListener("change", () => {
       debounce(() => renderSheetFiltered(userSearchInput.value, true), 220) 
     );
 
-    // Submit new place (with optional image)
     form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      message.textContent = "⏳ Menyimpan data..."; // DAHULU MELAYU
+  e.preventDefault();
+  message.textContent = "⏳ Menyimpan data...";
 
-      const newPlace = {
-        name: document.getElementById("name").value.trim(),
-        type: document.getElementById("type").value,
-        address: document.getElementById("address").value.trim(),
-        lat: parseFloat(document.getElementById("lat").value),
-        lng: parseFloat(document.getElementById("lng").value)
-      };
-      const fileInput = document.getElementById("image");
-      const file = fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
+  const main = document.getElementById("mainType").value.trim();
+  const sub = document.getElementById("subType").value.trim();
 
-    try {
+  const newPlace = {
+    name: document.getElementById("name").value.trim(),
+    type: `${main} - ${sub}`, // ★ FIXED ★
+    address: document.getElementById("address").value.trim(),
+    lat: parseFloat(document.getElementById("lat").value),
+    lng: parseFloat(document.getElementById("lng").value)
+  };
+
+  const fileInput = document.getElementById("image");
+  const file = fileInput.files?.[0] || null;
+
+  try {
     await sheetPostPlace(newPlace, file);
     message.textContent = "✅ Berjaya disimpan!";
 
-    // RESET ALL FORM FIELDS
     form.reset();
     subType.innerHTML = '<option value="">-- Pilih Jenis Terperinci --</option>';
     mainType.value = "";
-    document.getElementById("image").value = "";
 
-    // Update local cache
     sheetDataRaw.push({
       timestamp: new Date().toISOString(),
-      name: newPlace.name,
-      type: newPlace.type,
-      address: newPlace.address,
-      lat: newPlace.lat,
-      lng: newPlace.lng,
+      ...newPlace,
       image: ""
     });
 
     renderSheetFiltered(userSearchInput.value, true);
-
     document.getElementById('stat-approved').textContent = sheetDataRaw.length;
 
-    // CLOSE MODAL
-    setTimeout(() => { 
-        modal.style.display = "none"; 
-        message.textContent = ""; 
-    }, 700);
+    setTimeout(() => {
+      modal.style.display = "none";
+      message.textContent = "";
+    }, 800);
 
-} catch (err) {
+  } catch (err) {
     console.error(err);
     message.textContent = "❌ Gagal menyimpan!";
-}
-    });
+  }
+});
+
 
     // NEW: Function to calculate total placemarks from all JSON files
     async function updateTotalPlacemarks() {
