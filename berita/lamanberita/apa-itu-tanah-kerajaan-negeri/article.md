@@ -1,4 +1,4 @@
-![Alt text for the image](/Berita/LamanBerita/images/article2.png)
+![Alt text for the image](/Berita/LamanBerita/apa-itu-tanah-kerajaan-negeri/article2.png)
 
 ---
 

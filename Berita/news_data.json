@@ -7,7 +7,7 @@
     "description": "tanah-tanah kepunyaan Melayu akan berkekalan dikuasai oleh orang Melayu sepanjang zaman",
     "date": "November 4, 2025", 
     "isFeatured": true,
-    "image": "LamanBerita/images/article1.png",
+    "image": "LamanBerita/apa-itu-tanah-rizab-melayu/article1.png",
     "imagePlaceholder": "image.png", 
     "imageColor": "182B49/D4A762",
     "contentSource": "article1.md"
@@ -20,7 +20,7 @@
     "category": "Ilmu Tanah", 
     "description": "",
     "date": "November 4, 2025", 
-    "image": "LamanBerita/images/article2.png",
+    "image": "LamanBerita/apa-itu-tanah-kerajaan-negeri/article2.png",
     "imagePlaceholder": "image.png", 
     "imageColor": "182B49/D4A762",
     "contentSource": "article2.md"
@@ -33,7 +33,7 @@
     "category": "Ilmu Tanah", 
     "description": "",
     "date": "November 4, 2025", 
-    "image": "LamanBerita/images/article3.png",
+    "image": "LamanBerita/dari-stateland-ke-tanah-warta/article3.png",
     "imagePlaceholder": "image.png", 
     "imageColor": "182B49/D4A762",
     "contentSource": "article3.md"
@@ -46,7 +46,7 @@
     "category": "Ilmu Tanah", 
     "description": "",
     "date": "November 4, 2025", 
-    "image": "LamanBerita/images/article4.png",
+    "image": "LamanBerita/apa-itu-lot-lidi/article4.png",
     "imagePlaceholder": "image.png", 
     "imageColor": "182B49/D4A762",
     "contentSource": "article4.md"
@@ -54,12 +54,12 @@
 
   {
     "id": 5,
-    "slug": "Tindakan Tegas Terhadap Pencerobohan Tanah: Hentikan Amalan Memberi Pampasan",
-    "title": "Tindakan Tegas Terhadap Pencerobohan Tanah: Hentikan Amalan Memberi Pampasan", 
+    "slug": "Kerajaan-Perlu-Tegas-Dalam-Isu-Pencerobohan-Tanah",
+    "title": "Kerajaan Perlu Tegas Dalam Isu Pencerobohan Tanah ", 
     "category": "Isu Tanah", 
     "description": "",
     "date": "November 10, 2025", 
-    "image": "LamanBerita/images/article5.png",
+    "image": "LamanBerita/Kerajaan-Perlu-Tegas-Dalam-Isu-Pencerobohan-Tanah/article5.png",
     "imagePlaceholder": "image.png", 
     "imageColor": "182B49/D4A762",
     "contentSource": "article5.md"
