@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta name="google-adsense-account" content="ca-pub-5369415294282840">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
+
+  <!-- Open Graph / WhatsApp -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://tanahmalaya.com/">
+  <meta property="og:title" content="Tanah Malaya">
+  <meta property="og:description" content="Memelihara Tanah Negara">
+  <meta property="og:image" content="https://tanahmalaya.com/te.png">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://tanahmalaya.com/">
+  <meta property="twitter:title" content="Tanah Malaya">
+  <meta property="twitter:description" content="Memelihara Tanah Negara">
+  <meta property="twitter:image" content="https://tanahmalaya.com/te.png">
+
+  <!-- Favicon: Selesai, menggunakan te.png -->
+  <link rel="icon" type="image/png" href="te.png">
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tanah Malaya - Memelihara Tanah Negara</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Load Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+
+    <style>
+        /* Custom Font Import (Inter is default, but a fallback is good) */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-color);
+        }
+
+        /* Define custom CSS variables for easy theme changes (Emas & Tanah) */
+        :root {
+            --primary-color: #4A4339; /* Deep Earth Brown/Mocha */
+            --accent-color: #D4AF37; /* Rich Gold/Emas */
+            --text-color: #2D3748; 
+            --light-bg: #FDF9F5; /* Creamy off-white */
+        }
+        
+        /* Smooth scrolling for anchor links */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Styling for the custom modal dialog */
+        dialog {
+            border: none;
+            padding: 0;
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+            max-width: 90%;
+            width: 400px;
+        }
+
+        dialog::backdrop {
+            background-color: rgba(0, 0, 0, 0.6);
+        }
+        
+        /* --- START: Styling for the new Image Lightbox Modal --- */
+        #image-modal {
+            background-color: transparent;
+            border: none;
+            padding: 0;
+            max-width: 90vw;
+            max-height: 90vh;
+            width: auto;
+            height: auto;
+            overflow: visible; /* Allow button to be outside */
+            box-shadow: none; /* Remove default shadow */
+        }
+
+        #image-modal::backdrop {
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px); /* Add a blur effect to the background */
+        }
+        
+        #image-modal .image-modal-container {
+            /* This container holds the image and the close button */
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #modal-image-content {
+            max-width: 90vw;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        /* --- END: Styling for the new Image Lightbox Modal --- */
+
+        
+        /* --- CUSTOM ANIMATIONS & SCROLL-SNAP FOR GALLERY --- */
+        
+        /* Keyframes for the Subtle Gold Pulse on the main button */
+        @keyframes gold-pulse {
+            0% { box-shadow: 0 0 0 0px var(--accent-color); }
+            70% { box-shadow: 0 0 0 10px rgba(212, 175, 55, 0); }
+            100% { box-shadow: 0 0 0 0px rgba(212, 175, 55, 0); }
+        }
+        
+        .btn-gold-pulse {
+            animation: gold-pulse 2.5s infinite;
+        }
+
+        /* Initial state for scroll-triggered elements (Hidden, slightly moved down) */
+        .scroll-fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+
+        /* Final state when element is visible */
+        .scroll-fade-in.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Gallery Slider Specific Styles */
+        .slider-container {
+            overflow-x: scroll; /* Enable horizontal scrolling */
+            scroll-snap-type: x mandatory; /* Force snapping to slide boundaries */
+            -webkit-overflow-scrolling: touch; /* For smooth scrolling on iOS */
+            scrollbar-width: none; /* Hide scrollbar for Firefox */
+        }
+
+        /* Hide scrollbar for Webkit browsers (Chrome, Safari) */
+        .slider-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .slider-page {
+            flex: 0 0 100%; /* Each page takes up 100% of the container width */
+            scroll-snap-align: start; /* Align snap to the start of the page */
+            padding: 1rem; /* Add some padding around the grid */
+        }
+        
+        /* Adjusting grid column size for mobile and desktop */
+        .gallery-grid {
+            display: grid;
+            gap: 1rem;
+            /* 3 items in one row on desktop, 1 item per row on mobile */
+            grid-template-columns: repeat(3, 1fr); 
+            height: 100%; /* Ensure the row takes up the full slider-page height */
+        }
+
+        /* Adjusting layout for smaller screens */
+        @media (max-width: 768px) {
+            .gallery-grid {
+                grid-template-columns: repeat(1, 1fr); /* 1 item per row on smaller screens */
+            }
+        }
+        
+        /* Removed fixed aspect-ratio from .galeri-item-wrapper to allow image object-fit */
+        /* Images inside will fill the cell (h-full w-full) and use object-cover for mixed ratios */
+
+    </style>
+</head>
+<body class="antialiased" style="color: var(--text-color);">
+    
+    <!-- Custom Modal Dialog (Hidden by default) -->
+    <dialog id="action-modal">
+        <div class="p-6 text-center bg-white rounded-xl">
+            <div class="flex justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle-2" style="color: var(--accent-color);">
+                    <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Z"></path><path d="m9 12 2 2 4-4"></path>
+                </svg>
+            </div>
+            <h3 class="text-xl font-bold mb-3" style="color: var(--primary-color);">Tindakan Berjaya!</h3>
+            <p class="text-gray-600 mb-6" id="modal-message">Anda telah berjaya memulakan penerokaan.</p>
+            <button onclick="document.getElementById('action-modal').close()" class="w-full px-4 py-2 text-white font-semibold rounded-lg transition duration-200 hover:opacity-90" style="background-color: var(--primary-color);">Tutup</button>
+        </div>
+    </dialog>
+
+    <!-- START: Image Lightbox Modal (Hidden by default) -->
+    <dialog id="image-modal">
+        <div class="image-modal-container">
+            <img id="modal-image-content" src="" alt="Gambar Galeri" />
+            <!-- Close button for the image modal -->
+            <button onclick="closeImageModal()" class="absolute -top-3 -right-3 md:top-1 md:right-1 w-10 h-10 rounded-full bg-white/70 hover:bg-white transition shadow-lg flex items-center justify-center z-50" aria-label="Tutup Paparan Imej">
+                <i data-lucide="x" size="24" style="color: var(--primary-color);"></i>
+            </button>
+        </div>
+    </dialog>
+    <!-- END: Image Lightbox Modal -->
+
+
+    <!-- Header & Navigation -->
+    <header class="fixed top-0 left-0 w-full bg-white shadow-lg z-20">
+        <!-- Added a fade-in animation to the header for a smooth load effect -->
+        <div class="container mx-auto px-4 lg:px-8 py-3 flex justify-between items-center animate-[fade-in_0.5s_ease-out_forwards]">
+            <!-- Logo & Name (Ikon digantikan dengan te.png) -->
+            <div class="flex items-center space-x-2">
+                <!-- Icon now uses te.png for consistency with favicon -->
+                <img src="te.png" alt="Tanah Malaya Logo" class="h-6 w-6" />
+                <h1 class="text-xl font-extrabold tracking-tight" style="color: var(--primary-color);">Tanah Malaya</h1>
+            </div>
+
+            <!-- Main Navigation Links (Desktop) -->
+            <nav class="hidden md:flex space-x-4 md:space-x-8 text-gray-700 font-medium text-sm md:text-base">
+                <a href="#home" class="hover:text-gray-900 transition duration-150 p-2 rounded-lg hover:bg-gray-50">Utama</a>
+                <a href="#mengenai" class="hover:text-gray-900 transition duration-150 p-2 rounded-lg hover:bg-gray-50">Mengenai</a>
+                <a href="#galeri" class="hover:text-gray-900 transition duration-150 p-2 rounded-lg hover:bg-gray-50">Galeri</a>
+                <a href="#ciri" class="hover:text-gray-900 transition duration-150 p-2 rounded-lg hover:bg-gray-50">Ciri-Ciri</a>
+                <a href="#hubungi" class="hover:text-gray-900 transition duration-150 p-2 rounded-lg hover:bg-gray-50">Sokongan</a>
+            </nav>
+
+            <!-- Mobile Menu Button -->
+            <button id="menu-toggle" class="md:hidden p-2 rounded-lg hover:bg-gray-100 transition" aria-label="Toggle Navigation">
+                <!-- Hamburger Icon -->
+                <svg id="menu-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                <!-- Close Icon (Hidden by default) -->
+                <svg id="close-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+
+        <!-- Mobile Menu Overlay (Hidden by default) -->
+        <div id="mobile-menu" class="hidden md:hidden absolute top-full left-0 w-full bg-white shadow-xl border-t border-gray-200 py-4 z-10">
+            <nav class="flex flex-col items-start px-4 space-y-2 text-gray-700 font-medium">
+                <!-- Added onclick to close the menu when a link is clicked -->
+                <a href="#home" onclick="closeMobileMenu()" class="w-full hover:bg-gray-100 p-2 rounded-lg transition duration-150">Utama</a>
+                <a href="#mengenai" onclick="closeMobileMenu()" class="w-full hover:bg-gray-100 p-2 rounded-lg transition duration-150">Mengenai</a>
+                <a href="#galeri" onclick="closeMobileMenu()" class="w-full hover:bg-gray-100 p-2 rounded-lg transition duration-150">Galeri</a>
+                <a href="#ciri" onclick="closeMobileMenu()" class="w-full hover:bg-gray-100 p-2 rounded-lg transition duration-150">Ciri-Ciri</a>
+                <a href="#hubungi" onclick="closeMobileMenu()" class="w-full hover:bg-gray-100 p-2 rounded-lg transition duration-150">Sokongan</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section id="home" class="pt-32 pb-20 md:pt-40 md:pb-28" style="background-color: var(--light-bg);">
+            <div class="container mx-auto px-4 lg:px-8 text-center max-w-5xl">
+                <!-- Apply simple fade-in to text elements -->
+                <h2 class="text-5xl md:text-7xl font-extrabold leading-tight tracking-tighter mb-4 animate-in fade-in slide-in-from-top-4 duration-700" style="color: var(--primary-color);">
+                    Pangkalan Data Tanah & Rizab
+                </h2>
+                <p class="text-xl md:text-2xl text-gray-600 mb-10 animate-in fade-in slide-in-from-top-4 duration-700 delay-200" style="animation-fill-mode: both;">
+                   Menghimpunkan maklumat sahih tentang rizab, sempadan, dan status tanah di seluruh negara bagi mempertahan, memelihara, dan memartabatkan warisan tanah bangsa.
+                </p>
+                <!-- Added btn-gold-pulse class for the subtle animation -->
+                <div class="flex justify-center animate-in fade-in duration-700 delay-500" style="animation-fill-mode: both;">
+                    <a href="/Peta" target="_blank" rel="noopener noreferrer" class="px-8 py-3 text-lg font-bold text-gray-900 rounded-full transform transition duration-300 hover:scale-[1.05] active:scale-[0.98] focus:outline-none focus:ring-4 focus:ring-offset-2 btn-gold-pulse" 
+                            style="background-color: var(--accent-color); box-shadow: 0 0 0 0px #D4AF37cc;">
+                        Terokai Sekarang
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <!-- Added scroll-fade-in class to section content -->
+        <section id="mengenai" class="py-20 bg-white">
+            <div class="container mx-auto px-4 lg:px-8 max-w-6xl">
+                <h3 class="text-4xl font-extrabold mb-12 text-center scroll-fade-in" style="color: var(--primary-color);">
+                    Mengenai Tanah Malaya
+                </h3>
+                <div class="flex flex-col-reverse md:flex-row items-center md:space-x-16 scroll-fade-in">
+                    <div class="md:w-1/2">
+                        <!-- Image for visual asset: te.Png with fallback -->
+                        <img src="map.jpg" alt="Peta tanah interaktif Tanah Malaya" 
+                             class="w-full h-full object-cover rounded-xl shadow-lg border-4 mt-8 md:mt-0" 
+                             style="border-color: var(--accent-color);"
+                             onerror="this.onerror=null; this.src='https://placehold.co/640x640/4A4339/D4AF37?text=Gambar+te.Png+Tidak+Dijumpai';"
+                        >
+                    </div>
+                    <div class="md:w-1/2">
+                        <p class="text-lg leading-relaxed mb-4">
+                            tanahmalaya.com ialah platform digital yang menggabungkan data tanah, peta interaktif, dan analisis spatial untuk memudahkan masyarakat menilai status serta potensi sesuatu kawasan. Melalui integrasi maklumat rasmi daripada pelbagai agensi, tanahmalaya menyokong usaha meningkatkan ketelusan, kesedaran, dan tindakan berasaskan fakta dalam pengurusan serta penguatkuasaan tanah di Malaysia.
+                        </p>
+                        <p class="text-lg leading-relaxed font-semibold" style="color: var(--primary-color);">
+                            Misi kami ialah mengembalikan nilai dan maruah tanah bangsa, dengan menjadikan ilmu tanah, zonifikasi, dan perancangan pembangunan lebih telus, mudah difahami, dan boleh diakses oleh semua.
+                        </p>
+                        <!-- START: New "Berita Lanjut" button - UPDATED HREF -->
+                        <div class="mt-8">
+                            <a href="Berita" target="_blank"  class="inline-flex items-center space-x-2 px-6 py-3 text-base font-semibold text-white rounded-full shadow-lg transform transition duration-300 hover:scale-[1.03] active:scale-[0.98] focus:outline-none focus:ring-4 focus:ring-offset-2" 
+                                style="background-color: var(--primary-color); box-shadow: 0 4px 15px -4px #4A4339AA;">
+                                <i data-lucide="newspaper" size="20"></i>
+                                <span>Baca Artikel</span>
+                            </a>
+                        </div>
+                        <!-- END: New "Berita Lanjut" button -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- START: GALLERY SECTION (Updated to 1x3 Grid Slider with mixed image ratios) -->
+        <section id="galeri" class="py-20" style="background-color: var(--light-bg);">
+            <div class="container mx-auto px-0 lg:px-8">
+                <h3 class="text-4xl font-extrabold mb-12 text-center scroll-fade-in px-4 lg:px-0" style="color: var(--primary-color);">
+                    Galeri
+                </h3>
+
+                <!-- Slider Container -->
+                <!-- The height of the slider container defines the height of the row -->
+                <div class="relative max-w-7xl mx-auto">
+                    <div id="gallery-slider" class="flex slider-container snap-x snap-mandatory h-[300px] md:h-[400px]">
+                        
+                        <!-- Dynamic slides will be inserted here by JavaScript -->
+                        
+                    </div>
+                    
+                    <!-- Navigation Buttons (for desktop/non-touch users) -->
+                    <div class="absolute inset-y-0 left-0 flex items-center p-2">
+                        <button id="prev-slide" class="p-3 rounded-full bg-white/70 hover:bg-white transition shadow-lg opacity-70 hover:opacity-100 disabled:opacity-30 disabled:cursor-not-allowed" aria-label="Previous Slide">
+                            <i data-lucide="chevron-left" size="28" style="color: var(--primary-color);"></i>
+                        </button>
+                    </div>
+                    <div class="absolute inset-y-0 right-0 flex items-center p-2">
+                        <button id="next-slide" class="p-3 rounded-full bg-white/70 hover:bg-white transition shadow-lg opacity-70 hover:opacity-100 disabled:opacity-30 disabled:cursor-not-allowed" aria-label="Next Slide">
+                            <i data-lucide="chevron-right" size="28" style="color: var(--primary-color);"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Pagination Dots -->
+                    <div id="slider-dots" class="flex justify-center mt-6 space-x-2">
+                        <!-- Dots will be generated here by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- END: GALLERY SECTION -->
+
+
+        <!-- Features Grid Section -->
+        <section id="ciri" class="py-20 bg-white">
+            <div class="container mx-auto px-4 lg:px-8">
+                <h3 class="text-4xl font-extrabold mb-12 text-center scroll-fade-in" style="color: var(--primary-color);">
+                    Ciri-Ciri Utama
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto">
+                    
+                    <!-- Feature 1 - Added scroll-fade-in and refined hover effect -->
+                    <div class="bg-white p-8 rounded-2xl shadow-xl border-t-8 transition duration-500 hover:shadow-2xl hover:scale-[1.03] scroll-fade-in" style="border-top-color: var(--accent-color);">
+                        <i data-lucide="search" size="40" class="mb-5" style="color: var(--accent-color);"></i>
+                        <h4 class="text-2xl font-extrabold mb-3" style="color: var(--primary-color);">Carian Pantas & Tepat</h4>
+                        <p class="leading-relaxed text-base">
+                            Cari lokasi rumah ibadat yang dibina atas tanah tidak sah atau bukan hak milik yang sah. 
+                            Gunakan peta interaktif kami untuk mengenal pasti kawasan terlibat dan memahami konteks sebenar status tanah di sesuatu lokasi.
+                        </p>
+                    </div>
+
+                    <!-- Feature 2 - Added scroll-fade-in and refined hover effect with delay -->
+                    <div class="bg-white p-8 rounded-2xl shadow-xl border-t-8 transition duration-500 hover:shadow-2xl hover:scale-[1.03] scroll-fade-in" style="border-top-color: var(--accent-color); transition-delay: 0.1s;">
+                        <i data-lucide="map" size="40" class="mb-5" style="color: var(--accent-color);"></i>
+                        <h4 class="text-2xl font-extrabold mb-3" style="color: var(--primary-color);">Peta Interaktif Nasional</h4>
+                        <p class="leading-relaxed text-base">
+                            Teroka peta interaktif yang memaparkan maklumat rumah ibadat, sempadan lot, rizab, dan pelan guna tanah di seluruh negara. 
+                            Setiap titik dan poligon membantu pengguna menilai kesahihan serta sejarah pemilikan sesuatu kawasan.
+                        </p>
+                    </div>
+
+                    <!-- Feature 3 - Added scroll-fade-in and refined hover effect with delay -->
+                    <div class="bg-white p-8 rounded-2xl shadow-xl border-t-8 transition duration-500 hover:shadow-2xl hover:scale-[1.03] scroll-fade-in" style="border-top-color: var(--accent-color); transition-delay: 0.2s;">
+                        <i data-lucide="check-circle" size="40" class="mb-5" style="color: var(--accent-color);"></i>
+                        <h4 class="text-2xl font-extrabold mb-3" style="color: var(--primary-color);">Data Sahih & Terkini</h4>
+                        <p class="leading-relaxed text-base">
+                            Data tanahmalaya disahkan melalui rujukan silang dengan sumber rasmi seperti JUPEM, JKPTG dan KPKT. 
+                            Kami memastikan setiap maklumat berasaskan bukti sebenar bagi menyokong ketelusan dan tindakan penguatkuasaan.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+
+<!-- Sokong Section -->
+<section id="sokong" class="py-14" 
+         style="background:#fffdf6; text-align:center;">
+    <div class="container mx-auto px-4 max-w-4xl">
+
+        <h3 class="text-4xl md:text-5xl font-extrabold mb-4" 
+            style="color:#8a6d2f;">
+            Sokong Misi Data Tanah Kami.
+        </h3>
+
+        <p class="text-lg text-gray-700 mb-8">
+            Tanah Malaya dibina oleh komuniti untuk komuniti. Sumbangan anda membantu mengekalkan ketepatan data dan memastikan akses percuma untuk semua.
+        </p>
+
+        <!-- Donation -->
+        <a href="https://www.buymeacoffee.com/tanahmalaya" 
+           target="_blank" rel="noopener noreferrer"
+           class="inline-block transform transition duration-300 scale-[1.15] hover:scale-[1.2]">
+            <img src="buymecoffee.png" class="h-12 w-auto">
+        </a>
+
+    </div>
+</section>
+
+<!-- Hubungi Section (closer + different gold tone) -->
+<section id="hubungi" class="py-12" 
+         style="background:#fffaf0; text-align:center;">
+    <div class="container mx-auto px-4 max-w-4xl">
+
+        <h3 class="text-4xl md:text-5xl font-extrabold mb-3" 
+            style="color:#a8832b;">
+            Hubungi Kami
+        </h3>
+
+        <p class="text-lg text-gray-700 mb-7">
+            Sebarang pertanyaan atau permintaan sokongan boleh dihantar ke emel sokongan kami.
+        </p>
+
+        <!-- Email Button -->
+        <a href="mailto:tanahemassss@gmail.com"
+           style="
+                display:inline-block;
+                padding:12px 28px;
+                border-radius:10px;
+                background:#a8832b;
+                color:white;
+                font-weight:600;
+                font-size:1.1rem;
+                box-shadow:0 4px 12px rgba(166, 125, 44, 0.35);
+                transition:0.25s;
+           "
+           onmouseover="this.style.transform='scale(1.05)'"
+           onmouseout="this.style.transform='scale(1)'">
+           📩 tanahemasss@gmail.com
+        </a>
+
+    </div>
+</section>
+
+
+    </main>
+
+
+<footer class="text-white py-8" style="background-color: var(--primary-color);">
+  <div class="container mx-auto px-4 lg:px-8 flex flex-col md:flex-row items-center justify-between space-y-6 md:space-y-0">
+
+    <!-- Left: Copyright -->
+    <p class="text-sm text-gray-300 text-center md:text-left md:w-1/3">
+      &copy; <span id="current-year"></span> Tanah Malaya.<br>
+      Dibangunkan kerana Allah Taala untuk manfaat agama, bangsa dan negara.
+    </p>
+
+    <!-- Center: Institutional Icons -->
+    <div class="flex justify-center space-x-6 md:w-1/3">
+      <a href="https://etanah.selangor.gov.my/etanah-awam/AwamLoginForm.xhtml" target="_blank" rel="noopener noreferrer">
+        <img src="images/etanah.png" alt="eTanah" class="w-10 h-10 hover:scale-110 transition-transform duration-300 rounded-lg">
+      </a>
+      <a href="https://jupem2u.kul.jupem.gov.my/mylot/negeri.html" target="_blank" rel="noopener noreferrer">
+        <img src="images/mylot.png" alt="MyLot" class="w-10 h-10 hover:scale-110 transition-transform duration-300 rounded-lg">
+      </a>
+      <a href="https://iplan.planmalaysia.gov.my/" target="_blank" rel="noopener noreferrer">
+        <img src="images/iplan.png" alt="iPlan" class="w-10 h-10 hover:scale-110 transition-transform duration-300 rounded-lg">
+      </a>
+      <a href="https://www.lawnet.com.my/" target="_blank" rel="noopener noreferrer" onerror="this.onerror=null; this.src='https://placehold.co/40x40/4A4339/D4AF37?text=LawNet';" >
+        <img src="images/lawnet.png" alt="LawNet" class="w-10 h-10 hover:scale-110 transition-transform duration-300 rounded-lg">
+      </a>
+    </div>
+
+    <!-- Right: Social Media (Font Awesome brand icons) -->
+    <div class="flex justify-center md:justify-end space-x-6 md:w-1/3">
+      <a href="https://www.facebook.com/groups/692816973071066" target="_blank" rel="noopener noreferrer" class="transition-transform duration-300 hover:scale-110">
+        <i class="fa-brands fa-facebook-f text-gray-200 hover:text-[#1877F2] text-2xl"></i>
+      </a>
+      <a href="https://www.tiktok.com/@tanahmalaya" target="_blank" rel="noopener noreferrer" class="transition-transform duration-300 hover:scale-110">
+        <i class="fa-brands fa-tiktok text-gray-200 hover:text-white text-2xl"></i>
+      </a>
+      <a href="https://www.youtube.com/@tanahmalaya" target="_blank" rel="noopener noreferrer" class="transition-transform duration-300 hover:scale-110">
+        <i class="fa-brands fa-youtube text-gray-200 hover:text-[#FF0000] text-2xl"></i>
+      </a>
+      <a href="https://www.threads.net/@tanahmalaya" target="_blank" rel="noopener noreferrer" class="transition-transform duration-300 hover:scale-110">
+        <i class="fa-brands fa-threads text-gray-200 hover:text-white text-2xl"></i>
+      </a>
+    </div>
+
+  </div>
+</footer>
+
+
+<script>
+    // --- FUNGSI BARU UNTUK GALERI ---
+    // Function to generate the gallery content dynamically
+    function generateGalleryContent() {
+        const slider = document.getElementById('gallery-slider');
+        const dotsContainer = document.getElementById('slider-dots');
+        
+        // --- PERUBAHAN DI SINI ---
+        
+        // 1. Definisikan senarai gambar dan tajuk anda di sini.
+        //    Pastikan nama fail adalah sama dengan apa yang ada dalam folder 'gambar/'.
+        const galleryItems = [
+            { filename: 'gambar1.jpg', title: 'Galeri 1' },
+            { filename: 'gambar2.jpg', title: 'Galeri 2' },
+            { filename: 'gambar3.jpg', title: 'Galeri 3' },
+            { filename: 'gambar4.jpg', title: 'Galeri 4' },
+            { filename: 'gambar5.jpg', title: 'Galeri 5' },
+            { filename: 'gambar6.jpg', title: 'Galeri 6' },
+            { filename: 'gambar7.jpg', title: 'Galeri 7' },
+            { filename: 'gambar8.jpg', title: 'Galeri 8' },
+            { filename: 'gambar9.jpg', title: 'Galeri 9' },
+            { filename: 'gambar10.jpg', title: 'Galeri 10' },
+            { filename: 'gambar11.jpg', title: 'Galeri 11' },
+            { filename: 'gambar12.jpg', title: 'Galeri 12' },
+            { filename: 'gambar13.jpg', title: 'Galeri 13' },
+            { filename: 'gambar14.jpg', title: 'Galeri 14' },
+            { filename: 'gambar15.jpg', title: 'Galeri 15' },
+            { filename: 'gambar16.jpg', title: 'Galeri 16' },
+            { filename: 'gambar17.jpg', title: 'Galeri 17' },
+            { filename: 'gambar18.jpg', title: 'Galeri 18' },
+            { filename: 'gambar19.jpg', title: 'Galeri 19' },
+            { filename: 'gambar20.jpg', title: 'Galeri 20' },
+            { filename: 'gambar21.jpg', title: 'Galeri 21' },
+            { filename: 'gambar22.jpg', title: 'Galeri 22' },
+            { filename: 'gambar23.jpg', title: 'Galeri 23' },
+            { filename: 'gambar24.jpg', title: 'Galeri 24' },
+            // Anda boleh tambah atau buang item di sini.
+            // Contoh: { filename: 'nama-fail-baru.jpg', title: 'Tajuk Baru' }
+        ];
+        
+        // 2. Pembolehubah ini sekarang berdasarkan senarai 'galleryItems' anda
+        const itemsPerSlide = 3; 
+        const totalItems = galleryItems.length; 
+        
+        // --- TAMAT PERUBAHAN ---
+
+        let slideCount = 0;
+        let html = '';
+        dotsContainer.innerHTML = ''; // Clear existing dots
+
+        for (let i = 0; i < totalItems; i += itemsPerSlide) {
+            slideCount++;
+            let slideContent = '';
+            
+            // Start of a new slide container
+            slideContent += `<div class="slider-page flex-shrink-0 w-full" data-page="${slideCount}">`;
+            
+            // Added h-full here so the grid uses the full height of the slider container
+            slideContent += `<div class="gallery-grid h-full">`; 
+            
+            for (let j = 0; j < itemsPerSlide; j++) {
+                const itemIndex = i + j;
+                if (itemIndex < totalItems) {
+                    
+                    // --- PERUBAHAN DI SINI ---
+                    
+                    // 3. Ambil maklumat dari 'galleryItems'
+                    const item = galleryItems[itemIndex];
+                    // Handle missing title gracefully
+                    const title = item.title || 'Gambar Galeri'; 
+                    
+                    // 4. Bina URL menggunakan folder 'gambar/' dan nama fail yang anda tetapkan
+                    const url = `gambar/${item.filename}`; 
+                    
+                    // --- TAMAT PERUBAHAN ---
+                    
+                    // Wrapper for each individual image item. Added h-full.
+                    slideContent += `
+                        <div class="galeri-item-wrapper w-full relative h-full">
+                            <!-- MODIFIED: Added onclick event to open the modal -->
+                            <div class="w-full h-full rounded-xl shadow-lg overflow-hidden border-4 cursor-pointer transition duration-300 hover:shadow-xl hover:scale-[1.03]" 
+                                 style="border-color: var(--light-bg);"
+                                 onclick="openImageModal('${url}', '${title}')"> 
+                                <!-- object-cover ensures the image fills the container regardless of its original ratio -->
+                                <img src="${url}" alt="${title}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/600x600/4A4339/D4AF37?text=Gambar+Rosak'; this.onerror=null;">
+                                <!-- Overlay Text -->
+                                <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 opacity-0 hover:opacity-100 transition duration-300">
+                                    <span class="text-white text-lg font-bold p-2 bg-black/50 rounded-lg text-center">${title}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Add empty placeholder to maintain 3 column layout visually (optional)
+                    slideContent += `
+                        <div class="hidden md:block w-full h-full rounded-xl bg-gray-100/50 shadow-inner"></div>
+                    `;
+                }
+            }
+
+            slideContent += `</div></div>`; // Close gallery-grid and slider-page
+            html += slideContent;
+            
+            // Generate dot for pagination
+            dotsContainer.innerHTML += `<button class="dot w-3 h-3 rounded-full transition-all duration-300" style="background-color: var(--primary-color);" data-slide="${slideCount}"></button>`;
+        }
+        
+        slider.innerHTML = html;
+        return slideCount;
+    }
+
+
+    // Function to handle slider navigation and update dots
+    function setupSlider(slideCount) {
+        const slider = document.getElementById('gallery-slider');
+        const prevButton = document.getElementById('prev-slide');
+        const nextButton = document.getElementById('next-slide');
+        const dots = document.querySelectorAll('.dot');
+        
+        // Function to update the active dot and navigation button states
+        const updateState = (currentPage) => {
+            // Update dots
+            dots.forEach(dot => {
+                const dotPage = parseInt(dot.getAttribute('data-slide'));
+                if (dotPage === currentPage) {
+                    dot.classList.remove('opacity-40');
+                    dot.classList.add('w-6', 'opacity-100'); // Active state
+                } else {
+                    dot.classList.add('opacity-40');
+                    dot.classList.remove('w-6', 'opacity-100'); // Inactive state
+                }
+            });
+
+            // Update button disabled state
+            prevButton.disabled = currentPage === 1;
+            nextButton.disabled = currentPage === slideCount;
+        };
+
+        // Function to scroll to a specific page
+        const goToSlide = (page) => {
+            if (page >= 1 && page <= slideCount) {
+                slider.scrollTo({
+                    left: (page - 1) * slider.clientWidth,
+                    behavior: 'smooth'
+                });
+                updateState(page);
+            }
+        };
+
+        // Initial setup
+        goToSlide(1);
+
+        // Navigation buttons
+        prevButton.addEventListener('click', () => {
+            let currentScroll = slider.scrollLeft;
+            let currentPage = Math.round(currentScroll / slider.clientWidth) + 1;
+            goToSlide(currentPage - 1);
+        });
+
+        nextButton.addEventListener('click', () => {
+            let currentScroll = slider.scrollLeft;
+            let currentPage = Math.round(currentScroll / slider.clientWidth) + 1;
+            goToSlide(currentPage + 1);
+        });
+        
+        // Dot clicks
+        dots.forEach(dot => {
+            dot.addEventListener('click', (e) => {
+                const page = parseInt(e.target.getAttribute('data-slide'));
+                goToSlide(page);
+            });
+        });
+
+        // Update state on manual scroll
+        slider.addEventListener('scroll', () => {
+            // Calculate which slide is currently most in view
+            const currentScroll = slider.scrollLeft;
+            const currentPage = Math.round(currentScroll / slider.clientWidth) + 1;
+            updateState(currentPage);
+        });
+
+        // Recalculate scroll position on window resize
+        window.addEventListener('resize', () => {
+            // Re-identify the current page based on old scroll position
+            const currentScroll = slider.scrollLeft;
+            // Use Math.round to find the nearest slide
+            const currentPage = Math.round(currentScroll / (slider.clientWidth || 1)) + 1; 
+            // Re-scroll to the current page position based on new width
+            // This is crucial for fixing the jump after resize
+            goToSlide(currentPage); 
+        });
+    }
+
+    // Main DOM Content Loaded event
+    document.addEventListener('DOMContentLoaded', () => {
+        // Set the current year in the footer dynamically
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+
+        // 1. Generate content and get total slide count
+        const totalSlides = generateGalleryContent();
+        
+        // 2. Setup slider functionality
+        if (totalSlides > 0) {
+            setupSlider(totalSlides);
+        }
+
+        // --- Intersection Observer for Scroll Animations ---
+        const scrollElements = document.querySelectorAll(".scroll-fade-in");
+        const observerOptions = {
+            root: null, // relative to the viewport
+            rootMargin: '0px',
+            threshold: 0.2 // trigger when 20% of the item is visible
+        };
+
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add("is-visible");
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        scrollElements.forEach(el => observer.observe(el));
+
+
+        // --- Mobile Menu Toggle Logic ---
+        const menuToggle = document.getElementById('menu-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuIcon = document.getElementById('menu-icon');
+        const closeIcon = document.getElementById('close-icon');
+
+        menuToggle.addEventListener('click', () => {
+            const isHidden = mobileMenu.classList.toggle('hidden');
+            menuIcon.classList.toggle('hidden', !isHidden);
+            closeIcon.classList.toggle('hidden', isHidden);
+        });
+
+        window.closeMobileMenu = () => {
+            mobileMenu.classList.add('hidden');
+            menuIcon.classList.remove('hidden');
+            closeIcon.classList.add('hidden');
+        };
+        
+        // --- START: Image Modal Backdrop Click Listener ---
+        // Add click listener for image modal backdrop to close it
+        const imageModal = document.getElementById('image-modal');
+        if (imageModal) {
+            imageModal.addEventListener('click', (event) => {
+                // Check if the click is on the dialog backdrop itself (not its children)
+                if (event.target === imageModal) {
+                    closeImageModal();
+                }
+            });
+        }
+        // --- END: Image Modal Backdrop Click Listener ---
+
+
+        // Activate Lucide Icons after DOM is ready
+        if (typeof lucide !== 'undefined' && lucide.createIcons) {
+             lucide.createIcons();
+        }
+    });
+
+    /**
+     * Simulates a successful action using the custom modal dialog.
+     * @param {string} action - The action that was performed.
+     */
+    function simulateAction(action) {
+        const modal = document.getElementById('action-modal');
+        const messageElement = document.getElementById('modal-message');
+        
+        let message = '';
+        if (action === 'Sokongan') {
+            message = 'Terima kasih atas sokongan anda! Anda akan dibawa ke halaman sumbangan Buy Me a Coffee.';
+        } else {
+            message = 'Tindakan berjaya dilaksanakan.';
+        }
+        
+        messageElement.textContent = message;
+        
+        if (modal.showModal) {
+            modal.showModal();
+        } else {
+            console.log("Action Simulated:", action);
+        }
+    }
+
+    // --- START: New Functions for Image Modal ---
+    /**
+     * Opens the image lightbox modal with the specified image.
+     * @param {string} src - The source URL of the image to display.
+     * @param {string} alt - The alt text for the image.
+     */
+    function openImageModal(src, alt) {
+        const modal = document.getElementById('image-modal');
+        const imgElement = document.getElementById('modal-image-content');
+        
+        if (imgElement && modal) {
+            imgElement.src = src;
+            imgElement.alt = alt;
+            
+            if (modal.showModal) {
+                modal.showModal();
+            }
+        } else {
+            console.error('Image modal elements not found.');
+        }
+    }
+
+    /**
+     * Closes the image lightbox modal.
+     */
+    function closeImageModal() {
+        const modal = document.getElementById('image-modal');
+        if (modal && modal.close) {
+            modal.close();
+        }
+    }
+    // --- END: New Functions for Image Modal ---
+
+</script>
+</body>
+</html>
