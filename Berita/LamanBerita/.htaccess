@@ -1,0 +1,3 @@
+RewriteEngine On
+
+RewriteRule ^news/([A-Za-z0-9-]+)/?$ article.php?slug=$1 [L]

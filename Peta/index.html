@@ -208,12 +208,33 @@
 
   <!-- PANELS -->
   <div id="uiStack">
-    <!-- TOP: JSON-only -->
-    <div id="controls" class="panel">
-      <h3>🏡 RIBI Haram Malaysia</h3>
-
-      <!-- NEW: Guide Button -->
+          <!-- NEW: Guide Button -->
       <button id="guideButton" title="Lihat Panduan Penggunaan">❓ Panduan Pengguna</button>
+ 
+
+    <!-- BOTTOM: Sheet-only controls (no list) -->
+    <div id="userPanel" class="panel">
+      <h3>🧑‍🤝‍🧑 Aduan Pencerobohan</h3>
+      <!-- UPDATED: Button Group -->
+      <div class="button-group">
+        <button id="userAddBtn" title="Tambah lokasi baharu">➕ Tambah</button>
+        <button id="userRefreshBtn" title="Segarkan dari Sheet">🔄 Refresh</button>
+        <!-- NEW: Aduan Button -->
+        <button id="aduanBtn" title="Buat Aduan">🚨 SISPAA</button>
+      </div>
+      <input id="userSearchInput" placeholder="🔍 Cari (nama/jenis/alamat) " />
+    </div>
+   <!-- TOP: JSON-only -->
+    <div id="controls" class="panel">
+      <h3>🏡 Data Kerajaan</h3>
+
+<!-- New Jenis (State) Selector -->
+<select id="jenisselect" aria-label="Pilih Jenis">
+  <option value="">-- Pilih Jenis --</option>
+  <option value="pencerbohan">Pencerobohan</option>
+  <option value="tanah_rizab_melayu">Tanah Rizab Melayu</option>
+</select>
+
       
       <!-- New Negeri (State) Selector -->
       <select id="negeriSelect" aria-label="Pilih Negeri">
@@ -232,20 +253,6 @@
 
       <input type="text" id="searchInput" placeholder="🔍 Cari (nama/jenis/mukim) " />
     </div>
-
-    <!-- BOTTOM: Sheet-only controls (no list) -->
-    <div id="userPanel" class="panel">
-      <h4>🧑‍🤝‍🧑 Lokasi dari Pengguna</h4>
-      <!-- UPDATED: Button Group -->
-      <div class="button-group">
-        <button id="userAddBtn" title="Tambah lokasi baharu">➕ Tambah</button>
-        <button id="userRefreshBtn" title="Segarkan dari Sheet">🔄 Refresh</button>
-        <!-- NEW: Aduan Button -->
-        <button id="aduanBtn" title="Buat Aduan">🚨 Aduan</button>
-      </div>
-      <input id="userSearchInput" placeholder="🔍 Cari (nama/jenis/alamat) " />
-    </div>
-
     <!-- NEW: Stats Panel -->
     <div id="statsPanel" class="panel">
       <h4>📊 Statistik Lokasi</h4>
@@ -285,40 +292,110 @@
     <span style="border-radius: 50%; padding: 0 4px 2px; border: 1px solid #333;">🏮</span> Tokong
   </div>
 
-  <!-- Modal Form (For Adding Location) -->
-  <div id="modal">
-    <div class="modal-content">
-      <span class="close-btn" id="closeModal">&times;</span>
-      <h2>🛕 Tambah Lokasi Baru</h2>
-      <form id="placeForm">
-        <label>Nama Rumah Ibadat</label>
-        <input type="text" id="name" required>
-        <label>Jenis</label>
-        <select id="type" required>
-          <option value="">-- Pilih Jenis --</option>
-          <option value="Kuil">🛕 Kuil</option>
-          <option value="Tokong">⛩️ Tokong</option>
-          <option value="Gereja">⛪ Gereja</option>
-          <option value="Gurdwara">🕌 Gurdwara</option>
-        </select>
-        <label>Alamat / Lokasi</label>
-        <textarea id="address" rows="3" required></textarea>
-        <!-- DITERJEMAH -->
-        <label>Latitud</label>
-        <input type="number" step="any" id="lat" required>
-        <!-- DITERJEMAH -->
-        <label>Longitud</label>
-        <input type="number" step="any" id="lng" required>
+ <!-- Modal Form (For Adding Location) -->
+<div id="modal">
+  <div class="modal-content">
+    <span class="close-btn" id="closeModal">&times;</span>
+    <h2>🛕 Tambah Lokasi Baru</h2>
 
-        <!-- Image upload -->
-        <label>Gambar Bukti(pilihan)</label>
-        <input type="file" id="image" accept="image/*">
+    <form id="placeForm">
 
-        <button type="submit">💾 Simpan Data</button>
-      </form>
-      <div id="message"></div>
-    </div>
+      <!-- MAIN CATEGORY -->
+      <label>Jenis</label>
+      <select id="mainType" required>
+        <option value="">-- Pilih Jenis --</option>
+        <option value="Rumah Ibadat">Rumah Ibadat</option>
+        <option value="Pertanian">Pertanian</option>
+        <option value="Komersial">Komersial</option>
+        <option value="Hutan">Hutan dan Alam Sekitar</option>
+        <option value="Setinggan">Setinggan</option>
+        <option value="Tanah Rizab Melayu">Tanah Rizab Melayu</option>
+      </select>
+
+      <!-- SUB CATEGORY (Will change based on selection) -->
+      <label>Jenis Terperinci</label>
+      <select id="subType" required>
+        <option value="">-- Pilih Jenis Terperinci --</option>
+      </select>
+
+      <label>Nama</label>
+      <input type="text" id="name" required>
+
+      <label>Alamat / Lokasi</label>
+      <textarea id="address" rows="3" required></textarea>
+
+      <label>Latitud</label>
+      <input type="number" step="any" id="lat" required>
+
+      <label>Longitud</label>
+      <input type="number" step="any" id="lng" required>
+
+      <label>Gambar Bukti (pilihan)</label>
+      <input type="file" id="image" accept="image/*">
+
+      <button type="submit">💾 Simpan Data</button>
+    </form>
+
+    <div id="message"></div>
   </div>
+</div>
+<script>
+const mainType = document.getElementById("mainType");
+const subType = document.getElementById("subType");
+
+// Subcategories
+const options = {
+  "Rumah Ibadat": [
+    { value: "Kuil", text: "🛕 Kuil" },
+    { value: "Tokong", text: "⛩️ Tokong" },
+    { value: "Gereja", text: "⛪ Gereja" },
+    { value: "Gurdwara", text: "🕌 Gurdwara" }
+  ],
+
+  "Pertanian": [
+    { value: "Sawah", text: "🌾 Sawah Padi" },
+    { value: "Kebun", text: "🌿 Kebun Sayur" },
+    { value: "Dusun", text: "🍊 Dusun Buah" },
+    { value: "Ternakan", text: "🐄 Penternakan" }
+  ],
+
+  "Komersial": [
+    { value: "Kedai", text: "🏪 Kedai" },
+    { value: "Pasar", text: "🛒 Pasar" },
+    { value: "Kilang", text: "🏭 Kilang" }
+  ],
+
+  "Hutan": [
+    { value: "Hutan Simpan", text: "🌲 Hutan Simpan" },
+    { value: "Alam Sekitar", text: "🌿 Alam Sekitar" }
+  ],
+
+  "Setinggan": [
+    { value: "Perumahan", text: "🏚️ Penempatan Setinggan" }
+  ],
+
+  "Tanah Rizab Melayu": [
+    { value: "TRM", text: "Tanah Rizab Melayu" }
+  ]
+};
+
+// Listener
+mainType.addEventListener("change", function () {
+  const selected = this.value;
+
+  // clear old options
+  subType.innerHTML = `<option value="">-- Pilih Jenis Terperinci --</option>`;
+
+  if (options[selected]) {
+    options[selected].forEach(item => {
+      const opt = document.createElement("option");
+      opt.value = item.value;
+      opt.textContent = item.text;
+      subType.appendChild(opt);
+    });
+  }
+});
+  </script>
 
   <!-- Instruction Modal (NEW) -->
   <div id="instructionModal">
@@ -429,6 +506,7 @@ async function sheetPostPlace(place, file) {
     function clearStaticMarkers() { staticMarkers.forEach(m => map.removeLayer(m)); staticMarkers = []; }
     function clearSheetMarkers()  { sheetMarkers.forEach(m => map.removeLayer(m)); sheetMarkers  = []; }
 
+        const jenisselect = document.getElementById('jenisselect'); 
     const negeriSelect = document.getElementById('negeriSelect'); 
     const daerahSelect = document.getElementById('daerahSelect');
     const mukimSelect  = document.getElementById('mukimSelect');
@@ -592,46 +670,102 @@ async function sheetPostPlace(place, file) {
         { name: "Labuan (Tiada Data)", file: null }
     ]
 };
+/* --------------------------------------------------
+   FIXED BEHAVIOUR FOR JENIS
+   - Pencerobohan = enabled
+   - Tanah Rizab Melayu = disabled (no data)
+---------------------------------------------------- */
 
-    // Populate Negeri (State) dropdown on load
-    function populateNegeri() {
-        // Clear and add default option
-        negeriSelect.innerHTML = '<option value="">-- Pilih Negeri --</option>';
-        const states = Object.keys(locationData).sort((a, b) => a.localeCompare(b, 'ms'));
+let selectedJenis = "";
 
-        states.forEach(negeri => {
-            const opt = document.createElement('option');
-            opt.value = negeri;
-            opt.textContent = negeri;
-            negeriSelect.appendChild(opt);
-        });
-        daerahSelect.disabled = true;
+// When Jenis is selected
+jenisselect.addEventListener("change", () => {
+    selectedJenis = jenisselect.value;
+
+    // Reset daerah & mukim
+    daerahSelect.innerHTML = '<option value="">-- Pilih Daerah --</option>';
+    daerahSelect.disabled = true;
+    mukimSelect.style.display = 'none';
+    mukimSelect.innerHTML = '<option value="">-- Semua Mukim --</option>';
+
+    clearStaticMarkers();
+    staticDataRaw = [];
+
+    // Case 1: Pencerobohan → normal
+    if (selectedJenis === "pencerbohan") {
+        negeriSelect.disabled = false;
+        populateNegeri();     // Show negeri WITH data
+        return;
     }
 
-    // Handle Negeri selection to populate Daerah (District) dropdown
-    negeriSelect.addEventListener("change", () => {
-        const negeri = negeriSelect.value;
-        daerahSelect.innerHTML = '<option value="">-- Pilih Daerah --</option>';
-        mukimSelect.style.display = 'none';
-        mukimSelect.innerHTML = '<option value="">-- Semua Mukim --</option>';
-        clearStaticMarkers(); // Clear map on new state selection
-        staticDataRaw = []; // Clear current data
+    // Case 2: Tanah Rizab Melayu → disable ALL
+    if (selectedJenis === "tanah_rizab_melayu") {
+        negeriSelect.innerHTML = '<option value="">-- Tiada Data --</option>';
+        negeriSelect.disabled = true;
+        // alert("❗ Tiada data untuk Tanah Rizab Melayu.");
+        return;
+    }
 
-        if (negeri && locationData[negeri]) {
-            locationData[negeri].forEach(daerah => {
-                const opt = document.createElement('option');
-                // The value will be the JSON file name, or null/empty string if no data
-                opt.value = daerah.file || "";
-                opt.textContent = daerah.name;
-                // Add a visual indicator for no data
-                if (!daerah.file) opt.disabled = true;
-                daerahSelect.appendChild(opt);
-            });
-            daerahSelect.disabled = false;
-        } else {
-            daerahSelect.disabled = true;
-        }
+    // Case 3: No selection
+    populateNegeri();
+});
+
+
+
+/* --------------------------------------------------
+   Populate ALL negeri BUT disable negeri with no data
+---------------------------------------------------- */
+function populateNegeri() {
+    negeriSelect.disabled = false;
+    negeriSelect.innerHTML = '<option value="">-- Pilih Negeri --</option>';
+
+    const states = Object.keys(locationData).sort((a, b) =>
+        a.localeCompare(b, 'ms')
+    );
+
+    states.forEach(negeri => {
+        const hasData = locationData[negeri].some(d => d.file);
+
+        const opt = document.createElement("option");
+        opt.textContent = hasData ? negeri : `${negeri} (Tiada Data)`;
+        opt.value = hasData ? negeri : "";
+        if (!hasData) opt.disabled = true;
+
+        negeriSelect.appendChild(opt);
     });
+
+    daerahSelect.disabled = true;
+}
+
+
+negeriSelect.addEventListener("change", () => {
+    // If Tanah Rizab Melayu selected → block loading
+    if (selectedJenis === "tanah_rizab_melayu") {
+        daerahSelect.disabled = true;
+        return;
+    }
+
+    const negeri = negeriSelect.value;
+    daerahSelect.innerHTML = '<option value="">-- Pilih Daerah --</option>';
+    mukimSelect.style.display = 'none';
+    mukimSelect.innerHTML = '<option value="">-- Semua Mukim --</option>';
+    clearStaticMarkers();
+    staticDataRaw = [];
+
+    if (negeri && locationData[negeri]) {
+        locationData[negeri].forEach(daerah => {
+            const opt = document.createElement('option');
+            opt.value = daerah.file || "";
+            opt.textContent = daerah.name;
+            if (!daerah.file) opt.disabled = true;
+            daerahSelect.appendChild(opt);
+        });
+        daerahSelect.disabled = false;
+    } else {
+        daerahSelect.disabled = true;
+    }
+});
+
     /*********************** END LOCATION HIERARCHY DATA ***********************/
 
 
@@ -903,33 +1037,41 @@ async function sheetPostPlace(place, file) {
       const fileInput = document.getElementById("image");
       const file = fileInput.files && fileInput.files[0] ? fileInput.files[0] : null;
 
-      try {
-        await sheetPostPlace(newPlace, file);
-        message.textContent = "✅ Berjaya disimpan!"; // DAHULU MELAYU
-        form.reset();
+    try {
+    await sheetPostPlace(newPlace, file);
+    message.textContent = "✅ Berjaya disimpan!";
 
-        // Update local cache; user will still need Refresh to reload from Sheet if desired
-        sheetDataRaw.push({
-          timestamp: new Date().toISOString(),
-          name: newPlace.name,
-          type: newPlace.type,
-          address: newPlace.address,
-          lat: newPlace.lat,
-          lng: newPlace.lng,
-          image: "" // Worker returns imageUrl but we rely on Refresh to sync authoritative data
-        });
-        // MODIFIED: After adding a new place, we still want to render the current filter, 
-        // including this new local data.
-        renderSheetFiltered(userSearchInput.value, true); 
-        
-        // NEW: Update stat count
-        document.getElementById('stat-approved').textContent = sheetDataRaw.length;
+    // RESET ALL FORM FIELDS
+    form.reset();
+    subType.innerHTML = '<option value="">-- Pilih Jenis Terperinci --</option>';
+    mainType.value = "";
+    document.getElementById("image").value = "";
 
-        setTimeout(() => { modal.style.display = "none"; message.textContent = ""; }, 700);
-      } catch (err) {
-        console.error(err);
-        message.textContent = "✅ Berjaya disimpan!"; // DAHULU MELAYU
-      }
+    // Update local cache
+    sheetDataRaw.push({
+      timestamp: new Date().toISOString(),
+      name: newPlace.name,
+      type: newPlace.type,
+      address: newPlace.address,
+      lat: newPlace.lat,
+      lng: newPlace.lng,
+      image: ""
+    });
+
+    renderSheetFiltered(userSearchInput.value, true);
+
+    document.getElementById('stat-approved').textContent = sheetDataRaw.length;
+
+    // CLOSE MODAL
+    setTimeout(() => { 
+        modal.style.display = "none"; 
+        message.textContent = ""; 
+    }, 700);
+
+} catch (err) {
+    console.error(err);
+    message.textContent = "❌ Gagal menyimpan!";
+}
     });
 
     // NEW: Function to calculate total placemarks from all JSON files
@@ -1021,9 +1163,27 @@ async function sheetPostPlace(place, file) {
       }
     })();
   </script>
+<footer id="appFooter" 
+        style="position:fixed; bottom:0; left:0; width:100%; 
+               background:rgba(0,0,0,0.75); backdrop-filter:blur(6px);
+               color:#f3f4f6; padding:8px 12px; font-size:13px;
+               display:flex; justify-content:space-between; 
+               align-items:center; z-index:2000;">
 
-  <footer id="appFooter">
-    <span><strong>Tanah Malaya</strong> v1.0.81</span>
-  </footer>
+    <!-- LEFT (empty – keeps layout balanced) -->
+    <div style="flex:1;"></div>
+
+    <!-- CENTER -->
+    <div style="flex:1; text-align:center;">
+        <span><strong>Disclaimer:</strong> Data dari pengguna adalah untuk tujuan penandaan sahaja</span>
+    </div>
+
+    <!-- RIGHT -->
+    <div style="flex:1; text-align:right;">
+        <span><strong>Tanah Malaya</strong> v1.0.9</span>
+    </div>
+
+</footer>
+
 </body>
 </html>

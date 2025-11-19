@@ -1,6 +1,7 @@
 [
   { 
     "id": 1, 
+    "slug": "apa-itu-tanah-rizab-melayu",
     "title": "Apa itu Tanah Rizab Melayu (TRM)", 
     "category": "Ilmu Tanah", 
     "description": "tanah-tanah kepunyaan Melayu akan berkekalan dikuasai oleh orang Melayu sepanjang zaman",
@@ -11,8 +12,10 @@
     "imageColor": "182B49/D4A762",
     "contentSource": "article1.md"
   },
-  { 
+
+  {
     "id": 2,
+    "slug": "apa-itu-tanah-kerajaan-negeri",
     "title": "Apa Itu Tanah Kerajaan Negeri (Stateland)", 
     "category": "Ilmu Tanah", 
     "description": "",
@@ -22,8 +25,10 @@
     "imageColor": "182B49/D4A762",
     "contentSource": "article2.md"
   },
-  { 
+
+  {
     "id": 3,
+    "slug": "dari-stateland-ke-tanah-warta",
     "title": "Dari Stateland ke Tanah Warta: Prosedur dan Asal Usul Perubahan Status Tanah", 
     "category": "Ilmu Tanah", 
     "description": "",
@@ -33,8 +38,10 @@
     "imageColor": "182B49/D4A762",
     "contentSource": "article3.md"
   },
-  { 
+
+  {
     "id": 4,
+    "slug": "apa-itu-lot-lidi",
     "title": "Apa itu lot lidi", 
     "category": "Ilmu Tanah", 
     "description": "",
