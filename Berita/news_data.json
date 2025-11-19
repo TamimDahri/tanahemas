@@ -50,5 +50,18 @@
     "imagePlaceholder": "image.png", 
     "imageColor": "182B49/D4A762",
     "contentSource": "article4.md"
+  },
+
+  {
+    "id": 5,
+    "slug": "Tindakan Tegas Terhadap Pencerobohan Tanah: Hentikan Amalan Memberi Pampasan",
+    "title": "Tindakan Tegas Terhadap Pencerobohan Tanah: Hentikan Amalan Memberi Pampasan", 
+    "category": "Isu Tanah", 
+    "description": "",
+    "date": "November 10, 2025", 
+    "image": "LamanBerita/images/article5.png",
+    "imagePlaceholder": "image.png", 
+    "imageColor": "182B49/D4A762",
+    "contentSource": "article5.md"
   }
 ]
