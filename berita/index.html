@@ -125,7 +125,7 @@
 
           container.innerHTML = `
             <div class="lg:w-1/2">
-                <a href="./LamanBerita/${article.slug}" class="block group">
+                <a href="./lamanberita/${article.slug}" class="block group">
                     <img
                         src="${article.image}" 
                         alt="${article.title}"
@@ -136,7 +136,7 @@
             </div>
             <div class="lg:w-1/2 flex flex-col justify-center">
                 <p class="text-sm font-semibold uppercase text-secondary mb-2">${article.category}</p>
-                <a href="./LamanBerita/${article.slug}" class="block group">
+                <a href="./lamanberita/${article.slug}" class="block group">
                     <h3 class="text-4xl font-extrabold text-white leading-tight mb-4 group-hover:text-secondary transition duration-200">
                         ${article.title}
                     </h3>
@@ -144,7 +144,7 @@
                 <p class="text-gray-300 text-lg mb-6 leading-relaxed">
                     ${article.description}
                 </p>
-                <a href="./LamanBerita/${article.slug}" class="inline-flex items-center bg-secondary text-primary font-bold px-6 py-3 rounded-full text-base shadow-gold-sm hover:bg-white transition duration-300 self-start">
+                <a href="./lamanberita/${article.slug}" class="inline-flex items-center bg-secondary text-primary font-bold px-6 py-3 rounded-full text-base shadow-gold-sm hover:bg-white transition duration-300 self-start">
                     Baca Cerita Penuh &rarr;
                 </a>
             </div>
@@ -165,7 +165,7 @@
             otherArticles.forEach(article => {
                 html += `
                   <article class="news-card bg-white rounded-xl overflow-hidden flex flex-col">
-                    <a href="./LamanBerita/${article.slug}" class="block">
+                    <a href="./lamanberita/${article.slug}" class="block">
                       <img
                         src="${article.image}"
                         alt="${article.title}"
@@ -175,7 +175,7 @@
                     </a>
                     <div class="p-6 flex flex-col flex-grow">
                         <p class="text-xs font-semibold uppercase text-secondary mb-1">${article.category}</p>
-                        <a href="./LamanBerita/${article.slug}" class="block mb-3">
+                        <a href="./lamanberita/${article.slug}" class="block mb-3">
                             <h3 class="text-xl font-bold text-primary leading-snug hover:text-secondary transition duration-200">
                                 ${article.title}
                             </h3>
@@ -183,7 +183,7 @@
                         <p class="text-gray-600 mb-4 text-sm flex-grow">
                             ${article.description}
                         </p>
-                        <a href="./LamanBerita/${article.slug}" class="text-primary font-semibold hover:text-secondary transition duration-200 self-start mt-4 text-sm">
+                        <a href="./lamanberita/${article.slug}" class="text-primary font-semibold hover:text-secondary transition duration-200 self-start mt-4 text-sm">
                             Baca Lagi &rarr;
                         </a>
                         <div class="mt-4 text-xs text-gray-400">${article.date}</div>
