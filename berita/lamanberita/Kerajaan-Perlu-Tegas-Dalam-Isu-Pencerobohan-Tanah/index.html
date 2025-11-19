@@ -16,7 +16,7 @@
 <meta property="twitter:description" content="Pandangan mengenai kepentingan ketegasan kerajaan dalam menangani isu pencerobohan tanah.">
 <meta property="twitter:image" content="https://tanahmalaya.com/berita/kerajaan-perlu-tegas-dalam-isu-pencerobohan-tanah/cover.jpg">
 
-    <link rel="icon" type="image/png" href="article5.png">
+    <link rel="icon" type="image/png" href="te.png">
 
     <title id="page-title">Artikel | TanahMalaya</title>
 
@@ -117,7 +117,7 @@ async function loadArticle() {
     const slug = window.location.pathname.split("/").filter(x => x).pop();
 
     // 2. Load news_data.json
-    const res = await fetch("/Berita/news_data.json");
+    const res = await fetch("/berita/news_data.json");
     const list = await res.json();
     const data = list.find(a => a.slug === slug);
 

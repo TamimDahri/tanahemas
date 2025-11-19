@@ -18,7 +18,7 @@
 <meta property="twitter:description" content="Panduan lengkap mengenai bagaimana tanah Stateland boleh diwartakan serta prosedur perubahan status tanah di Malaysia.">
 <meta property="twitter:image" content="https://tanahmalaya.com/berita/dari-stateland-ke-tanah-warta/cover.jpg">
 
-    <link rel="icon" type="image/png" href="article3.png">
+    <link rel="icon" type="image/png" href="te.png">
 
     <title id="page-title">Artikel | TanahMalaya</title>
 
@@ -119,7 +119,7 @@ async function loadArticle() {
     const slug = window.location.pathname.split("/").filter(x => x).pop();
 
     // 2. Load news_data.json
-    const res = await fetch("/Berita/news_data.json");
+    const res = await fetch("/berita/news_data.json");
     const list = await res.json();
     const data = list.find(a => a.slug === slug);
 

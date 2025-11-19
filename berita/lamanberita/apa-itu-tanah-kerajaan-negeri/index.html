@@ -19,8 +19,7 @@
 <meta property="twitter:image" content="https://tanahmalaya.com/berita/apa-itu-tanah-kerajaan-negeri/cover.jpg">
 
 
-    <link rel="icon" type="image/png" href="article2.png">
-
+    <link rel="icon" type="image/png" href="te.png">
     <title id="page-title">Artikel | TanahMalaya</title>
 
     <!-- Tailwind CDN -->
@@ -104,7 +103,7 @@
 
         <div class="mt-12 text-center">
             <a href="../../index.html" class="inline-flex items-center bg-primary text-white font-bold px-8 py-3 rounded-full hover:bg-dark-bg transition">
-                ← Kembali ke Senarai Berita
+                ← Kembali ke Senarai berita
             </a>
         </div>
     </div>
@@ -120,7 +119,7 @@ async function loadArticle() {
     const slug = window.location.pathname.split("/").filter(x => x).pop();
 
     // 2. Load news_data.json
-    const res = await fetch("/Berita/news_data.json");
+    const res = await fetch("/berita/news_data.json");
     const list = await res.json();
     const data = list.find(a => a.slug === slug);
 
