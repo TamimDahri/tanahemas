@@ -1100,9 +1100,17 @@ negeriSelect.addEventListener("change", () => {
   const main = document.getElementById("mainType").value.trim();
   const sub = document.getElementById("subType").value.trim();
 
+  // ★ MODIFIED: Conditional Type Formatting ★
+  // If "Rumah Ibadat", use ONLY the sub-type (e.g., "Kuil").
+  // Otherwise, use "Main - Sub" (e.g., "Pertanian - Sawah").
+  let finalType = `${main} - ${sub}`;
+  if (main === "Rumah Ibadat") {
+      finalType = sub;
+  }
+
   const newPlace = {
     name: document.getElementById("name").value.trim(),
-    type: `${main} - ${sub}`, // ★ FIXED ★
+    type: finalType, 
     address: document.getElementById("address").value.trim(),
     lat: parseFloat(document.getElementById("lat").value),
     lng: parseFloat(document.getElementById("lng").value)
