@@ -239,7 +239,7 @@
       <!-- UPDATED: Button Group -->
       <div class="button-group">
         <button id="userAddBtn" title="Tambah lokasi baharu">➕ Tambah</button>
-        <button id="userRefreshBtn" title="Segarkan dari Sheet">🔄 Refresh</button>
+        <button id="userRefreshBtn" title="Segarkan dari Sheet">🔄 Lihat</button>
         <!-- NEW: Aduan Button -->
         <button id="aduanBtn" title="Buat Aduan">🚨 SISPAA</button>
       </div>
@@ -282,7 +282,7 @@
         <div class="stat-card">
           <div class="stat-info">
             <!-- DITERJEMAH & ID DITAMBAH -->
-            <span class="stat-title">Jumlah Lokasi</span>
+            <span class="stat-title">Data Kerajaan</span>
             <span class="stat-number" id="stat-total">...</span>
           </div>
           <span class="stat-icon">🛕</span>
@@ -291,7 +291,7 @@
         <div class="stat-card">
           <div class="stat-info">
             <!-- DITERJEMAH & ID DITAMBAH -->
-            <span class="stat-title">Lokasi Diluluskan</span>
+            <span class="stat-title">Data Pengguna</span>
             <span class="stat-number" id="stat-approved">...</span> <!-- Diubah dari 0 -->
           </div>
           <span class="stat-icon">✅</span>
@@ -312,8 +312,7 @@
     <span style="border-radius: 50%; padding: 0 4px 2px; border: 1px solid #333;">⛪</span> Gereja
     <span style="border-radius: 50%; padding: 0 4px 2px; border: 1px solid #333;">🏮</span> Tokong
   </div>
-
- <!-- Modal Form (For Adding Location) -->
+<!-- Modal Form (For Adding Location) -->
 <div id="modal">
   <div class="modal-content">
     <span class="close-btn" id="closeModal">&times;</span>
@@ -333,7 +332,7 @@
         <option value="Tanah Rizab Melayu">Tanah Rizab Melayu</option>
       </select>
 
-      <!-- SUB CATEGORY (Will change based on selection) -->
+      <!-- SUB CATEGORY -->
       <label>Jenis Terperinci</label>
       <select id="subType" required>
         <option value="">-- Pilih Jenis Terperinci --</option>
@@ -354,13 +353,48 @@
       <label>Gambar Bukti (pilihan)</label>
       <input type="file" id="image" accept="image/*">
 
-      <button type="submit">💾 Simpan Data</button>
+      <!-- BUTTONS -->
+      <div style="display:flex; gap:10px; margin-top:15px;">
+        <button type="submit" style="flex:1;">💾 Simpan Data</button>
+
+        <!-- RESET BUTTON -->
+        <button type="button" id="clearFormBtn" 
+          style="
+            flex:1;
+            background:#fff7cc;
+            border:1px solid #d4b300;
+            color:#8a6d00;
+            font-weight:600;
+            border-radius:10px;
+            padding:9px;
+          ">
+          Kosongkan Borang
+        </button>
+      </div>
+
     </form>
 
     <div id="message"></div>
   </div>
 </div>
+
 <script>
+  // RESET FORM BUTTON
+const clearFormBtn = document.getElementById("clearFormBtn");
+
+clearFormBtn.onclick = () => {
+    form.reset();
+
+    // Reset dropdowns
+    mainType.value = "";
+    subType.innerHTML = '<option value="">-- Pilih Jenis Terperinci --</option>';
+
+    // Reset file
+    document.getElementById("image").value = "";
+
+    message.textContent = "";
+};
+
 const mainType = document.getElementById("mainType");
 const subType = document.getElementById("subType");
 
@@ -418,47 +452,63 @@ mainType.addEventListener("change", function () {
 });
   </script>
 
-  <!-- Instruction Modal (NEW) -->
-  <div id="instructionModal">
-    <div class="modal-content">
-      <span class="close-btn" id="closeInstructionModal">&times;</span>
-      <h2>📖 ARAHAN PENGGUNA LAMAN tanahmalaya.COM</h2>
-      <ol class="instruction-list">
-        <li>
-          <strong>PILIH NEGERI</strong>
-          <p>Klik pada kotak “Negeri” di bahagian atas kiri. Pilih negeri yang ingin dilihat (contohnya: Selangor, Johor, Pahang).</p>
-        </li>
-        <li>
-          <strong>PILIH DAERAH</strong>
-          <p>Selepas pilih negeri, senarai Daerah akan muncul secara automatik. Pilih daerah yang ada data seperti: Jabatan Agama Islam Selangor (JAIS), Klang, Petaling Jaya. Jika tertera (Tiada Data), bermaksud tiada maklumat untuk daerah itu lagi.</p>
-        </li>
-        <li>
-          <strong>PILIH MUKIM (JIKA ADA)</strong>
-          <p>Jika daerah yang dipilih mempunyai maklumat mukim, kotak Mukim akan muncul. Anda boleh pilih mukim tertentu untuk melihat data yang lebih spesifik.</p>
-        </li>
-        <li>
-          <strong>LIHAT PETA</strong>
-          <p>Penanda (emoji 🛕 ⛩️ ⛪ 🕌) akan muncul di peta. Klik mana-mana penanda untuk melihat butiran: Nama rumah ibadat, Jenis (Kuil, Tokong, Gereja, Gurdwara), Mukim & alamat, Status tanah, Pautan “📍 Buka di Google Maps”</p>
-        </li>
-        <li>
-          <strong>CARI LOKASI</strong>
-          <p>Gunakan kotak Cari (nama/jenis/mukim) untuk menapis penanda berdasarkan teks yang anda taip.</p>
-        </li>
-        <li>
-          <strong>TAMBAH LOKASI BAHARU</strong>
-          <p>Klik butang ➕ Tambah di panel Lokasi dari Pengguna. Isi semua maklumat yang diminta: Nama rumah ibadat, Jenis (Kuil/Tokong/Gereja/Gurdwara), Alamat/Lokasi, Latitude & Longitude, (Pilihan) Gambar bukti. Klik 💾 Simpan Data untuk menghantar. Jika berjaya, mesej “✅ Berjaya disimpan!” akan muncul.</p>
-        </li>
-        <li>
-          <strong>SEGARKAN SEMULA DATA</strong>
-          <p>Klik butang 🔄 Refresh untuk memuat semula semua data sumbangan pengguna dari pangkalan Google Sheet.</p>
-        </li>
-        <li>
-          <strong>CARI DALAM DATA PENGGUNA</strong>
-          <p>Gunakan kotak Cari (nama/jenis/alamat) di panel bawah untuk menapis lokasi yang dihantar oleh pengguna lain.</p>
-        </li>
-      </ol>
-    </div>
+<!-- Instruction Modal (UPDATED) -->
+<div id="instructionModal">
+  <div class="modal-content">
+    <span class="close-btn" id="closeInstructionModal">&times;</span>
+    <h2>📖 ARAHAN PENGGUNA LAMAN tanahmalaya.COM</h2>
+
+    <ol class="instruction-list">
+
+      <li>
+        <strong>PILIH JENIS</strong>
+        <p>Pada bahagian atas, pilih jenis data yang ingin dilihat — contoh: <strong>Pencerobohan</strong> atau <strong>Tanah Rizab Melayu</strong>. Hanya negeri yang mempunyai data akan diaktifkan.</p>
+      </li>
+
+      <li>
+        <strong>PILIH NEGERI</strong>
+        <p>Klik pada kotak “Negeri”. Hanya negeri yang mempunyai data akan boleh diklik. Negeri yang tidak mempunyai data akan dipaparkan sebagai “(Tiada Data)”.</p>
+      </li>
+
+      <li>
+        <strong>PILIH DAERAH</strong>
+        <p>Selepas negeri dipilih, senarai Daerah akan muncul. Pilih daerah yang mempunyai fail data. Jika ia bertanda (Tiada Data), ia bermaksud belum ada maklumat untuk daerah tersebut.</p>
+      </li>
+
+      <li>
+        <strong>PILIH MUKIM (JIKA ADA)</strong>
+        <p>Jika daerah mempunyai maklumat mukim, kotak pilihan mukim akan muncul. Anda boleh memilih mukim tertentu untuk melihat data yang lebih terperinci.</p>
+      </li>
+
+      <li>
+        <strong>LIHAT PETA</strong>
+        <p>Penanda lokasi akan muncul di peta. Klik penanda untuk melihat maklumat seperti: Nama lokasi, jenis, mukim, alamat, status tanah, serta pautan “📍 Buka di Google Maps”.</p>
+      </li>
+
+      <li>
+        <strong>CARI LOKASI (DATA KERAJAAN)</strong>
+        <p>Gunakan kotak “Cari (nama/jenis/mukim)” untuk menapis penanda berdasarkan teks yang anda taip.</p>
+      </li>
+
+      <li>
+        <strong>TAMBAH LOKASI BAHARU (DATA PENGGUNA)</strong>
+        <p>Klik butang ➕ Tambah di panel Data Pengguna. Isi maklumat seperti Nama lokasi, Jenis, Alamat, Latitude & Longitude dan (pilihan) gambar bukti. Klik “💾 Simpan Data”. Mesej “Berjaya disimpan!” akan muncul jika berjaya.</p>
+      </li>
+
+      <li>
+        <strong>SEGARKAN DATA</strong>
+        <p>Klik butang 🔄 Lihat untuk memuat semula semua data pengguna daripada Google Sheet.</p>
+      </li>
+
+      <li>
+        <strong>CARI DALAM DATA PENGGUNA</strong>
+        <p>Gunakan kotak carian di panel Data Pengguna untuk menapis lokasi yang dihantar oleh komuniti.</p>
+      </li>
+
+    </ol>
   </div>
+</div>
+
 
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -534,7 +584,7 @@ async function sheetPostPlace(place, file) {
     const searchInput  = document.getElementById('searchInput');
 
     const iconMap = {
-      "Kuil": "🛕", "Gurdwara": "🕌", "Tokong": "⛩️", "Gereja": "⛪", "default": "📍"
+      "Rumah Ibadat - Kuil": "🛕", "Rumah Ibadat - Gurdwara": "🕌", "Rumah Ibadat - Tokong": "⛩️", "Rumah Ibadat - Gereja": "⛪","Pertanian - Sawah": "🌾", "Pertanian - Kebun": "🌿", "Pertanian - Dusun": "🍊","Pertanian - Ternakan": "🐄", "default": "📍"
     };
 
     /*********************** LOCATION HIERARCHY DATA ***********************/
