@@ -526,6 +526,14 @@ mainType.addEventListener("change", function () {
       return Array.isArray(data.places) ? data.places : [];
     }
 
+    // NEW: Helper to check verification
+    function checkIsVerified(item) {
+        // Jika data baru (tiada column verified), anggap belum verify
+        // User mahu: "get the data that sy tulis yes"
+        if (!item.verified) return false; 
+        return String(item.verified).trim().toLowerCase() === "yes";
+    }
+
 // POST with optional image (multipart/form-data)
 async function sheetPostPlace(place, file) {
     const fd = new FormData();
@@ -1073,7 +1081,11 @@ negeriSelect.addEventListener("change", () => {
     userRefreshBtn.onclick = async () => {
       try {
         userRefreshBtn.disabled = true;
-        sheetDataRaw = await sheetGetPlaces();
+        const allRows = await sheetGetPlaces();
+        
+        // FILTER: Hanya ambil yang verified = 'yes'
+        sheetDataRaw = allRows.filter(r => checkIsVerified(r));
+
         // MODIFIED: Call with renderMarkers = true to show markers on refresh
         renderSheetFiltered(userSearchInput.value, true); 
         // NEW: Update stat count
@@ -1202,7 +1214,11 @@ negeriSelect.addEventListener("change", () => {
         const statEl = document.getElementById('stat-approved');
         try {
             statEl.textContent = 'Memuat...'; // Loading...
-            sheetDataRaw = await sheetGetPlaces();
+            const allRows = await sheetGetPlaces();
+
+            // FILTER: Hanya ambil yang verified = 'yes'
+            sheetDataRaw = allRows.filter(r => checkIsVerified(r));
+
             // MODIFIED: Call with renderMarkers = false to only load data, not display on map
             renderSheetFiltered(userSearchInput.value, false); 
             statEl.textContent = sheetDataRaw.length;
