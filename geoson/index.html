@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Selangor GeoJSON Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+  <style>
+    body { margin:0; padding:0; font-family: Arial; }
+    #map { width:100%; height:100vh; }
+
+    .sidebar {
+      position:absolute;
+      top:10px; left:10px;
+      background:white;
+      padding:15px;
+      width:250px;
+      z-index:999;
+      border-radius:10px;
+      box-shadow:0 0 10px rgba(0,0,0,0.3);
+    }
+
+    select, input {
+      width:100%;
+      padding:7px;
+      margin-bottom:10px;
+      border:1px solid #ccc;
+      border-radius:5px;
+    }
+
+    button {
+      width:100%;
+      padding:8px;
+      cursor:pointer;
+      border:none;
+      margin-bottom:7px;
+      background:#0d6efd;
+      color:white;
+      border-radius:6px;
+    }
+
+    button:hover { opacity:0.9; }
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<div class="sidebar">
+  <h3>Pilih Daerah</h3>
+  <select id="dropdownDaerah">
+    <option value="">— Pilih Daerah —</option>
+  </select>
+
+  <button id="zoomSemua">Zoom Seluruh Selangor</button>
+
+  <hr>
+
+  <input type="text" id="searchBox" placeholder="Cari Nama Rezab…" />
+  <button id="btnSearch">Cari</button>
+
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+// ================================
+// 1. Setup Map
+// ================================
+const map = L.map("map").setView([3.0, 101.6], 10);
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+
+// ================================
+// 2. GeoJSON File List
+// ================================
+const files = [
+  "trm_gombak.geojson",
+  "trm_hululangat.geojson",
+  "trm_huluselangor.geojson",
+  "trm_klang.geojson",
+  "trm_klang2.geojson",
+  "trm_kselanggor.geojson",
+  "trm_petaling.geojson",
+  "trm_sabakbernam.geojson",
+  "trm_selangor.geojson",
+  "trm_sepang.geojson"
+];
+
+// Layer containers
+const layers = {};
+const rezabIndex = [];
+
+// Color generator
+function randomColor() {
+  return `hsl(${Math.random()*360}, 65%, 50%)`;
+}
+
+// ================================
+// 3. Load All GeoJSON (Hidden by Default)
+// ================================
+files.forEach(file => {
+  fetch("geojson/" + file)
+    .then(r => r.json())
+    .then(data => {
+
+      const color = randomColor();
+
+      const layer = L.geoJSON(data, {
+        style: {
+          color,
+          weight: 2,
+          fillOpacity: 0.25
+        },
+
+        onEachFeature: (feature, l) => {
+          const p = feature.properties || {};
+
+          l.bindPopup(`
+            <b>Nama Rezab:</b> ${p.Nama_Rezab || "-"}<br>
+            <b>Mukim:</b> ${p.Mukim || "-"}<br>
+            <b>Daerah:</b> ${p.Daerah || "-"}<br>
+            <b>Negeri:</b> ${p.Negeri || "-"}<br>
+            <b>Luas (Ek):</b> ${p.Luas_Ek || "-"}
+          `);
+
+          if (p.Nama_Rezab) l.bindTooltip(p.Nama_Rezab);
+
+          l.on("mouseover", () => l.setStyle({ weight:4, fillOpacity:0.4 }));
+          l.on("mouseout", () => l.setStyle({ weight:2, fillOpacity:0.25 }));
+          l.on("click", () => map.fitBounds(l.getBounds()));
+
+          rezabIndex.push({ name:p.Nama_Rezab, layer:l });
+        }
+      });
+
+      layers[file] = layer; // save layer
+
+      // Add to dropdown
+      const dd = document.getElementById("dropdownDaerah");
+      const option = document.createElement("option");
+      option.value = file;
+      option.textContent = file.replace(".geojson","");
+      dd.appendChild(option);
+
+    });
+});
+
+// ================================
+// 4. Show One Layer Only
+// ================================
+document.getElementById("dropdownDaerah").onchange = function () {
+  const selected = this.value;
+
+  // Hide all layers
+  Object.values(layers).forEach(l => map.removeLayer(l));
+
+  if (selected && layers[selected]) {
+    layers[selected].addTo(map);
+    map.fitBounds(layers[selected].getBounds());
+  }
+};
+
+// ================================
+// 5. Zoom Semua Daerah
+// ================================
+document.getElementById("zoomSemua").onclick = () => {
+  const group = L.featureGroup(Object.values(layers));
+  map.fitBounds(group.getBounds());
+};
+
+// ================================
+// 6. Search Rezab
+// ================================
+let lastHighlight = null;
+
+document.getElementById("btnSearch").onclick = () => {
+  const text = document.getElementById("searchBox").value.toLowerCase();
+  if (!text) return;
+
+  if (lastHighlight) {
+    lastHighlight.setStyle({ weight:2, fillOpacity:0.25 });
+  }
+
+  const found = rezabIndex.find(r => r.name && r.name.toLowerCase().includes(text));
+
+  if (!found) {
+    alert("Tiada padanan ditemui.");
+    return;
+  }
+
+  lastHighlight = found.layer;
+
+  found.layer.setStyle({
+    weight:5,
+    color:"#ff0000",
+    fillOpacity:0.6
+  });
+
+  map.fitBounds(found.layer.getBounds());
+};
+</script>
+
+</body>
+</html>

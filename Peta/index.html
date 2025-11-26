@@ -147,7 +147,14 @@
       box-shadow: 0 24px 56px rgba(0,0,0,0.25); border: 1px solid var(--border);
     }
     .modal-content h2 { text-align: center; color: var(--brand); margin-bottom: 12px; }
-    .close-btn { float: right; font-size: 20px; cursor: pointer; color: #667085; }
+.close-btn {
+  float: right;
+  font-size: 50px;
+  cursor: pointer;
+  color: #667085;
+  padding: 10px;
+}
+
     label { display: block; margin-top: 10px; font-weight: 600; }
     #message { text-align: center; margin-top: 10px; font-weight: bold; color:#0b6a0b; }
 
@@ -239,7 +246,7 @@
       <!-- UPDATED: Button Group -->
       <div class="button-group">
         <button id="userAddBtn" title="Tambah lokasi baharu">➕ Tambah</button>
-        <button id="userRefreshBtn" title="Segarkan dari Sheet">🔄 Lihat</button>
+        <button id="userRefreshBtn" title="Segarkan dari Sheet">Lihat Data Pengguna</button>
         <!-- NEW: Aduan Button -->
         <button id="aduanBtn" title="Buat Aduan">🚨 SISPAA</button>
       </div>
@@ -252,7 +259,7 @@
 <!-- New Jenis (State) Selector -->
 <select id="jenisselect" aria-label="Pilih Jenis">
   <option value="">-- Pilih Jenis --</option>
-  <option value="pencerbohan">Pencerobohan</option>
+  <option value="pencerobohan">Pencerobohan</option>
   <option value="tanah_rizab_melayu">Tanah Rizab Melayu</option>
 </select>
 
@@ -350,8 +357,11 @@
       <label>Longitud</label>
       <input type="number" step="any" id="lng" required>
 
-      <label>Gambar Bukti (pilihan)</label>
-      <input type="file" id="image" accept="image/*">
+            <label>Sumber</label>
+      <textarea id="source" rows="3" required></textarea>
+
+      <!-- <label>Gambar Bukti (pilihan)</label>
+      <input type="file" id="image" accept="image/*"> -->
 
       <!-- BUTTONS -->
       <div style="display:flex; gap:10px; margin-top:15px;">
@@ -456,58 +466,47 @@ mainType.addEventListener("change", function () {
 <div id="instructionModal">
   <div class="modal-content">
     <span class="close-btn" id="closeInstructionModal">&times;</span>
-    <h2>📖 ARAHAN PENGGUNA LAMAN tanahmalaya.COM</h2>
+    <h2>📖 ARAHAN PENGGUNA LAMAN tanahmalaya.com</h2>
 
     <ol class="instruction-list">
 
       <li>
-        <strong>PILIH JENIS</strong>
-        <p>Pada bahagian atas, pilih jenis data yang ingin dilihat — contoh: <strong>Pencerobohan</strong> atau <strong>Tanah Rizab Melayu</strong>. Hanya negeri yang mempunyai data akan diaktifkan.</p>
+        <strong>ADUAN PENCEROBOHAN</strong>
+        <p>Panel untuk menghantar atau melihat aduan pencerobohan tanah.</p>
       </li>
 
       <li>
-        <strong>PILIH NEGERI</strong>
-        <p>Klik pada kotak “Negeri”. Hanya negeri yang mempunyai data akan boleh diklik. Negeri yang tidak mempunyai data akan dipaparkan sebagai “(Tiada Data)”.</p>
+        <strong>TAMBAH ADUAN / LOKASI</strong>
+        <p>Klik butang ➕ Tambah dan isi maklumat seperti nama lokasi, jenis, alamat, koordinat dan gambar (pilihan). Selepas klik 💾 Simpan Data, pengguna perlu <strong>refresh website secara manual</strong> untuk melihat data terkini.</p>
       </li>
 
       <li>
-        <strong>PILIH DAERAH</strong>
-        <p>Selepas negeri dipilih, senarai Daerah akan muncul. Pilih daerah yang mempunyai fail data. Jika ia bertanda (Tiada Data), ia bermaksud belum ada maklumat untuk daerah tersebut.</p>
+        <strong>LIHAT DATA PENGGUNA</strong>
+        <p>Klik Lihat Data Pengguna untuk memaparkan semua data yang dihantar oleh pengguna. Data akan muncul sebagai penanda pada peta. Gunakan kotak carian (nama/jenis/alamat) untuk menapis data. Klik penanda untuk melihat maklumat lengkap termasuk pautan 📍 Google Maps.</p>
       </li>
 
       <li>
-        <strong>PILIH MUKIM (JIKA ADA)</strong>
-        <p>Jika daerah mempunyai maklumat mukim, kotak pilihan mukim akan muncul. Anda boleh memilih mukim tertentu untuk melihat data yang lebih terperinci.</p>
+        <strong>HANTAR ADUAN KE KERAJAAN (SISPAA)</strong>
+        <p>Klik 🚨 SISPAA untuk membuat aduan rasmi melalui sistem aduan kerajaan.</p>
       </li>
 
       <li>
-        <strong>LIHAT PETA</strong>
-        <p>Penanda lokasi akan muncul di peta. Klik penanda untuk melihat maklumat seperti: Nama lokasi, jenis, mukim, alamat, status tanah, serta pautan “📍 Buka di Google Maps”.</p>
+        <strong>DATA KERAJAAN</strong>
+        <p>Data kerajaan mengandungi 2 jenis sahaja: <br>
+        ✔ Pencerobohan <br>
+        ✔ Tanah Rizab Melayu (TRM) <br><br>
+        Cara guna: Pilih Jenis → Pilih Negeri (hanya negeri ada data) → Pilih Daerah → Jika ada Mukim, ia akan muncul. Data dipaparkan pada peta sebagai penanda atau poligon. Gunakan carian (nama/jenis/mukim) untuk menapis data.</p>
       </li>
 
       <li>
-        <strong>CARI LOKASI (DATA KERAJAAN)</strong>
-        <p>Gunakan kotak “Cari (nama/jenis/mukim)” untuk menapis penanda berdasarkan teks yang anda taip.</p>
-      </li>
-
-      <li>
-        <strong>TAMBAH LOKASI BAHARU (DATA PENGGUNA)</strong>
-        <p>Klik butang ➕ Tambah di panel Data Pengguna. Isi maklumat seperti Nama lokasi, Jenis, Alamat, Latitude & Longitude dan (pilihan) gambar bukti. Klik “💾 Simpan Data”. Mesej “Berjaya disimpan!” akan muncul jika berjaya.</p>
-      </li>
-
-      <li>
-        <strong>SEGARKAN DATA</strong>
-        <p>Klik butang 🔄 Lihat untuk memuat semula semua data pengguna daripada Google Sheet.</p>
-      </li>
-
-      <li>
-        <strong>CARI DALAM DATA PENGGUNA</strong>
-        <p>Gunakan kotak carian di panel Data Pengguna untuk menapis lokasi yang dihantar oleh komuniti.</p>
+        <strong>STATISTIK LOKASI</strong>
+        <p>Panel statistik menunjukkan jumlah Data Kerajaan dan jumlah Data Pengguna.</p>
       </li>
 
     </ol>
   </div>
 </div>
+
 
 
 
@@ -542,6 +541,7 @@ async function sheetPostPlace(place, file) {
     fd.append("address", place.address || "");
     fd.append("lat", String(place.lat ?? ""));
     fd.append("lng", String(place.lng ?? ""));
+    fd.append("source", place.source || "");
     if (file) fd.append("image", file, file.name);
 
     // --- START DEBUG BLOCK ---
@@ -749,6 +749,55 @@ async function sheetPostPlace(place, file) {
         { name: "Labuan (Tiada Data)", file: null }
     ]
 };
+const locationDatas = {
+"TanahRizabMelayu": [
+       { name: "Seluruh Selangor", file: "trm_selangor.geojson" },
+    { name: "Gombak", file: "trm_gombak.geojson" },
+    { name: "Hulu Langat", file: "trm_hululangat.geojson" },
+    { name: "Hulu Selangor", file: "trm_huluselangor.geojson" },
+    { name: "Klang", file: "trm_klang.geojson" },
+    { name: "Kuala Langat", file: "trm_klangat.geojson" },
+    { name: "Kuala Selangor", file: "trm_kselangor.geojson" },
+    { name: "Petaling", file: "trm_petaling.geojson" },
+    { name: "Sabak Bernam", file: "trm_sabakbernam.geojson" },
+    { name: "Sepang", file: "trm_sepang.geojson" }
+],
+};
+// ===============================
+// TRM SELANGOR (POLYGON)
+// ===============================
+let trmLayer = null;
+
+async function loadTRM(file) {
+    // Remove old polygon
+    if (trmLayer) {
+        map.removeLayer(trmLayer);
+        trmLayer = null;
+    }
+
+    const res = await fetch("geojson/" + file);
+    const geo = await res.json();
+
+    trmLayer = L.geoJSON(geo, {
+        style: {
+            color: "#007bff",
+            weight: 2,
+            fillOpacity: 0.30
+        },
+        onEachFeature: (feature, layer) => {
+            const p = feature.properties || {};
+            layer.bindPopup(`
+                <b>${p.Nama_Rezab || "-"}</b><br>
+                Mukim: ${p.Mukim || "-"}<br>
+                Daerah: ${p.Daerah || "-"}<br>
+                Luas: ${p.Luas_Ek || "-"}
+            `);
+        }
+    }).addTo(map);
+
+    map.fitBounds(trmLayer.getBounds());
+}
+
 /* --------------------------------------------------
    FIXED BEHAVIOUR FOR JENIS
    - Pencerobohan = enabled
@@ -759,35 +808,53 @@ let selectedJenis = "";
 
 // When Jenis is selected
 jenisselect.addEventListener("change", () => {
-    selectedJenis = jenisselect.value;
+    const selected = jenisselect.value;
 
-    // Reset daerah & mukim
-    daerahSelect.innerHTML = '<option value="">-- Pilih Daerah --</option>';
-    daerahSelect.disabled = true;
-    mukimSelect.style.display = 'none';
-    mukimSelect.innerHTML = '<option value="">-- Semua Mukim --</option>';
-
-    clearStaticMarkers();
+    // RESET SCREEN
+    //clearStaticMarkers();
+    clearSheetMarkers();
     staticDataRaw = [];
+    daerahSelect.innerHTML = '<option value="">-- Pilih Daerah --</option>';
+    mukimSelect.style.display = "none";
 
-    // Case 1: Pencerobohan → normal
-    if (selectedJenis === "pencerbohan") {
+    // =========================================
+    // CASE 1 — PENCEROBOHAN → NORMAL SYSTEM
+    // =========================================
+    if (selected === "pencerobohan") {
+        populateNegeri();
+        return;
+    }
+
+    // =========================================
+    // CASE 2 — TANAH RIZAB MELAYU (TRM)
+    // =========================================
+    if (selected === "tanah_rizab_melayu") {
+
+        // Negeri fixed = Selangor
+        negeriSelect.innerHTML = `<option value="TanahRizabMelayu">Selangor</option>`;
         negeriSelect.disabled = false;
-        populateNegeri();     // Show negeri WITH data
+
+        // Populate Daerah TRM (from geojson)
+        daerahSelect.innerHTML = '<option value="">-- Pilih Daerah --</option>';
+
+        locationDatas["TanahRizabMelayu"].forEach(d => {
+            const opt = document.createElement("option");
+            opt.value = d.file;
+            opt.textContent = d.name;
+            daerahSelect.appendChild(opt);
+        });
+
+        daerahSelect.disabled = false;
+
         return;
     }
 
-    // Case 2: Tanah Rizab Melayu → disable ALL
-    if (selectedJenis === "tanah_rizab_melayu") {
-        negeriSelect.innerHTML = '<option value="">-- Tiada Data --</option>';
-        negeriSelect.disabled = true;
-        // alert("❗ Tiada data untuk Tanah Rizab Melayu.");
-        return;
-    }
-
-    // Case 3: No selection
+    // =========================================
+    // CASE 3 — NO SELECTION
+    // =========================================
     populateNegeri();
 });
+
 
 
 
@@ -828,7 +895,7 @@ negeriSelect.addEventListener("change", () => {
     daerahSelect.innerHTML = '<option value="">-- Pilih Daerah --</option>';
     mukimSelect.style.display = 'none';
     mukimSelect.innerHTML = '<option value="">-- Semua Mukim --</option>';
-    clearStaticMarkers();
+    // clearStaticMarkers();
     staticDataRaw = [];
 
     if (negeri && locationData[negeri]) {
@@ -918,7 +985,7 @@ negeriSelect.addEventListener("change", () => {
     }
 
     function renderStatic(mukimFilter = "", searchQuery = "") {
-      clearStaticMarkers();
+      //clearStaticMarkers();
       const bounds = new L.LatLngBounds();
       const q = (searchQuery || "").toLowerCase();
 
@@ -962,21 +1029,36 @@ negeriSelect.addEventListener("change", () => {
       else if (!bounds.isValid()) map.setView([3.08, 101.62], 11);
     }
 
-    // Update Daerah selection listener to load data
-    daerahSelect.addEventListener("change", async () => {
-      const filename = daerahSelect.value; // The value is now the filename (e.g., 'klang' or 'jais')
+daerahSelect.addEventListener("change", async () => {
 
-      if (!filename) {
-        staticDataRaw = [];
-        populateMukimFromStatic();
-        renderStatic("", searchInput.value);
-        return;
+  // ========================
+  // TRM GEOJSON HANDLER
+  // ========================
+  if (jenisselect.value === "tanah_rizab_melayu") {
+      if (daerahSelect.value) {
+          await loadTRM(daerahSelect.value);   // ← load polygon
       }
+      return;  // ← STOP HERE, jangan run sistem JSON
+  }
 
-      staticDataRaw = await loadData(`${filename}.json`);
-      populateMukimFromStatic();
-      renderStatic(mukimSelect.value, searchInput.value);
-    });
+  // ========================
+  // NORMAL JSON SYSTEM (PENCEROBOHAN)
+  // ========================
+  const filename = daerahSelect.value;
+
+  if (!filename) {
+    staticDataRaw = [];
+    populateMukimFromStatic();
+    renderStatic("", searchInput.value);
+    return;
+  }
+
+  staticDataRaw = await loadData(`${filename}.json`);
+  populateMukimFromStatic();
+  renderStatic(mukimSelect.value, searchInput.value);
+
+});
+
 
     mukimSelect.addEventListener("change", () => renderStatic(mukimSelect.value, searchInput.value));
     searchInput.addEventListener("input", () => renderStatic(mukimSelect.value, searchInput.value));
@@ -1019,6 +1101,7 @@ negeriSelect.addEventListener("change", () => {
           const popup = `<b>${r.name || "Tidak Dinyatakan"}</b> <span style="font-size:11px;color:#777"></span><br>
             Jenis: ${r.type || "-"}<br>
             Lokasi: ${r.address || "-"}${imgLine}<br>
+            Sumber: ${r.source || "-"}${imgLine}<br>
             <a href="${gmapsLink}" target="_blank">📍 Buka di Google Maps</a>`;
 
           const m = L.marker([lat, lng], { icon: divIcon }).bindPopup(popup).addTo(map);
@@ -1124,6 +1207,7 @@ negeriSelect.addEventListener("change", () => {
     name: document.getElementById("name").value.trim(),
     type: finalType, 
     address: document.getElementById("address").value.trim(),
+    source: document.getElementById("source").value.trim(),
     lat: parseFloat(document.getElementById("lat").value),
     lng: parseFloat(document.getElementById("lng").value)
   };
@@ -1265,12 +1349,12 @@ negeriSelect.addEventListener("change", () => {
 
     <!-- CENTER -->
     <div style="flex:1; text-align:center;">
-        <span><strong>Disclaimer:</strong> Data dari pengguna adalah untuk tujuan penandaan sahaja</span>
+        <span><strong>Disclaimer:</strong> Data daripada pengguna adalah untuk tujuan penandaan sahaja</span>
     </div>
 
     <!-- RIGHT -->
     <div style="flex:1; text-align:right;">
-        <span><strong>Tanah Malaya</strong> v1.0.9</span>
+        <span><strong>Tanah Malaya</strong> v1.0.10</span>
     </div>
 
 </footer>
