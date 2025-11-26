@@ -357,7 +357,11 @@
       <label>Longitud</label>
       <input type="number" step="any" id="lng" required>
 
-      <label>Gambar Bukti (pilihan)</label>
+            <label>Sumber (pilihan)</label>
+      <input type="text" id="source" placeholder="Contoh: Media sosial, Surat khabar, Sumber rasmi">
+      <!-- <div style="display:flex; gap:10px; margin-top:15px;"> -->
+
+<label>Gambar Bukti (pilihan)</label>
       <input type="file" id="image" accept="image/*">
 
       <!-- BUTTONS -->
@@ -1198,12 +1202,13 @@ daerahSelect.addEventListener("change", async () => {
       finalType = sub;
   }
 
-  const newPlace = {
+const newPlace = {
     name: document.getElementById("name").value.trim(),
     type: finalType, 
     address: document.getElementById("address").value.trim(),
     lat: parseFloat(document.getElementById("lat").value),
-    lng: parseFloat(document.getElementById("lng").value)
+    lng: parseFloat(document.getElementById("lng").value),
+    source: document.getElementById("source").value.trim() // <--- BARIS INI DITAMBAH
   };
 
   const fileInput = document.getElementById("image");
@@ -1348,7 +1353,7 @@ daerahSelect.addEventListener("change", async () => {
 
     <!-- RIGHT -->
     <div style="flex:1; text-align:right;">
-        <span><strong>Tanah Malaya</strong> v1.0.9</span>
+        <span><strong>Tanah Malaya</strong> v1.0.10</span>
     </div>
 
 </footer>
