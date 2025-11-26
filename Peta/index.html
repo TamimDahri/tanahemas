@@ -357,11 +357,8 @@
       <label>Longitud</label>
       <input type="number" step="any" id="lng" required>
 
-            <label>Sumber</label>
-      <textarea id="source" rows="3" required></textarea>
-
-      <!-- <label>Gambar Bukti (pilihan)</label>
-      <input type="file" id="image" accept="image/*"> -->
+      <label>Gambar Bukti (pilihan)</label>
+      <input type="file" id="image" accept="image/*">
 
       <!-- BUTTONS -->
       <div style="display:flex; gap:10px; margin-top:15px;">
@@ -541,7 +538,6 @@ async function sheetPostPlace(place, file) {
     fd.append("address", place.address || "");
     fd.append("lat", String(place.lat ?? ""));
     fd.append("lng", String(place.lng ?? ""));
-    fd.append("source", place.source || "");
     if (file) fd.append("image", file, file.name);
 
     // --- START DEBUG BLOCK ---
@@ -1101,7 +1097,6 @@ daerahSelect.addEventListener("change", async () => {
           const popup = `<b>${r.name || "Tidak Dinyatakan"}</b> <span style="font-size:11px;color:#777"></span><br>
             Jenis: ${r.type || "-"}<br>
             Lokasi: ${r.address || "-"}${imgLine}<br>
-            Sumber: ${r.source || "-"}${imgLine}<br>
             <a href="${gmapsLink}" target="_blank">📍 Buka di Google Maps</a>`;
 
           const m = L.marker([lat, lng], { icon: divIcon }).bindPopup(popup).addTo(map);
@@ -1207,7 +1202,6 @@ daerahSelect.addEventListener("change", async () => {
     name: document.getElementById("name").value.trim(),
     type: finalType, 
     address: document.getElementById("address").value.trim(),
-    source: document.getElementById("source").value.trim(),
     lat: parseFloat(document.getElementById("lat").value),
     lng: parseFloat(document.getElementById("lng").value)
   };
@@ -1354,7 +1348,7 @@ daerahSelect.addEventListener("change", async () => {
 
     <!-- RIGHT -->
     <div style="flex:1; text-align:right;">
-        <span><strong>Tanah Malaya</strong> v1.0.10</span>
+        <span><strong>Tanah Malaya</strong> v1.0.9</span>
     </div>
 
 </footer>
