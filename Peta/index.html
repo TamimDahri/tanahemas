@@ -1098,15 +1098,36 @@ daerahSelect.addEventListener("change", async () => {
           const hasImg = r.image && String(r.image).startsWith('http');
           const imgLine = hasImg ? `<br><a href="${r.image}" target="_blank">🖼️ Lihat imej</a>` : '';
 
-          const popup = `<b>${r.name || "Tidak Dinyatakan"}</b> <span style="font-size:11px;color:#777"></span><br>
-            Jenis: ${r.type || "-"}<br>
-            Lokasi: ${r.address || "-"}${imgLine}<br>
-            <a href="${gmapsLink}" target="_blank">📍 Buka di Google Maps</a>`;
+// Ambil nilai sumber dan buang whitespace
+const sourceValue = r.source ? String(r.source).trim() : '';
+let sourceLine = '';
 
-          const m = L.marker([lat, lng], { icon: divIcon }).bindPopup(popup).addTo(map);
-          sheetMarkers.push(m); bounds.extend([lat, lng]);
-        });
-      }
+if (sourceValue) {
+    // Periksa sama ada nilai sumber bermula dengan protokol pautan (http atau https)
+    const isLink = sourceValue.startsWith('http://') || sourceValue.startsWith('https://');
+    let sourceContent;
+
+    if (isLink) {
+        // JIKA IALAH PAUTAN: Jadikan ia pautan yang boleh diklik dengan teks "Pautan"
+        sourceContent = `<a href="${sourceValue}" target="_blank">Pautan</a>`;
+    } else {
+        // JIKA BUKAN PAUTAN: Paparkan sebagai teks biasa
+        sourceContent = sourceValue;
+    }
+
+    // Bina baris sumber akhir
+    sourceLine = `<br>Sumber: ${sourceContent}`;
+}
+
+const popup = `<b>${r.name || "Tidak Dinyatakan"}</b> <span style="font-size:11px;color:#777"></span><br>
+    Jenis: ${r.type || "-"}<br>
+    Lokasi: ${r.address || "-"}${sourceLine}${imgLine}<br>
+    <a href="${gmapsLink}" target="_blank">📍 Buka di Google Maps</a>`;
+
+const m = L.marker([lat, lng], { icon: divIcon }).bindPopup(popup).addTo(map);
+sheetMarkers.push(m); bounds.extend([lat, lng]);
+});
+}
 
       // Only auto-fit when no JSON dataset is active AND if markers were rendered
       if (!negeriSelect.value && renderMarkers && sheetMarkers.length > 0 && bounds.isValid()) {
@@ -1222,9 +1243,10 @@ const newPlace = {
     subType.innerHTML = '<option value="">-- Pilih Jenis Terperinci --</option>';
     mainType.value = "";
 
-    sheetDataRaw.push({
+sheetDataRaw.push({
       timestamp: new Date().toISOString(),
       ...newPlace,
+      source: newPlace.source, // <--- BARIS INI DITAMBAH
       image: ""
     });
 
