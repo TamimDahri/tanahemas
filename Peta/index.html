@@ -542,6 +542,7 @@ async function sheetPostPlace(place, file) {
     fd.append("address", place.address || "");
     fd.append("lat", String(place.lat ?? ""));
     fd.append("lng", String(place.lng ?? ""));
+    fd.append("source", place.source || ""); // <--- BARIS INI DITAMBAH!
     if (file) fd.append("image", file, file.name);
 
     // --- START DEBUG BLOCK ---
@@ -1370,7 +1371,7 @@ sheetDataRaw.push({
 
     <!-- CENTER -->
     <div style="flex:1; text-align:center;">
-        <span><strong>Disclaimer:</strong> Data daripada pengguna adalah untuk tujuan penandaan sahaja</span>
+        <span><strong>Disclaimer:</strong>Data daripada pengguna adalah untuk tujuan penandaan dan rujukan sahaja</span>
     </div>
 
     <!-- RIGHT -->
