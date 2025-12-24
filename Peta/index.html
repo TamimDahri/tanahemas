@@ -478,7 +478,7 @@ mainType.addEventListener("change", function () {
 
       <li>
         <strong>TAMBAH ADUAN / LOKASI</strong>
-        <p>Klik butang ➕ Tambah dan isi maklumat seperti nama lokasi, jenis, alamat, koordinat dan gambar (pilihan). Selepas klik 💾 Simpan Data, pengguna perlu <strong>refresh website secara manual</strong> untuk melihat data terkini.</p>
+        <p>Klik butang ➕ Tambah dan isi maklumat seperti nama lokasi, jenis, alamat, koordinat,sumber(pilihan) dan gambar (pilihan). Selepas klik 💾 Simpan Data, pengguna perlu <strong>refresh website secara manual</strong> untuk melihat data terkini.</p>
       </li>
 
       <li>
@@ -1178,7 +1178,7 @@ sheetMarkers.push(m); bounds.extend([lat, lng]);
     aduanBtn.onclick = () => {
       // PENTING: Gantikan URL ini dengan pautan aduan anda yang sebenar
       // Ini adalah pautan contoh sahaja
-      window.open('https://jpa.spab.gov.my/eApps/sdmscasepool/SdmsCasePool/add.do', '_blank'); 
+      window.open('https://pcb.spab.gov.my/eApps/sdmscasepool/SdmsCasePool/add.do?aplCode=ms', '_blank'); 
     };
 
     // Refresh → fetch from Sheet and render markers only
@@ -1371,12 +1371,12 @@ sheetDataRaw.push({
 
     <!-- CENTER -->
     <div style="flex:1; text-align:center;">
-        <span><strong>Disclaimer:</strong>Data daripada pengguna adalah untuk tujuan penandaan dan rujukan sahaja</span>
+        <span><strong>Disclaimer:</strong> Data daripada pengguna adalah untuk tujuan penandaan dan rujukan sahaja</span>
     </div>
 
     <!-- RIGHT -->
     <div style="flex:1; text-align:right;">
-        <span><strong>Tanah Malaya</strong> v1.0.10</span>
+        <span><strong>Tanah Malaya</strong> v1.0.11</span>
     </div>
 
 </footer>
