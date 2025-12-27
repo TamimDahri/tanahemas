@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ms"> <!-- Tukar bahasa ke 'ms' (Malay) -->
 <head>
@@ -142,9 +143,11 @@
       display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45);
       justify-content: center; align-items: center; z-index: 2000;
     }
+    /* Scrollable content inside modal */
     .modal-content {
       background: #fff; padding: 20px; border-radius: 14px; width: 92%; max-width: 480px;
       box-shadow: 0 24px 56px rgba(0,0,0,0.25); border: 1px solid var(--border);
+      max-height: 90vh; overflow-y: auto; /* Allow scrolling if form is long */
     }
     .modal-content h2 { text-align: center; color: var(--brand); margin-bottom: 12px; }
 .close-btn {
@@ -154,6 +157,26 @@
   color: #667085;
   padding: 10px;
 }
+
+#jenisDataModal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+}
+
+.choice-btn {
+  margin-top: 12px;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: 700;
+  border-radius: 14px;
+  cursor: pointer;
+}
+
 
     label { display: block; margin-top: 10px; font-weight: 600; }
     #message { text-align: center; margin-top: 10px; font-weight: bold; color:#0b6a0b; }
@@ -242,7 +265,7 @@
 
     <!-- BOTTOM: Sheet-only controls (no list) -->
     <div id="userPanel" class="panel">
-      <h3>🧑‍🤝‍🧑 Aduan Pencerobohan</h3>
+      <h3>🧑‍🤝‍🧑 Data Pengguna</h3>
       <!-- UPDATED: Button Group -->
       <div class="button-group">
         <button id="userAddBtn" title="Tambah lokasi baharu">➕ Tambah</button>
@@ -317,19 +340,36 @@
 
   <div id="map"></div>
 
-  <!-- <div class="legend">
-    <span style="border-radius: 50%; padding: 0 4px 2px; border: 1px solid #333;">🛕</span> Kuil
-    <span style="border-radius: 50%; padding: 0 4px 2px; border: 1px solid #333;">⛪</span> Gereja
-    <span style="border-radius: 50%; padding: 0 4px 2px; border: 1px solid #333;">🏮</span> Tokong
-  </div> -->
+<!-- Pilih Jenis Data Modal -->
+<div id="jenisDataModal">
+  <div class="modal-content">
+    <span class="close-btn" id="closeJenisData">&times;</span>
+    <h2>Pilih Jenis Input</h2>
+
+    <button class="choice-btn" data-jenis="Pencerobohan Tanah">
+      🚧 Pencerobohan Tanah
+    </button>
+
+    <button class="choice-btn" data-jenis="Rizab Melayu">
+      📜 Tanah Rizab Melayu
+    </button>
+
+    <button class="choice-btn" data-jenis="Tanah Wakaf">
+      ☪️ Tanah Wakaf
+    </button>
+  </div>
+</div>
+
 <!-- Modal Form (For Adding Location) -->
 <div id="modal">
   <div class="modal-content">
     <span class="close-btn" id="closeModal">&times;</span>
-    <h2>Tambah Lokasi Baru</h2>
+    <h2 id="modalTitle">Tambah Lokasi Baru</h2>
 
+    <!-- =============================================
+         FORM 1: PENCEROBOHAN TANAH (EXISTING FORM)
+         ============================================= -->
     <form id="placeForm">
-
       <!-- MAIN CATEGORY -->
       <label>Jenis</label>
       <select id="mainType" required>
@@ -360,32 +400,102 @@
       <label>Longitud</label>
       <input type="number" step="any" id="lng" required>
 
-            <label>Sumber</label>
-<input type="url" id="source" placeholder="Link Google Maps">
-      <!-- <div style="display:flex; gap:10px; margin-top:15px;"> -->
+      <label>Sumber</label>
+      <input type="url" id="source" placeholder="Link Google Maps">
 
-<label>Gambar Bukti (pilihan)</label>
+      <label>Gambar Bukti (pilihan)</label>
       <input type="file" id="image" accept="image/*">
 
       <!-- BUTTONS -->
       <div style="display:flex; gap:10px; margin-top:15px;">
         <button type="submit" style="flex:1;">💾 Simpan Data</button>
-
-        <!-- RESET BUTTON -->
-        <button type="button" id="clearFormBtn" 
-          style="
-            flex:1;
-            background:#fff7cc;
-            border:1px solid #d4b300;
-            color:#8a6d00;
-            font-weight:600;
-            border-radius:10px;
-            padding:9px;
-          ">
-          Kosongkan Borang
-        </button>
+        <button type="button" id="clearFormBtn" style="flex:1; background:#fff7cc; border:1px solid #d4b300; color:#8a6d00; font-weight:600; border-radius:10px; padding:9px;">Kosongkan Borang</button>
       </div>
+    </form>
 
+    <!-- =============================================
+         FORM 2: TANAH RIZAB MELAYU (NEW FORM)
+         ============================================= -->
+    <form id="formTRM" style="display:none;">
+        <label>Nama Pemilik</label>
+        <input type="text" id="trmNamaPemilik">
+
+        <label>Alamat (Wajib)</label>
+        <textarea id="trmAlamat" rows="3" required></textarea>
+
+        <label>No. Geran</label>
+        <input type="text" id="trmNoGeran">
+
+        <label>No. Lot (Wajib)</label>
+        <input type="text" id="trmNoLot" required>
+
+        <label>Keluasan (Ekar)</label>
+        <input type="number" step="any" id="trmKeluasan">
+
+        <label>Status Tanah</label>
+        <select id="trmStatusTanah">
+            <option value="">-- Pilih Status --</option>
+            <option value="Freehold">Freehold</option>
+            <option value="Leasehold">Leasehold</option>
+        </select>
+
+        <label>Guna Tanah</label>
+        <select id="trmGunaTanah">
+            <option value="">-- Pilih Guna Tanah --</option>
+            <option value="Bangunan">Bangunan</option>
+            <option value="Pertanian">Pertanian</option>
+            <option value="Industri">Industri</option>
+        </select>
+
+        <label>No. Warta</label>
+        <input type="text" id="trmNoWarta">
+        
+        <label>Geran (Pilihan - Fail)</label>
+        <input type="file" id="trmFileGeran" accept="image/*,.pdf">
+
+        <!-- Lat/Lng needed for map placement -->
+        <label>Latitud</label>
+        <input type="number" step="any" id="trmLat" required>
+
+        <label>Longitud</label>
+        <input type="number" step="any" id="trmLng" required>
+
+        <div style="display:flex; gap:10px; margin-top:15px;">
+            <button type="submit" style="flex:1; background-color:#198754; color:white;">💾 Simpan TRM</button>
+        </div>
+    </form>
+
+    <!-- =============================================
+         FORM 3: TANAH WAKAF (NEW FORM)
+         ============================================= -->
+    <form id="formWakaf" style="display:none;">
+        <label>Pewakaf</label>
+        <select id="wakafPewakaf">
+            <option value="">-- Pilih Pewakaf --</option>
+            <option value="Kerajaan">Kerajaan</option>
+            <option value="Institusi">Institusi</option>
+            <option value="Individu">Individu</option>
+        </select>
+
+        <label>Pentadbir Tanah (Jawatankuasa Kariah)</label>
+        <input type="text" id="wakafPentadbir">
+
+        <label>Pemegang Amanah (Majlis Agama Islam Negeri)</label>
+        <input type="text" id="wakafPemegang">
+
+        <label>Alamat</label>
+        <textarea id="wakafAlamat" rows="3"></textarea>
+
+        <!-- Lat/Lng needed for map placement -->
+        <label>Latitud</label>
+        <input type="number" step="any" id="wakafLat" required>
+
+        <label>Longitud</label>
+        <input type="number" step="any" id="wakafLng" required>
+
+        <div style="display:flex; gap:10px; margin-top:15px;">
+            <button type="submit" style="flex:1; background-color:#6f42c1; color:white;">💾 Simpan Wakaf</button>
+        </div>
     </form>
 
     <div id="message"></div>
@@ -393,11 +503,12 @@
 </div>
 
 <script>
-  // RESET FORM BUTTON
+  // RESET FORM BUTTON (For Pencerobohan Form)
 const clearFormBtn = document.getElementById("clearFormBtn");
+const message = document.getElementById("message");
 
 clearFormBtn.onclick = () => {
-    form.reset();
+    document.getElementById("placeForm").reset();
 
     // Reset dropdowns
     mainType.value = "";
@@ -519,9 +630,18 @@ mainType.addEventListener("change", function () {
     /***********************
      * Google Sheets via Cloudflare Worker
      ***********************/
+    // EXISTING SHEET API (FOR PENCEROBOHAN) - Cloudflare Worker
     const SHEET_API = "https://throbbing-block-8c08.tanahemasss.workers.dev/";
 
-    // GET rows
+    // SHEET API (FOR TRM) - CLOUDFLARE WORKER
+    // Sila masukkan URL Cloudflare Worker untuk TRM di sini (bukan URL Sheet terus)
+    const SHEET_API_TRM = "https://tanahrizabmelayu.tanahemasss.workers.dev"; 
+
+    // SHEET API (FOR WAKAF) - CLOUDFLARE WORKER
+    // Sila masukkan URL Cloudflare Worker untuk Wakaf di sini (bukan URL Sheet terus)
+    const SHEET_API_WAKAF = "https://tanahwakaf.tanahemasss.workers.dev"; 
+
+    // GET rows (Defaulting to Pencerobohan for Map View)
     async function sheetGetPlaces() {
       const res = await fetch(SHEET_API);
       if (!res.ok) throw new Error("Gagal ambil data dari Sheet");
@@ -538,40 +658,26 @@ mainType.addEventListener("change", function () {
     }
 
 // POST with optional image (multipart/form-data)
-async function sheetPostPlace(place, file) {
+async function sheetPostPlace(place, file, apiUrl) {
+    // If no API URL is provided, default to Pencerobohan (Safety fallback)
+    const targetUrl = apiUrl || SHEET_API;
+
     const fd = new FormData();
-    fd.append("name", place.name || "");
-    fd.append("type", place.type || "");
-    fd.append("address", place.address || "");
-    fd.append("lat", String(place.lat ?? ""));
-    fd.append("lng", String(place.lng ?? ""));
-    fd.append("source", place.source || ""); // <--- BARIS INI DITAMBAH!
+    // Appending all keys in the place object to FormData
+    for (const key in place) {
+        fd.append(key, place[key] || "");
+    }
+    
+    // Append file if exists
     if (file) fd.append("image", file, file.name);
 
-    // --- START DEBUG BLOCK ---
-    console.log("--- DEBUG: FormData Contents ---");
-    let hasImage = false;
-    for (const [key, value] of fd.entries()) {
-        if (key === 'image') {
-            hasImage = true;
-            console.log(`Key: ${key}, Value Type: ${value instanceof File ? 'File' : typeof value}, File Name: ${value.name || 'N/A'}`);
-        } else {
-            console.log(`Key: ${key}, Value: ${value}`);
-        }
-    }
-    if (hasImage) {
-        console.log("✅ Image file is included in FormData.");
-    } else {
-        console.warn("❌ WARNING: The 'image' file key is MISSING from FormData.");
-    }
-    console.log("-------------------------------");
-    // --- END DEBUG BLOCK ---
+    console.log(`--- DEBUG: Posting to ${targetUrl} ---`);
 
-    const res = await fetch(SHEET_API, { method: "POST", body: fd });
+    const res = await fetch(targetUrl, { method: "POST", body: fd });
     if (!res.ok) throw new Error("Gagal simpan ke Sheet");
     const data = await res.json();
     if (!data.ok) throw new Error(data.error || "Gagal simpan");
-    return data; // {ok:true, imageUrl?}
+    return data; 
 }
 
     /***********************
@@ -1249,7 +1355,7 @@ sheetMarkers.push(m); bounds.extend([lat, lng]);
 
     // Controls
     const modal = document.getElementById("modal");
-    const message = document.getElementById("message");
+    const modalTitle = document.getElementById("modalTitle");
     const userAddBtn = document.getElementById("userAddBtn");
     const userRefreshBtn = document.getElementById("userRefreshBtn");
     const userSearchInput = document.getElementById("userSearchInput");
@@ -1259,10 +1365,58 @@ sheetMarkers.push(m); bounds.extend([lat, lng]);
     const instructionModal = document.getElementById("instructionModal");
     const closeInstructionModal = document.getElementById("closeInstructionModal");
 
+    // NEW: Jenis Data Modal Elements
+    const jenisDataModal = document.getElementById("jenisDataModal");
+    const closeJenisData = document.getElementById("closeJenisData");
+    const choiceBtns = document.querySelectorAll(".choice-btn");
+
     // Open/close location modal
     const closeModal = document.getElementById("closeModal");
-    const form = document.getElementById("placeForm");
-    userAddBtn.onclick = () => { modal.style.display = "flex"; message.textContent = ""; };
+    const form = document.getElementById("placeForm"); // Existing Pencerobohan Form
+    const formTRM = document.getElementById("formTRM"); // New TRM Form
+    const formWakaf = document.getElementById("formWakaf"); // New Wakaf Form
+
+    // MODIFIED: Click "Tambah" -> Open Jenis Data Modal (UI with 3 buttons)
+    userAddBtn.onclick = () => { 
+        jenisDataModal.style.display = "flex"; 
+    };
+
+    // Close Jenis Data Modal
+    closeJenisData.onclick = () => {
+        jenisDataModal.style.display = "none";
+    };
+
+    // Handle 3 Buttons Click -> Open Correct Form
+    choiceBtns.forEach(btn => {
+        btn.onclick = () => {
+            const jenis = btn.getAttribute("data-jenis");
+            
+            // 1. Close the Selection Modal
+            jenisDataModal.style.display = "none";
+            // 2. Open the Main Modal
+            modal.style.display = "flex";
+            message.textContent = "";
+
+            // 3. Hide ALL forms first
+            form.style.display = "none";
+            formTRM.style.display = "none";
+            formWakaf.style.display = "none";
+
+            // 4. Show the specific form based on selection
+            if (jenis === "Pencerobohan Tanah") {
+                modalTitle.textContent = "Tambah Lokasi Pencerobohan";
+                form.style.display = "block"; // Show original form
+            } else if (jenis === "Rizab Melayu") {
+                modalTitle.textContent = "Tambah Tanah Rizab Melayu";
+                formTRM.style.display = "block"; // Show TRM form
+            } else if (jenis === "Tanah Wakaf") {
+                modalTitle.textContent = "Tambah Tanah Wakaf";
+                formWakaf.style.display = "block"; // Show Wakaf form
+            }
+        };
+    });
+
+    // Close Form Modal
     closeModal.onclick = () => { modal.style.display = "none"; message.textContent = ""; };
     
     // Open/close guide modal
@@ -1273,6 +1427,7 @@ sheetMarkers.push(m); bounds.extend([lat, lng]);
     window.onclick = (e) => { 
         if (e.target === modal) { modal.style.display = "none"; message.textContent = ""; }
         if (e.target === instructionModal) { instructionModal.style.display = "none"; }
+        if (e.target === jenisDataModal) { jenisDataModal.style.display = "none"; }
     };
 
     // NEW: Aduan Button Link
@@ -1311,61 +1466,112 @@ sheetMarkers.push(m); bounds.extend([lat, lng]);
       debounce(() => renderSheetFiltered(userSearchInput.value, true), 220) 
     );
 
+    /* =========================================
+       SUBMIT HANDLER 1: PENCEROBOHAN (EXISTING)
+       ========================================= */
     form.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  message.textContent = "⏳ Menyimpan data...";
+        e.preventDefault();
+        message.textContent = "⏳ Menyimpan data Pencerobohan...";
 
-  const main = document.getElementById("mainType").value.trim();
-  const sub = document.getElementById("subType").value.trim();
+        const main = document.getElementById("mainType").value.trim();
+        const sub = document.getElementById("subType").value.trim();
 
-  // ★ MODIFIED: Conditional Type Formatting ★
-  // If "Rumah Ibadat", use ONLY the sub-type (e.g., "Kuil").
-  // Otherwise, use "Main - Sub" (e.g., "Pertanian - Sawah").
-  let finalType = `${main} - ${sub}`;
-  if (main === "Rumah Ibadat") {
-      finalType = sub;
-  }
+        let finalType = `${main} - ${sub}`;
+        if (main === "Rumah Ibadat") {
+            finalType = sub;
+        }
 
-const newPlace = {
-    name: document.getElementById("name").value.trim(),
-    type: finalType, 
-    address: document.getElementById("address").value.trim(),
-    lat: parseFloat(document.getElementById("lat").value),
-    lng: parseFloat(document.getElementById("lng").value),
-    source: document.getElementById("source").value.trim() // <--- BARIS INI DITAMBAH
-  };
+        const newPlace = {
+            name: document.getElementById("name").value.trim(),
+            type: finalType, 
+            address: document.getElementById("address").value.trim(),
+            lat: parseFloat(document.getElementById("lat").value),
+            lng: parseFloat(document.getElementById("lng").value),
+            source: document.getElementById("source").value.trim()
+        };
 
-  const fileInput = document.getElementById("image");
-  const file = fileInput.files?.[0] || null;
+        const fileInput = document.getElementById("image");
+        const file = fileInput.files?.[0] || null;
 
-  try {
-    await sheetPostPlace(newPlace, file);
-    message.textContent = "✅ Berjaya disimpan!";
+        try {
+            await sheetPostPlace(newPlace, file, SHEET_API); // Use original API
+            message.textContent = "✅ Berjaya disimpan!";
 
-    form.reset();
-    subType.innerHTML = '<option value="">-- Pilih Jenis Terperinci --</option>';
-    mainType.value = "";
+            form.reset();
+            subType.innerHTML = '<option value="">-- Pilih Jenis Terperinci --</option>';
+            mainType.value = "";
 
-sheetDataRaw.push({
-      timestamp: new Date().toISOString(),
-      ...newPlace,
-      source: newPlace.source, // <--- BARIS INI DITAMBAH
-      image: ""
+            setTimeout(() => { modal.style.display = "none"; message.textContent = ""; }, 800);
+        } catch (err) {
+            console.error(err);
+            message.textContent = "✅ Berjaya disimpan!";
+        }
     });
 
-    renderSheetFiltered(userSearchInput.value, true);
-    document.getElementById('stat-approved').textContent = sheetDataRaw.length;
+    /* =========================================
+       SUBMIT HANDLER 2: TRM (NEW)
+       ========================================= */
+    formTRM.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        message.textContent = "⏳ Menyimpan data Rizab Melayu...";
 
-    setTimeout(() => {
-      modal.style.display = "none";
-      message.textContent = "";
-    }, 800);
+        // Construct TRM object mapping inputs to keys
+        const newTRM = {
+            nama_pemilik: document.getElementById("trmNamaPemilik").value.trim(),
+            alamat: document.getElementById("trmAlamat").value.trim(),
+            no_geran: document.getElementById("trmNoGeran").value.trim(),
+            no_lot: document.getElementById("trmNoLot").value.trim(),
+            keluasan: document.getElementById("trmKeluasan").value,
+            status_tanah: document.getElementById("trmStatusTanah").value,
+            guna_tanah: document.getElementById("trmGunaTanah").value,
+            no_warta: document.getElementById("trmNoWarta").value.trim(),
+            lat: parseFloat(document.getElementById("trmLat").value),
+            lng: parseFloat(document.getElementById("trmLng").value),
+            type: "Tanah Rizab Melayu" // System tag
+        };
 
-  } catch (err) {
-    console.error(err);
-    message.textContent = "✅ Berjaya disimpan!";
-  }
-});
+        const fileInput = document.getElementById("trmFileGeran");
+        const file = fileInput.files?.[0] || null;
+
+        try {
+            await sheetPostPlace(newTRM, file, SHEET_API_TRM); // Use NEW API for TRM
+            message.textContent = "✅ Berjaya disimpan!";
+            formTRM.reset();
+            setTimeout(() => { modal.style.display = "none"; message.textContent = ""; }, 800);
+        } catch (err) {
+            console.error(err);
+            message.textContent = "❌ Gagal disimpan. Pastikan URL Script betul.";
+        }
+    });
+
+    /* =========================================
+       SUBMIT HANDLER 3: WAKAF (NEW)
+       ========================================= */
+    formWakaf.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        message.textContent = "⏳ Menyimpan data Wakaf...";
+
+        const newWakaf = {
+            pewakaf: document.getElementById("wakafPewakaf").value,
+            pentadbir: document.getElementById("wakafPentadbir").value.trim(),
+            pemegang_amanah: document.getElementById("wakafPemegang").value.trim(),
+            alamat: document.getElementById("wakafAlamat").value.trim(),
+            lat: parseFloat(document.getElementById("wakafLat").value),
+            lng: parseFloat(document.getElementById("wakafLng").value),
+            type: "Tanah Wakaf" // System tag
+        };
+
+        try {
+            // No file upload for Wakaf form based on request, passing null
+            await sheetPostPlace(newWakaf, null, SHEET_API_WAKAF); // Use NEW API for Wakaf
+            message.textContent = "✅ Berjaya disimpan!";
+            formWakaf.reset();
+            setTimeout(() => { modal.style.display = "none"; message.textContent = ""; }, 800);
+        } catch (err) {
+            console.error(err);
+            message.textContent = "❌ Gagal disimpan. Pastikan URL Script betul.";
+        }
+    });
 
 
     // NEW: Function to calculate total placemarks from all JSON files
@@ -1478,7 +1684,7 @@ sheetDataRaw.push({
 
     <!-- RIGHT -->
     <div style="flex:1; text-align:right;">
-        <span><strong>Tanah Malaya</strong> v1.0.12</span>
+        <span><strong>Tanah Malaya</strong> v1.0.13</span>
     </div>
 
 </footer>
