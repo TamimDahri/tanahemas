@@ -843,7 +843,7 @@ async function loadTRM(file) {
             // ===== PARLIMEN =====
             if (file.includes("parlimen")) {
                 layer.bindPopup(`
-                    <b>${p.parlimen || p.penyandang  || "-"}</b><br>
+                    <b>${p.parlimen || "-"}</b><br>
                     <b>${p.penyandang  || "-"}</b><br>
                     Negeri: ${p.state || "-"}<br>
                     Parti: ${p.parti || "-"}<br>
@@ -858,9 +858,13 @@ async function loadTRM(file) {
             // ===== DUN =====
             if (file.includes("dun")) {
                 layer.bindPopup(`
-                    <b>${p.parlimen || p.penyandang || "-"}</b><br>
+                    <b>${p.parlimen || "-"}</b><br>
+                    <b>${p.penyandang  || "-"}</b><br>
                     Negeri: ${p.state || "-"}<br>
-                    Kod DUN: ${p.code_parli || "-"}<br>
+                    Parti: ${p.parti || "-"}<br>
+                    Pengundi Berdaftar: ${p.pengudidaf || "-"}<br>
+                    Undi Menang: ${p.undimenang || "-"}<br>
+                    Majoriti: ${p.majoriti || "-"}<br>
                     Keluasan (m²): ${p.Shape_Area?.toLocaleString() || "-"}
                 `);
                 return;
