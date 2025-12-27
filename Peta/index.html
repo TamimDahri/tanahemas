@@ -259,8 +259,11 @@
 <!-- New Jenis (State) Selector -->
 <select id="jenisselect" aria-label="Pilih Jenis">
   <option value="">-- Pilih Jenis --</option>
-  <option value="pencerobohan">Pencerobohan</option>
+  <option value="parlimen">Parlimen</option>
+  <option value="dun">DUN</option>
+  <option value="pbt">PBT</option>
   <option value="tanah_rizab_melayu">Tanah Rizab Melayu</option>
+  <option value="pencerobohan">Pencerobohan</option>
 </select>
 
       
@@ -283,7 +286,7 @@
     </div>
     <!-- NEW: Stats Panel -->
     <div id="statsPanel" class="panel">
-      <h4>📊 Statistik Lokasi</h4>
+      <h4>📊 Statistik Pencerobohan</h4>
       <div class="stat-grid">
         
         <div class="stat-card">
@@ -314,11 +317,11 @@
 
   <div id="map"></div>
 
-  <div class="legend">
+  <!-- <div class="legend">
     <span style="border-radius: 50%; padding: 0 4px 2px; border: 1px solid #333;">🛕</span> Kuil
     <span style="border-radius: 50%; padding: 0 4px 2px; border: 1px solid #333;">⛪</span> Gereja
     <span style="border-radius: 50%; padding: 0 4px 2px; border: 1px solid #333;">🏮</span> Tokong
-  </div>
+  </div> -->
 <!-- Modal Form (For Adding Location) -->
 <div id="modal">
   <div class="modal-content">
@@ -357,8 +360,8 @@
       <label>Longitud</label>
       <input type="number" step="any" id="lng" required>
 
-            <label>Sumber (pilihan)</label>
-      <input type="text" id="source" placeholder="Contoh: Media sosial, Surat khabar, Sumber rasmi">
+            <label>Sumber</label>
+<input type="url" id="source" placeholder="Link Google Maps">
       <!-- <div style="display:flex; gap:10px; margin-top:15px;"> -->
 
 <label>Gambar Bukti (pilihan)</label>
@@ -761,9 +764,36 @@ const locationDatas = {
     { name: "Kuala Selangor", file: "trm_kselangor.geojson" },
     { name: "Petaling", file: "trm_petaling.geojson" },
     { name: "Sabak Bernam", file: "trm_sabakbernam.geojson" },
-    { name: "Sepang", file: "trm_sepang.geojson" }
+    { name: "Sepang", file: "trm_sepang.geojson" },
+
 ],
+
 };
+
+// Map of type → data
+const locationMap = {
+    "parlimen": {
+        negeri: "Seluruh",        // fixed state
+        data: [
+            { name: "Malaysia", file: "parlimen_malaysia.geojson" }
+        ]
+    },
+    "dun": {
+        negeri: "Seluruh",
+        data: [
+            { name: "Malaysia", file: "dun_malaysia.geojson" }
+        ]
+    },
+    "pbt": {
+        negeri: "Seluruh",
+        data: [
+            { name: "Malaysia", file: "pbt_malaysia.geojson" }
+        ]
+    }
+};
+
+
+
 // ===============================
 // TRM SELANGOR (POLYGON)
 // ===============================
@@ -780,18 +810,68 @@ async function loadTRM(file) {
     const geo = await res.json();
 
     trmLayer = L.geoJSON(geo, {
-        style: {
-            color: "#007bff",
-            weight: 2,
-            fillOpacity: 0.30
+        style: feature => {
+            // Detect by filename
+            if (file.includes("pbt")) {
+                return { color: "#0d6efd", weight: 2, fillOpacity: 0.30 };
+            }
+            if (file.includes("parlimen")) {
+                return { color: "#dc3545", weight: 2, fillOpacity: 0.30 };
+            }
+            if (file.includes("dun")) {
+                return { color: "#fd7e14", weight: 2, fillOpacity: 0.30 };
+            }
+
+            // Default = TRM
+            return { color: "#198754", weight: 2, fillOpacity: 0.30 };
         },
+
         onEachFeature: (feature, layer) => {
             const p = feature.properties || {};
+
+            // ===== PBT =====
+            if (file.includes("pbt")) {
+                layer.bindPopup(`
+                    <b>${p.NAM || "-"}</b><br>
+                    Negeri: ${p.NAMNEGERI || "-"}<br>
+                    Kod PBT: ${p.KODPBT || "-"}<br>
+                    Keluasan (m²): ${p.Shape_Area?.toLocaleString() || "-"}
+                `);
+                return;
+            }
+
+            // ===== PARLIMEN =====
+            if (file.includes("parlimen")) {
+                layer.bindPopup(`
+                    <b>${p.parlimen || p.penyandang  || "-"}</b><br>
+                    <b>${p.penyandang  || "-"}</b><br>
+                    Negeri: ${p.state || "-"}<br>
+                    Parti: ${p.parti || "-"}<br>
+                    Pengundi Berdaftar: ${p.undidaftar || "-"}<br>
+                    Undi Menang: ${p.undimenang || "-"}<br>
+                    Majoriti: ${p.majoriti || "-"}<br>
+                    Keluasan (m²): ${p.Shape_Area?.toLocaleString() || "-"}
+                `);
+                return;
+            }
+
+            // ===== DUN =====
+            if (file.includes("dun")) {
+                layer.bindPopup(`
+                    <b>${p.parlimen || p.penyandang || "-"}</b><br>
+                    Negeri: ${p.state || "-"}<br>
+                    Kod DUN: ${p.code_parli || "-"}<br>
+                    Keluasan (m²): ${p.Shape_Area?.toLocaleString() || "-"}
+                `);
+                return;
+            }
+
+            // ===== TRM (default) =====
             layer.bindPopup(`
                 <b>${p.Nama_Rezab || "-"}</b><br>
                 Mukim: ${p.Mukim || "-"}<br>
                 Daerah: ${p.Daerah || "-"}<br>
-                Luas: ${p.Luas_Ek || "-"}
+                Luas (ekar): ${p.Luas_Ek || "-"}
             `);
         }
     }).addTo(map);
@@ -805,39 +885,62 @@ async function loadTRM(file) {
    - Tanah Rizab Melayu = disabled (no data)
 ---------------------------------------------------- */
 
+    // if (selected === "parlimen") {
+    //     loadTRM();
+    //     return;
+    // }
+
 let selectedJenis = "";
 
 // When Jenis is selected
 jenisselect.addEventListener("change", () => {
-    const selected = jenisselect.value;
+    const selected = jenisselect.value.toLowerCase(); // normalize
 
     // RESET SCREEN
-    //clearStaticMarkers();
     clearSheetMarkers();
     staticDataRaw = [];
     daerahSelect.innerHTML = '<option value="">-- Pilih Daerah --</option>';
     mukimSelect.style.display = "none";
 
-    // =========================================
-    // CASE 1 — PENCEROBOHAN → NORMAL SYSTEM
-    // =========================================
+    // CASE: if selected type exists in our map
+    if (locationMap[selected]) {
+        const info = locationMap[selected];
+
+        // Set Negeri
+        negeriSelect.innerHTML = `<option value="${info.negeri}">${info.negeri}</option>`;
+        negeriSelect.disabled = true; // no need to change
+
+        // Load all polygons immediately
+        info.data.forEach(d => {
+            loadTRM(d.file);
+        });
+
+        // Optional: populate Daerah if you still want dropdown
+        daerahSelect.innerHTML = "";
+        info.data.forEach(d => {
+            const opt = document.createElement("option");
+            opt.value = d.file;
+            opt.textContent = d.name;
+            daerahSelect.appendChild(opt);
+        });
+        daerahSelect.disabled = false;
+
+        return;
+    }
+
+    // Existing cases
     if (selected === "pencerobohan") {
         populateNegeri();
         return;
     }
 
-    // =========================================
-    // CASE 2 — TANAH RIZAB MELAYU (TRM)
-    // =========================================
     if (selected === "tanah_rizab_melayu") {
-
         // Negeri fixed = Selangor
         negeriSelect.innerHTML = `<option value="TanahRizabMelayu">Selangor</option>`;
         negeriSelect.disabled = false;
 
         // Populate Daerah TRM (from geojson)
         daerahSelect.innerHTML = '<option value="">-- Pilih Daerah --</option>';
-
         locationDatas["TanahRizabMelayu"].forEach(d => {
             const opt = document.createElement("option");
             opt.value = d.file;
@@ -846,17 +949,12 @@ jenisselect.addEventListener("change", () => {
         });
 
         daerahSelect.disabled = false;
-
         return;
     }
 
-    // =========================================
-    // CASE 3 — NO SELECTION
-    // =========================================
+    // Default
     populateNegeri();
 });
-
-
 
 
 /* --------------------------------------------------
@@ -1376,7 +1474,7 @@ sheetDataRaw.push({
 
     <!-- RIGHT -->
     <div style="flex:1; text-align:right;">
-        <span><strong>Tanah Malaya</strong> v1.0.11</span>
+        <span><strong>Tanah Malaya</strong> v1.0.12</span>
     </div>
 
 </footer>
