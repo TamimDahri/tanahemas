@@ -635,11 +635,11 @@ mainType.addEventListener("change", function () {
 
     // SHEET API (FOR TRM) - CLOUDFLARE WORKER
     // Sila masukkan URL Cloudflare Worker untuk TRM di sini (bukan URL Sheet terus)
-    const SHEET_API_TRM = "https://tanahrizabmelayu.tanahemasss.workers.dev"; 
+    const SHEET_API_TRM = "https://tanahrizabmelayu.tanahemasss.workers.dev/"; 
 
     // SHEET API (FOR WAKAF) - CLOUDFLARE WORKER
     // Sila masukkan URL Cloudflare Worker untuk Wakaf di sini (bukan URL Sheet terus)
-    const SHEET_API_WAKAF = "https://tanahwakaf.tanahemasss.workers.dev"; 
+    const SHEET_API_WAKAF = "https://tanahwakaf.tanahemasss.workers.dev/"; 
 
     // GET rows (Defaulting to Pencerobohan for Map View)
     async function sheetGetPlaces() {
@@ -1532,16 +1532,52 @@ sheetMarkers.push(m); bounds.extend([lat, lng]);
 
         const fileInput = document.getElementById("trmFileGeran");
         const file = fileInput.files?.[0] || null;
+try {
+  const result = await sheetPostPlace(newTRM, file, SHEET_API_TRM);
 
-        try {
-            await sheetPostPlace(newTRM, file, SHEET_API_TRM); // Use NEW API for TRM
-            message.textContent = "✅ Berjaya disimpan!";
-            formTRM.reset();
-            setTimeout(() => { modal.style.display = "none"; message.textContent = ""; }, 800);
-        } catch (err) {
-            console.error(err);
-            message.textContent = "❌ Gagal disimpan. Pastikan URL Script betul.";
-        }
+  console.log("API RESULT:", result);
+
+  message.textContent = "✅ Berjaya disimpan!";
+  formTRM.reset();
+
+  setTimeout(() => {
+    modal.style.display = "none";
+    message.textContent = "";
+  }, 800);
+
+} catch (err) {
+
+  console.error("SAVE ERROR:", err);
+
+  // Default message
+  let errorMsg = "❌ Gagal disimpan.";
+
+  // 1️⃣ Network / Fetch error
+  if (err instanceof TypeError) {
+    errorMsg = "❌ Tidak dapat sambung ke server (Network error).";
+  }
+
+  // 2️⃣ Apps Script response (custom)
+  else if (err.message?.includes("403")) {
+    errorMsg = "❌ Akses ditolak (403). Web App belum public.";
+  }
+
+  else if (err.message?.includes("404")) {
+    errorMsg = "❌ URL Script tidak dijumpai (404).";
+  }
+
+  else if (err.message?.includes("500")) {
+    errorMsg = "❌ Ralat server (500). Semak Apps Script.";
+  }
+
+  // 3️⃣ Custom error dari Apps Script
+  else if (err.message) {
+    errorMsg = "❌ " + err.message;
+  }
+
+  message.textContent = errorMsg;
+}
+
     });
 
     /* =========================================
