@@ -388,7 +388,7 @@
         <option value="">-- Pilih Jenis Terperinci --</option>
       </select>
 
-      <label>Nama</label>
+      <label>Nama Binaan</label>
       <input type="text" id="name" required>
 
       <label>Alamat / Lokasi</label>
@@ -900,93 +900,171 @@ const locationMap = {
 
 
 
+const partyColors = {
+    // Pakatan Harapan
+    "PKR": "#0072BC",
+    "DAP": "#E21B23",
+    "AMANAH": "#F5A623",
+    "PAN": "#F5A623", // Alias for Amanah
+
+    // Perikatan Nasional
+    "PAS": "#00923F",
+    "BERSATU": "#6F2C91",
+
+    // Barisan Nasional
+    "UMNO": "#D71920",
+    "MCA": "#0054A6",
+    "MIC": "#1B9AAA",
+
+    // GRS & Sabah Parties
+    "GRS": "#2F80ED",
+    "PBS": "#003A8F",
+    "STAR": "#7A1E3A",
+    "WARISAN": "#7ED321",
+    "UPKO": "#F2994A",
+    "KDM": "#27AE60",
+
+    // GPS & Sarawak Parties
+    "GPS": "#1F3C88",
+    "PBB": "#154360",
+    "SUPP": "#C0392B",
+    "PRS": "#229954",
+    "PDP": "#7D3C98",
+
+    // Others
+    "BEBAS": "#9E9E9E",
+    "DEFAULT_TRM": "#198754",
+    "DEFAULT_PBT": "#0d6efd"
+};
+
+/**
+ * Helper to get party color safely
+ */
+function getPartyColor(partyName) {
+    if (!partyName) return partyColors.BEBAS;
+    const key = partyName.toUpperCase().trim();
+    return partyColors[key] || partyColors.BEBAS;
+}
+
 // ===============================
 // TRM SELANGOR (POLYGON)
 // ===============================
 let trmLayer = null;
 
 async function loadTRM(file) {
-    // Remove old polygon
+    // Remove old layer if exists
     if (trmLayer) {
         map.removeLayer(trmLayer);
         trmLayer = null;
     }
 
-    const res = await fetch("geojson/" + file);
-    const geo = await res.json();
+    try {
+        const res = await fetch("geojson/" + file);
+        const geo = await res.json();
 
-    trmLayer = L.geoJSON(geo, {
-        style: feature => {
-            // Detect by filename
-            if (file.includes("pbt")) {
-                return { color: "#0d6efd", weight: 2, fillOpacity: 0.30 };
-            }
-            if (file.includes("parlimen")) {
-                return { color: "#dc3545", weight: 2, fillOpacity: 0.30 };
-            }
-            if (file.includes("dun")) {
-                return { color: "#fd7e14", weight: 2, fillOpacity: 0.30 };
-            }
+        trmLayer = L.geoJSON(geo, {
+            style: feature => {
+                const p = feature.properties || {};
+                
+                // Color by Party for Parlimen and DUN
+                if (file.includes("parlimen") || file.includes("dun")) {
+                    const color = getPartyColor(p.parti);
+                    return { 
+                        color: "#ffffff", // white border for better contrast
+                        fillColor: color, 
+                        weight: 1.5, 
+                        fillOpacity: 0.6 
+                    };
+                }
 
-            // Default = TRM
-            return { color: "#198754", weight: 2, fillOpacity: 0.30 };
-        },
+                // Color for PBT
+                if (file.includes("pbt")) {
+                    return { color: partyColors.DEFAULT_PBT, weight: 2, fillOpacity: 0.30 };
+                }
 
-        onEachFeature: (feature, layer) => {
-            const p = feature.properties || {};
+                // Default = TRM
+                return { color: partyColors.DEFAULT_TRM, weight: 2, fillOpacity: 0.30 };
+            },
 
-            // ===== PBT =====
-            if (file.includes("pbt")) {
+            onEachFeature: (feature, layer) => {
+                const p = feature.properties || {};
+
+                // Mouseover effects
+                layer.on({
+                    mouseover: (e) => {
+                        const l = e.target;
+                        l.setStyle({ weight: 3, fillOpacity: 0.8 });
+                    },
+                    mouseout: (e) => {
+                        trmLayer.resetStyle(e.target);
+                    }
+                });
+
+                // ===== PBT =====
+                if (file.includes("pbt")) {
+                    layer.bindPopup(`
+                        <div style="font-family: sans-serif;">
+                            <b style="color:${partyColors.DEFAULT_PBT}">${p.NAM || "-"}</b><br>
+                            Negeri: ${p.NAMNEGERI || "-"}<br>
+                            Kod PBT: ${p.KODPBT || "-"}<br>
+                            Keluasan (m²): ${p.Shape_Area?.toLocaleString() || "-"}
+                        </div>
+                    `);
+                    return;
+                }
+
+                // ===== PARLIMEN =====
+                if (file.includes("parlimen")) {
+                    const color = getPartyColor(p.parti);
+                    layer.bindPopup(`
+                        <div style="border-top: 5px solid ${color}; padding-top: 5px;">
+                            <span style="font-size: 0.8rem; color: #666;">Kawasan Parlimen</span><br>
+                            <b style="font-size: 1.1rem;">${p.parlimen || "-"}</b><br>
+                            <b style="color: ${color}">${p.penyandang || "-"} (${p.parti || "-"})</b><br>
+                            <hr style="margin: 5px 0">
+                            Negeri: ${p.state || "-"}<br>
+                            Pengundi Berdaftar: ${p.undidaftar || "-"}<br>
+                            Undi Menang: ${p.undimenang || "-"}<br>
+                            Majoriti: ${p.majoriti || "-"}<br>
+                            Keluasan (m²): ${p.Shape_Area?.toLocaleString() || "-"}
+                        </div>
+                    `);
+                    return;
+                }
+
+                // ===== DUN =====
+                if (file.includes("dun")) {
+                    const color = getPartyColor(p.parti);
+                    layer.bindPopup(`
+                        <div style="border-top: 5px solid ${color}; padding-top: 5px;">
+                            <span style="font-size: 0.8rem; color: #666;">Kawasan DUN</span><br>
+                            <b style="font-size: 1.1rem;">${p.dun || "-"}</b><br>
+                            <b style="color: ${color}">${p.penyandang || "-"} (${p.parti || "-"})</b><br>
+                            <hr style="margin: 5px 0">
+                            Negeri: ${p.state || "-"}<br>
+                            Pengundi Berdaftar: ${p.pengudidaf || "-"}<br>
+                            Undi Menang: ${p.undimenang || "-"}<br>
+                            Majoriti: ${p.majoriti || "-"}<br>
+                            Keluasan (m²): ${p.Shape_Area?.toLocaleString() || "-"}
+                        </div>
+                    `);
+                    return;
+                }
+
+                // ===== TRM (default) =====
                 layer.bindPopup(`
-                    <b>${p.NAM || "-"}</b><br>
-                    Negeri: ${p.NAMNEGERI || "-"}<br>
-                    Kod PBT: ${p.KODPBT || "-"}<br>
-                    Keluasan (m²): ${p.Shape_Area?.toLocaleString() || "-"}
+                    <b>${p.Nama_Rezab || "-"}</b><br>
+                    Mukim: ${p.Mukim || "-"}<br>
+                    Daerah: ${p.Daerah || "-"}<br>
+                    Luas (ekar): ${p.Luas_Ek || "-"}
                 `);
-                return;
             }
+        }).addTo(map);
 
-            // ===== PARLIMEN =====
-            if (file.includes("parlimen")) {
-                layer.bindPopup(`
-                    <b>${p.parlimen || "-"}</b><br>
-                    <b>${p.penyandang  || "-"}</b><br>
-                    Negeri: ${p.state || "-"}<br>
-                    Parti: ${p.parti || "-"}<br>
-                    Pengundi Berdaftar: ${p.undidaftar || "-"}<br>
-                    Undi Menang: ${p.undimenang || "-"}<br>
-                    Majoriti: ${p.majoriti || "-"}<br>
-                    Keluasan (m²): ${p.Shape_Area?.toLocaleString() || "-"}
-                `);
-                return;
-            }
-
-            // ===== DUN =====
-            if (file.includes("dun")) {
-                layer.bindPopup(`
-                    <b>${p.dun || "-"}</b><br>
-                    <b>${p.penyandang  || "-"}</b><br>
-                    Negeri: ${p.state || "-"}<br>
-                    Parti: ${p.parti || "-"}<br>
-                    Pengundi Berdaftar: ${p.pengudidaf || "-"}<br>
-                    Undi Menang: ${p.undimenang || "-"}<br>
-                    Majoriti: ${p.majoriti || "-"}<br>
-                    Keluasan (m²): ${p.Shape_Area?.toLocaleString() || "-"}
-                `);
-                return;
-            }
-
-            // ===== TRM (default) =====
-            layer.bindPopup(`
-                <b>${p.Nama_Rezab || "-"}</b><br>
-                Mukim: ${p.Mukim || "-"}<br>
-                Daerah: ${p.Daerah || "-"}<br>
-                Luas (ekar): ${p.Luas_Ek || "-"}
-            `);
-        }
-    }).addTo(map);
-
-    map.fitBounds(trmLayer.getBounds());
+        map.fitBounds(trmLayer.getBounds());
+    } catch (error) {
+        console.error("Error loading GeoJSON:", error);
+    }
 }
 
 /* --------------------------------------------------
